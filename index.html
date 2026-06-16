@@ -291,12 +291,24 @@
     }
 
     /* --- AUTHENTICATION --- */
-    function toggleAuth(panel) {
-        document.getElementById('loginPanel').style.display = 'none';
-        document.getElementById('registerPanel').style.display = 'none';
-        document.getElementById('adminLoginPanel').style.display = 'none';
-        document.getElementById(panel + 'Panel').style.display = 'block';
+function toggleAuth(panel) {
+    // Tüm panelleri gizle
+    document.getElementById('loginPanel').style.display = 'none';
+    document.getElementById('registerPanel').style.display = 'none';
+    document.getElementById('adminLoginPanel').style.display = 'none';
+    
+    // Panel ID'lerini netleştir
+    let panelId = panel + 'Panel';
+    let target = document.getElementById(panelId);
+    
+    if (target) {
+        target.style.display = 'block';
+    } else {
+        // Fallback: Admin özel durumu için
+        if(panel === 'admin') document.getElementById('adminLoginPanel').style.display = 'block';
     }
+}
+
 
     function updateLoginDropdown() {
         let sel = document.getElementById('loginUserSelect');
@@ -382,29 +394,51 @@
     }
 
     /* --- ADMIN SETUP & DRAW --- */
-    function renderAdminSetup() {
-        let list = document.getElementById('adminPlayerChecklist');
-        list.innerHTML = "";
-        let sorted = Object.values(globalUsers).sort((a,b) => b.sysScore - a.sysScore);
-        
-        sorted.forEach(u => {
-            let color = u.tier === 'PLATIN' ? 'var(--accent-color)' : (u.tier === 'GOLD' ? 'var(--warning)' : 'var(--sub-text)');
-            list.innerHTML += `
-                <div class="admin-player-card">
-                    <div>
-                        <input type="checkbox" id="chk_${u.id}" value="${u.id}">
-                        <label for="chk_${u.id}" style="font-weight:bold;">${u.name}</label>
-                        <div style="font-size:10px; color:${color}; margin-top:3px;">Sistem Analizi: ${u.sysScore} (${u.tier})</div>
-                    </div>
-                    <select id="forceTier_${u.id}" class="auth-select" style="width:100px; padding:4px; margin:0; font-size:11px;">
-                        <option value="${u.tier}">Otomatik</option>
-                        <option value="GOLD">Gold'a Zorla</option>
-                        <option value="PLATIN">Platin'e Zorla</option>
-                    </select>
+function renderAdminSetup() {
+    let list = document.getElementById('adminPlayerChecklist');
+    if (!list) return;
+    list.innerHTML = "";
+    // globalUsers artık v5/users altında
+    Object.values(globalUsers).forEach(u => {
+        list.innerHTML += `
+            <div class="admin-player-card">
+                <div>
+                    <input type="checkbox" id="chk_${u.id}" value="${u.id}">
+                    <label for="chk_${u.id}" style="font-weight:bold;">${u.name}</label>
+                    <div style="font-size:10px; color:var(--sub-text);">Sistem Analizi: ${u.sysScore || 'N/A'}</div>
                 </div>
-            `;
-        });
-    }
+            </div>
+        `;
+    });
+}
+
+function startTournament() {
+    const btn = document.getElementById('startKuraBtn');
+    let checkedBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
+    if(checkedBoxes.length < 4) { alert("En az 4 oyuncu seç!"); return; }
+
+    let selectedPlayers = [];
+    checkedBoxes.forEach(chk => {
+        let u = globalUsers[chk.value];
+        selectedPlayers.push({ id: u.id, name: u.name, wins: 0, losses: 0, kor: 0, playedMatches: 0 });
+    });
+
+    let newTid = "LIG_" + Date.now();
+    let settings = { 
+        customName: document.getElementById('leagueCustomName').value || "Yeni Lig", 
+        tier: document.getElementById('leagueTier').value 
+    };
+
+    // YENİ Firebase Yolu: the_35_gold_league/v5/tournaments/
+    database.ref('the_35_gold_league/v5/tournaments/' + newTid).set({ 
+        settings: settings, 
+        players: selectedPlayers, 
+        matches: [] 
+    }).then(() => { 
+        alert("Turnuva oluşturuldu!"); 
+        adminSwitchLeague(); 
+    });
+}
 
     function adminSwitchLeague() {
         let val = document.getElementById('adminLeagueSelect').value;
