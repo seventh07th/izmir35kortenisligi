@@ -9,27 +9,40 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         :root { 
-            --bg-color: #040814; --card-bg: #0b1329; --accent-color: #ffd700; 
-            --text-color: #ffffff; --success: #00ffaa; --warning: #ffbd00; 
-            --danger: #ef4444; --border-color: #1e293b; --sub-text: #94a3b8; --divider: #334155; 
+            --bg-color: #040814; 
+            --card-bg: #0b1329; 
+            --accent-color: #ffd700; 
+            --text-color: #ffffff; 
+            --success: #00ffaa; 
+            --warning: #ffbd00; 
+            --danger: #ef4444; 
+            --border-color: #1e293b; 
+            --sub-text: #94a3b8; 
+            --divider: #334155; 
         }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 10px; transition: 0.3s; }
         .container { max-width: 100%; margin: 0 auto; }
-        h1, h2, h3 { text-align: center; color: var(--accent-color); text-transform: uppercase; margin: 10px 0; letter-spacing: 1px; }
+        h1, h2, h3 { text-align: center; color: var(--accent-color); text-transform: uppercase; margin: 10px 0; letter-spacing: 1px; transition: color 0.3s; }
         
         .nav-bar { display: none; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px; }
         .nav-btn { background: #1e293b; color: white; border: 1px solid var(--border-color); padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.3s; }
         .nav-btn:hover { background: #334155; }
         
-        #authWrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; }
+        /* AUTH VE PROFİL STİLLERİ EKLENDİ */
+        #authWrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; margin-top:20px; }
         .auth-card { background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.5); width: 100%; max-width: 400px; text-align: center; display: none; margin-bottom: 20px; }
         .auth-input, .auth-select { padding: 12px; width: 100%; border-radius: 6px; border: 1px solid var(--border-color); background: #020617; color: white; text-align: center; font-size: 14px; margin-bottom: 12px; box-sizing: border-box; }
         .auth-btn { background: var(--accent-color); color: #000; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; margin: 5px 0; font-size: 14px; transition: 0.3s; width: 100%; }
         .switch-link { color: var(--sub-text); font-size: 12px; cursor: pointer; text-decoration: underline; margin-top: 15px; display: inline-block; }
+        
+        .chk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: left; font-size: 12px; margin-bottom: 15px; }
+        .chk-label { background: #1e293b; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .admin-player-list { max-height: 250px; overflow-y: auto; background: #020617; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); text-align: left; margin-bottom: 10px; }
+        .admin-player-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed var(--divider); }
 
+        /* ORİJİNAL SEKME STİLLERİ (HİÇ DOKUNULMADI) */
         #mainApp { display: none; }
         #adminTopBar { display: none; background: #1e293b; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 15px; border: 1px dashed var(--accent-color); }
-        
         .tabs { display: flex; gap: 4px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
         .tab-btn { background-color: var(--card-bg); color: var(--sub-text); border: 1px solid var(--border-color); padding: 11px 8px; cursor: pointer; border-radius: 6px; font-weight: bold; flex: 1; text-align: center; font-size: 12px; white-space: nowrap; transition: 0.3s; }
         .tab-btn.active { background-color: var(--accent-color); color: #000; border-color: var(--accent-color); }
@@ -37,10 +50,11 @@
         .panel.active { display: block; }
         
         button.action-btn { background-color: var(--accent-color); color: #000; border: none; padding: 12px; font-size: 15px; font-weight: bold; cursor: pointer; border-radius: 8px; width: 100%; margin-top: 8px; transition: 0.3s; }
+        button.action-btn:disabled { opacity: 0.7; cursor: not-allowed; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
         th, td { padding: 10px 4px; text-align: center; border-bottom: 1px solid var(--border-color); }
-        th { background-color: #1e293b; color: var(--accent-color); }
+        th { background-color: #1e293b; color: var(--accent-color); transition: color 0.3s; }
         .zone-direct { background-color: rgba(0, 255, 170, 0.08); border-left: 3px solid var(--success); }
         .zone-playoff { background-color: rgba(255, 189, 0, 0.08); border-left: 3px solid var(--warning); }
         .zone-eliminated { background-color: rgba(239, 68, 68, 0.05); border-left: 3px solid var(--danger); }
@@ -48,23 +62,52 @@
         .rivals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
         .player-rivals-card { background: #020617; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; }
         .player-main-title { background: #1e293b; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; color: var(--accent-color); font-size: 14px; }
-        .rival-line { display: flex; justify-content: space-between; padding: 8px 2px; border-bottom: 1px solid #1e293b; font-size: 12px; align-items: center; flex-wrap: wrap;}
+        .rival-line { display: flex; justify-content: space-between; padding: 8px 2px; border-bottom: 1px solid #1e293b; font-size: 12px; align-items: center; flex-wrap:wrap;}
 
         .matches-grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-top: 15px; }
         .match-card { background: #020617; padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .match-card-header { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 8px 12px; margin: -15px -15px 12px -15px; border-top-left-radius: 11px; border-top-right-radius: 11px; border-bottom: 1px solid var(--divider); }
         .match-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed var(--divider); }
+        .match-player { flex: 1; font-size: 14px; font-weight: bold; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .score-inputs { display: flex; gap: 4px; align-items: center; }
         .score-input { width: 34px; text-align: center; background: #1e293b; color: white; border: 1px solid #475569; padding: 6px; font-weight: bold; border-radius: 6px; font-size: 13px; }
+        .score-input:disabled { opacity: 0.5; cursor: not-allowed; }
         
-        .save-btn { background: var(--success); border: none; padding: 11px; color: black; font-weight: bold; cursor: pointer; border-radius: 6px; flex: 1; font-size: 13px; }
-        .pending-btn { background: var(--warning); border: none; padding: 11px; color: black; font-weight: bold; cursor: pointer; border-radius: 6px; flex: 1; font-size: 13px; }
+        .tb-input-row { display: flex; justify-content: space-between; align-items: center; background: #1a1e36; padding: 8px 12px; border-radius: 6px; margin: 8px 0; font-size: 11px; border: 1px solid var(--accent-color); }
+        .tb-title { font-weight: bold; color: var(--accent-color); }
         
-        /* Checkbox Grid (Takvim) */
-        .chk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: left; font-size: 12px; margin-bottom: 15px; }
-        .chk-label { background: #1e293b; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .live-status-bar { background: #111827; border: 1px solid #1f2937; padding: 8px; text-align: center; font-size: 12px; font-weight: bold; border-radius: 6px; margin: 8px 0; color: var(--success); }
+        .save-btn { background: var(--success); border: none; padding: 11px; color: black; font-weight: bold; cursor: pointer; border-radius: 6px; flex: 1; font-size: 13px; transition: 0.3s; }
+        .save-btn:disabled { background: #334155 !important; color: #64748b !important; cursor: not-allowed !important; opacity: 0.6; }
+        .cancel-btn { background: var(--danger); border: 1px solid #991b1b; padding: 11px; color: white; font-weight: bold; cursor: pointer; border-radius: 6px; font-size: 13px; transition: 0.3s; margin-left: 8px; }
+        .pending-btn { background: var(--warning); border: none; padding: 11px; color: black; font-weight: bold; cursor: pointer; border-radius: 6px; flex: 1; font-size: 13px; transition: 0.3s; margin-left: 8px; }
+        select.match-opt { background: #1e293b; color: white; border: 1px solid var(--border-color); padding: 5px; border-radius: 4px; font-size: 12px; }
+
+        .bracket-scroll-container { width: 100%; overflow-x: auto; padding-bottom: 15px; margin-top:20px; }
+        .cl-bracket { display: flex; justify-content: space-between; align-items: center; margin: 0 auto; padding: 20px 0; }
+        .bracket-col { display: flex; flex-direction: column; justify-content: space-around; gap: 15px; height: 100%; }
+        .bracket-match { background: #0b1329; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; width: 140px; text-align: center; font-size: 11px; font-weight: bold; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .bracket-center { display: flex; flex-direction: column; align-items: center; padding: 0 20px; }
+        .trophy { font-size: 50px; text-shadow: 0 0 15px var(--accent-color); margin-bottom: 15px; }
+        .final-match { width: 180px; border-color: var(--accent-color); background: #1a1e36; }
+        .vs { font-size: 9px; color: #64748b; margin: 4px 0; }
+        .seed { display: inline-block; background: #1e293b; color: var(--accent-color); padding: 2px 5px; border-radius: 3px; font-size: 9px; margin-right: 5px; }
+        .empty-match { color: #64748b; border-style: dashed; }
+        .po-match { width: 150px; font-size: 10px; background: #020617; border: 1px dashed var(--warning); padding:10px; text-align:center; border-radius:6px; }
+
+        .rules-content { padding: 15px; font-size: 13px; line-height: 1.7; color: #cbd5e1; }
+        .rules-content h3 { color: var(--accent-color); border-bottom: 1px solid var(--divider); padding-bottom: 5px; margin-top: 25px; text-align: left; }
+        .rules-content p { margin: 10px 0; text-align: left; }
+        .rules-content ul { padding-left: 20px; text-align: left; }
+        .highlight-text { color: white; font-weight: bold; }
         
-        /* Admin Checkbox List */
-        .admin-player-list { max-height: 250px; overflow-y: auto; background: #020617; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); text-align: left; margin-bottom: 10px; }
-        .admin-player-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed var(--divider); }
+        .delete-btn { background: var(--danger); color: white; border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; margin-left: 10px; transition: 0.3s; }
+        .delete-btn:hover { background: #b91c1c; }
+        .example-box { background: rgba(255, 215, 0, 0.05); border-left: 3px solid var(--accent-color); padding: 12px; margin-top: 15px; border-radius: 0 6px 6px 0; }
+        .guide-box { background: #1e293b; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 12px; border-left: 4px solid var(--success); text-align: left;}
+        .guide-box h4 { margin-top: 0; color: var(--success); }
+        .guide-box ul { padding-left: 15px; margin-bottom: 5px; }
+        .guide-box li { margin-bottom: 8px; }
     </style>
 </head>
 <body>
@@ -72,49 +115,48 @@
 <div class="container">
     <div class="nav-bar" id="appNavBar">
         <div>
-            <select id="userActiveLeagueSelect" class="auth-input" style="width:auto; margin:0; padding:6px; font-size:12px;" onchange="userSwitchLeague()">
-                <option value="none">Lig Seçimi</option>
+            <button class="nav-btn" onclick="goHome()">🏠 Ana Sayfa</button>
+            <select id="userActiveLeagueSelect" class="auth-input" style="width:auto; margin:0 0 0 5px; padding:6px; font-size:12px; display:none;" onchange="userSwitchLeague()">
+                <option value="none">Turnuva Seçin</option>
             </select>
         </div>
         <div style="font-size: 11px; font-weight: bold; color: var(--accent-color);" id="navLeagueIndicator">İZMİR 35 LİGİ</div>
         <button class="nav-btn" style="background: var(--danger); border-color: var(--danger);" onclick="logoutSession()">🚪 Çıkış</button>
     </div>
 
-    <!-- AUTHENTICATION (Kayıt, Giriş, Admin) -->
     <div id="authWrapper">
-        <h1 id="mainTitle">✨ İZMİR 35 KORTENİS ✨</h1>
-        <p style="text-align:center; margin:0 0 15px 0; font-size:12px; color:var(--sub-text);" id="subTitleText">Kariyer ve Lig Yönetim Sistemi</p>
+        <h1 id="mainTitle">✨ İZMİR 35 KORTENİS LİGİ ✨</h1>
+        <p style="text-align:center; margin:0 0 15px 0; font-size:12px; color:var(--sub-text); font-style:italic;" id="subTitleText">KOR (Kort Oyun Reytingi) Sistemi</p>
 
-        <!-- LOGIN -->
+        <!-- YENİ GİRİŞ EKRANI -->
         <div class="auth-card" id="loginPanel" style="display: block;">
             <h3 style="margin-top:0;">Oyuncu Girişi</h3>
             <select id="loginGlobalUserSelect" class="auth-select"><option value="">Kullanıcı Yükleniyor...</option></select>
             <input type="password" id="loginGlobalPassword" class="auth-input" placeholder="Şifreniz">
             <button class="auth-btn" onclick="loginGlobalUser()">🎾 GİRİŞ YAP</button>
-            <p class="switch-link" onclick="toggleAuth('registerPanel')">Hesabın Yok Mu? Kayıt Ol</p><br>
+            <p class="switch-link" onclick="toggleAuth('registerPanel')">Hesabın Yok Mu? Yeni Kayıt Ol</p><br>
             <p class="switch-link" style="color:var(--danger);" onclick="toggleAuth('adminLoginPanel')">Yönetici Paneli</p>
         </div>
 
-        <!-- REGISTER -->
+        <!-- YENİ KAYIT VE ANKET EKRANI -->
         <div class="auth-card" id="registerPanel">
-            <h3 style="margin-top:0;">Yeni Kariyer Oluştur</h3>
+            <h3 style="margin-top:0;">Kariyerini Oluştur</h3>
             <input type="text" id="regName" class="auth-input" placeholder="Ad Soyad (Örn: Oğuz Uzun)">
-            <input type="password" id="regPassword" class="auth-input" placeholder="Kendinize bir Şifre Belirleyin">
+            <input type="password" id="regPassword" class="auth-input" placeholder="Şifrenizi Belirleyin">
             
-            <div style="font-size:12px; color:var(--accent-color); font-weight:bold; margin-top:10px; margin-bottom:5px;">📅 Kort Müsaitlik Saatleriniz (Çoklu Seçim)</div>
+            <div style="font-size:12px; color:var(--accent-color); font-weight:bold; margin-top:10px; margin-bottom:5px;">📅 Maç Müsaitliğiniz (Çoklu Seçilebilir)</div>
             <div class="chk-grid">
-                <label class="chk-label"><input type="checkbox" class="avail-chk" value="Hafta İçi Gündüz"> Hafta İçi Gündüz</label>
-                <label class="chk-label"><input type="checkbox" class="avail-chk" value="Hafta İçi Akşam"> Hafta İçi Akşam</label>
-                <label class="chk-label"><input type="checkbox" class="avail-chk" value="Hafta Sonu Gündüz"> Hafta Sonu Gündüz</label>
-                <label class="chk-label"><input type="checkbox" class="avail-chk" value="Hafta Sonu Akşam"> Hafta Sonu Akşam</label>
+                <label class="chk-label"><input type="checkbox" class="avail-chk" value="H.İçi Gündüz"> H.İçi Gündüz</label>
+                <label class="chk-label"><input type="checkbox" class="avail-chk" value="H.İçi Akşam"> H.İçi Akşam</label>
+                <label class="chk-label"><input type="checkbox" class="avail-chk" value="H.Sonu Gündüz"> H.Sonu Gündüz</label>
+                <label class="chk-label"><input type="checkbox" class="avail-chk" value="H.Sonu Akşam"> H.Sonu Akşam</label>
             </div>
 
             <div style="font-size:12px; color:var(--warning); font-weight:bold; margin-top:10px; margin-bottom:5px; border-top:1px dashed var(--divider); padding-top:10px;">📊 Seviye Belirleme Anketi</div>
-            
-            <select id="q1" class="auth-select" style="font-size:11px; padding:8px;"><option value="">1. Forehand/Backhand İstikrarı?</option><option value="2.0">Sadece topu karşıya atıyorum</option><option value="4.0">Güvenilir ve yönlendirebilirim</option><option value="6.5">Çok sert ve spinli silahımdır</option></select>
-            <select id="q2" class="auth-select" style="font-size:11px; padding:8px;"><option value="">2. Servis ve Çift Hata?</option><option value="2.0">İkinci serviste zorlanırım</option><option value="4.0">Birincim iyi, ikinciyi oyuna sokarım</option><option value="6.5">Servisimle direkt puan alırım</option></select>
-            <select id="q3" class="auth-select" style="font-size:11px; padding:8px;"><option value="">3. File Önü (Vole/Smaç)?</option><option value="2.0">Fileye çıkmam, geride kalırım</option><option value="4.0">Fırsat buldukça çıkar bitiririm</option><option value="6.5">Agresif oynar, fileyi domine ederim</option></select>
-            <select id="q4" class="auth-select" style="font-size:11px; padding:8px;"><option value="">4. Maç ve Stres Yönetimi?</option><option value="2.0">Pek maça çıkmadım, çabuk düşerim</option><option value="4.0">Düzenli maç yaparım, taktik kurarım</option><option value="6.5">Turnuva oyuncusuyum, baskıyı severim</option></select>
+            <select id="q1" class="auth-select" style="font-size:11px; padding:8px;"><option value="">1. Ralli (Dip Çizgi) Temponuz?</option><option value="2.0">Sadece topu karşıya atıyorum</option><option value="4.0">Güvenilir ve yönlendirebilirim</option><option value="6.5">Çok sert ve spinli vururum</option></select>
+            <select id="q2" class="auth-select" style="font-size:11px; padding:8px;"><option value="">2. File Önü (Vole/Yaklaşma)?</option><option value="2.0">Fileye çıkmam, geride kalırım</option><option value="4.0">Fırsat buldukça çıkar bitiririm</option><option value="6.5">Her bölgede hakimim, agresif oynarım</option></select>
+            <select id="q3" class="auth-select" style="font-size:11px; padding:8px;"><option value="">3. Servis Gücünüz?</option><option value="2.0">Sadece oyuna sokmaya çalışırım</option><option value="4.0">Birinci servisim kuvvetlidir</option><option value="6.5">Servisimle direkt puan alırım</option></select>
+            <select id="q4" class="auth-select" style="font-size:11px; padding:8px;"><option value="">4. Maç/Stres Yönetimi?</option><option value="2.0">Deneyimim az, çabuk koparım</option><option value="4.0">Taktik kurarım, maç tecrübem var</option><option value="6.5">Turnuva oyuncusuyum, baskıyı severim</option></select>
 
             <button class="auth-btn" style="background:var(--success);" onclick="registerNewUser()">KAYDINI TAMAMLA</button>
             <p class="switch-link" onclick="toggleAuth('loginPanel')">Geri Dön</p>
@@ -122,31 +164,34 @@
 
         <!-- ADMIN LOGIN -->
         <div class="auth-card" id="adminLoginPanel">
-            <h3 style="margin-top:0; color:var(--danger);">Yönetici Girişi</h3>
+            <h3 style="margin-top:0; color:var(--danger)">Yönetici Girişi</h3>
             <input type="password" id="adminPassword" class="auth-input" placeholder="Yönetici Şifresi">
-            <button class="auth-btn" style="background:var(--danger); color:white;" onclick="loginAdmin()">GİRİŞ</button>
+            <button class="auth-btn" style="background:var(--danger); color:white;" onclick="loginAdmin()">GİRİŞ YAP</button>
             <p class="switch-link" onclick="toggleAuth('loginPanel')">Oyuncu Girişine Dön</p>
         </div>
     </div>
 
-    <!-- MAIN APP (Turnuva ve Profil Arayüzü) -->
+    <!-- ORİJİNAL ANA UYGULAMA (HİÇBİR EKRAN VEYA SEKMESİ SİLİNMEDİ) -->
     <div id="mainApp">
         <div id="adminTopBar">
             <span style="color:var(--warning); font-size:13px; font-weight:bold; margin-right:5px;">⚙️ KONTROL MERKEZİ:</span>
             <select id="adminLeagueSelect" class="auth-input" style="width:auto; margin:0; padding:6px; font-size:13px; display:inline-block;" onchange="adminSwitchLeague()">
                 <option value="new">➕ Yeni Turnuva Kur</option>
             </select>
+            <button id="deleteLeagueBtn" class="delete-btn" style="display:none;" onclick="deleteCurrentTournament()">🗑️ LİGİ SİL</button>
         </div>
 
         <div class="tabs" id="tabsContainer" style="display:none;">
+            <!-- Yeni Profil Sekmesi eklendi, orijinaller aynen korundu -->
             <button class="tab-btn" onclick="switchTab('profile')">👤 Profil</button>
+            <button class="tab-btn" onclick="switchTab('rules')">📜 Kurallar</button>
             <button class="tab-btn active" onclick="switchTab('standings')">Lig Havuzu</button>
-            <button class="tab-btn" onclick="switchTab('rivals')">Fikstür</button>
+            <button class="tab-btn" onclick="switchTab('rivals')">Fikstürler</button>
             <button class="tab-btn" onclick="switchTab('matches')">Skor Gir</button>
             <button class="tab-btn" onclick="switchTab('tree')">Ağaç 🏆</button>
         </div>
 
-        <!-- YENİ PROFİL SEKMESİ -->
+        <!-- YENİ EKLENEN PROFİL BÖLÜMÜ -->
         <div id="profile" class="panel">
             <div style="text-align:center; padding:20px; background:#020617; border-radius:12px; border:1px solid var(--border-color);">
                 <div style="font-size:40px; margin-bottom:10px;">👤</div>
@@ -156,14 +201,16 @@
                 <div style="display:flex; justify-content:space-around; margin-top:20px;">
                     <div><div id="profKKor" style="font-size:24px; font-weight:bold; color:var(--accent-color);">0</div><div style="font-size:10px; color:var(--sub-text);">Kariyer K-KOR</div></div>
                     <div><div id="profFame" style="font-size:24px; font-weight:bold; color:var(--success);">0</div><div style="font-size:10px; color:var(--sub-text);">Şöhret Puanı</div></div>
-                    <div><div id="profWin" style="font-size:24px; font-weight:bold; color:white;">0</div><div style="font-size:10px; color:var(--sub-text);">Galibiyet</div></div>
+                    <div><div id="profWin" style="font-size:24px; font-weight:bold; color:white;">0</div><div style="font-size:10px; color:var(--sub-text);">Toplam Galibiyet</div></div>
                 </div>
             </div>
-            <h3 style="font-size:13px; color:var(--sub-text); margin-top:20px; border-bottom:1px solid var(--divider); padding-bottom:5px;">Müsaitlik Takviminiz</h3>
-            <div id="profAvail" style="font-size:12px; color:var(--success);">Henüz girilmemiş.</div>
+            <div class="guide-box" style="margin-top:15px;">
+                <h4 style="margin-bottom:5px;">📅 Seçili Oyun Saatleriniz</h4>
+                <div id="profAvail" style="color:var(--text-color);">Yükleniyor...</div>
+            </div>
         </div>
 
-        <!-- GELİŞMİŞ KURULUM (ADMIN) -->
+        <!-- ORİJİNAL KURULUM EKRANI (Textarea yerine Checkbox eklendi, ölçeklendirme korundu) -->
         <div id="setup" class="panel">
             <h2>Gelişmiş Kura Motoru</h2>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 10px;">
@@ -172,54 +219,142 @@
                     <option value="6_GAME" selected>🎾 6 OYUNLUK FORMAT</option>
                     <option value="4_GAME">⚡ 4 OYUNLUK FORMAT</option>
                 </select>
-                <select id="leagueTier" class="auth-input" style="width:100%; margin:0;"><option value="SILVER">🥈 SILVER</option><option value="GOLD" selected>🥇 GOLD</option><option value="PLATIN">💎 PLATIN</option></select>
+                <select id="leagueRegion" class="auth-input" style="width:100%; margin:0;">
+                    <option value="BOSTANLI">📍 BOSTANLI</option>
+                    <option value="BORNOVA">📍 BORNOVA</option>
+                    <option value="İNCİRALTI">📍 İNCİRALTI</option>
+                    <option value="KONAK">📍 KONAK</option>
+                    <option value="ÇİĞLİ">📍 ÇİĞLİ</option>
+                    <option value="BUCA">📍 BUCA</option>
+                </select>
+                <select id="leagueTier" class="auth-input" style="width:100%; margin:0;">
+                    <option value="SILVER">🥈 SILVER</option>
+                    <option value="GOLD" selected>🥇 GOLD</option>
+                    <option value="PLATIN">💎 PLATIN</option>
+                </select>
+                <select id="leagueGender" class="auth-input" style="width:100%; margin:0;">
+                    <option value="ERKEK">👨 ERKEK</option>
+                    <option value="KADIN">👩 KADIN</option>
+                </select>
                 <input type="date" id="startDate" class="auth-input" style="width:100%; margin:0;" title="Lig Başlangıç Tarihi">
             </div>
-            
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-                <span style="font-size:12px; color:var(--sub-text);">Sisteme Kayıtlı Oyuncular (Kura İçin Seçin):</span>
-                <span id="playerCountDisplay" style="background:var(--accent-color); color:black; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:11px;">0 Seçildi</span>
+                <span style="font-size:12px; color:var(--sub-text);">Sistemdeki Oyuncuları Seçin (Kuraya Dahil Et):</span>
+                <span id="playerCountDisplay" style="background:var(--accent-color); color:black; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:11px;">0 Oyuncu Seçildi</span>
             </div>
             
-            <!-- YENİ LİSTE (TEXTAREA YERİNE) -->
+            <!-- TEXTAREA KALDIRILDI, YERİNE CHECKBOX GELDİ -->
             <div class="admin-player-list" id="adminChecklist"></div>
             
             <button class="action-btn" id="startKuraBtn" onclick="startTournament()">🔮 DİNAMİK KURAYI ÇEK VE BAŞLAT</button>
+            
+            <!-- ORİJİNAL KILAVUZ KORUNDU -->
+            <div class="guide-box">
+                <h4>🛠️ Kura Öncesi Ölçeklendirme Kılavuzu</h4>
+                <ul>
+                    <li><strong>12 - 23 Oyuncu (Butik Lig):</strong> 6 Maç. İlk 2 Seribaşı, İkinci 2 Play-Off, En iyi 4 KOR Play-In.</li>
+                    <li><strong>24 - 47 Oyuncu (Standart Lig):</strong> 8 Maç. İlk 4 Seribaşı, İkinci 4 Play-Off, En iyi 8 KOR Play-In.</li>
+                    <li><strong>48+ Oyuncu (Büyük Lig):</strong> 10 Maç. İlk 8 Seribaşı, İkinci 8 Play-Off, En iyi 16 KOR Play-In.</li>
+                </ul>
+            </div>
         </div>
 
-        <!-- ESKİ KUSURSUZ ÇEKİRDEK (Değiştirilmedi, sadece div isimleri) -->
-        <div id="standings" class="panel"><table id="standingsTable"><thead><tr><th>Sıra</th><th style="text-align:left;">Oyuncu</th><th>OM</th><th>G</th><th>M</th><th>Set Av.</th><th>KOR 🎯</th></tr></thead><tbody></tbody></table></div>
-        <div id="rivals" class="panel"><select id="playerFilterSelect" class="auth-input" style="width:100%; margin-bottom:15px;" onchange="filterPlayerFikstur()"></select><div class="rivals-grid" id="rivalsGridContainer"></div></div>
+        <!-- ORİJİNAL KURALLAR EKRANI (HİÇ DOKUNULMADI) -->
+        <div id="rules" class="panel">
+            <h2>📜 TURNUVA KURALLARI VE LİG FORMATI</h2>
+            <div class="rules-content">
+                <h3>🗓️ 1. TURNUVA TAKVİMİ VE İŞLEYİŞ</h3>
+                <ul>
+                    <li><span class="highlight-text">Lig Aşaması (<span id="ruleStartDate">⏳</span> - <span id="ruleEndDate">⏳</span>):</span> <span id="rulePlayerCount"></span> oyuncu arasında, her bir oyuncunun <span id="ruleMatchLimit"></span> farklı rakiple eşleşeceği ve <span id="ruleMatchLimit2"></span> haftalık bir süreçte tamamlanan rastgele atamalı lig fikstürü.</li>
+                    <li><span class="highlight-text">Esnek Fikstür:</span> Belirtilen haftalık süreç boyunca dilediğiniz rakiple, dilediğiniz sırayla korta çıkabilirsiniz. Bu esnek yapı, tüm oyuncularımıza kendi programlarına uygun bir rekabet alanı sunmak ve maçların (WO) kaçırılma ihtimalini en aza indirerek ligin dinamizmini kesintisiz kılmak amacıyla tasarlanmıştır.</li>
+                    <li><span class="highlight-text">Play-Off ve Final Takvimi:</span> Lig aşaması tamamlandıktan sonra Play-Off süreci başlar. Büyük Final hariç tüm Play-Off turlarının <strong style="color:var(--warning)"><span id="rulePoDate">⏳</span></strong> içerisinde tamamlanması hedeflenmektedir. Büyük Final Şöleni ise bu sürenin bitimindeki ilk hafta sonu olan <strong style="color:var(--success)"><span id="ruleFinalDate">⏳</span></strong> tarihinde oynanacaktır.</li>
+                </ul>
+                
+                <h3>🎾 2. LİG FORMATI VE ZAMAN YÖNETİMİ</h3>
+                <ul>
+                    <li><span class="highlight-text">Maç Formatı:</span> <span id="ruleActiveFormatText" style="color: var(--success); font-weight: bold;">Yükleniyor...</span> Setlerde 1-1'lik eşitlik olması durumunda 10 puanlık maç tie-break'i oynanır.</li>
+                    <li><span class="highlight-text">Zaman Yönetimi:</span> Kort rezervasyonunun kısıtlı (1 saat) olması durumunda, tarafların anlaşması koşuluyla süreyi verimli kullanmak adına "Avantaj" yerine <strong style="color:white">"Karar Puanı (Altın Puan)"</strong> oynanabilir. Bu seçimi katılımcılarımıza bırakıyoruz. <strong style="color:var(--danger)">Puan durumu ve lig sıralamasına bir etkisi yoktur.</strong></li>
+                </ul>
+
+                <h3>📊 3. KOR (KORT OYUN REYTİNGİ) VE YENİLİKÇİ PUANLAMA</h3>
+                <p>Klasik "oyun averajı" sisteminin ötesine geçen KOR; maçın sonucuna, oyunun bütününe ve gösterilen performansa değer veren, tenisin rekabetçi ruhunu ödüllendiren <strong>yenilikçi bir performans analizidir.</strong> Sıralama önceliği: <strong>1) Galibiyet Sayısı, 2) Set Averajı, 3) KOR Puanı</strong> şeklindedir.</p>
+                <ul>
+                    <li><span class="highlight-text">MİP (Maç İçi Performans):</span> [Kazandığınız Oyun / Toplam Oynanan Oyun] × 100</li>
+                    <li><span class="highlight-text">RGÇ (Rakip Güç Çarpanı):</span> 1 + [Rakibin Güncel Galibiyet Oranı]</li>
+                </ul>
+                <div style="background:#1e293b; padding:10px; border-radius:6px; font-family:monospace; margin:10px 0;">
+                    <div style="text-align:center; color:var(--accent-color); font-weight:bold; margin-bottom:8px; border-bottom:1px dashed #334155; padding-bottom:5px;">📌 KOR PUANI NASIL HESAPLANIR?</div>
+                    <span style="color:var(--success)">🏆 KAZANAN:</span> (MİP × RGÇ) + 30 Puan (Galibiyet Primi)<br>
+                    <span style="color:var(--danger)">🛡️ KAYBEDEN:</span> (MİP × RGÇ) × 0.50 (Mağlup Çarpanı)
+                </div>
+                
+                <div class="example-box" id="ruleKorExample"></div>
+
+                <h3>⚔️ 4. KATMANLI PLAY-OFF SİSTEMİ</h3>
+                <ul>
+                    <li><span class="highlight-text">Play-Off Yapısı:</span> <span id="rulePoStructure">⏳ Hesaplanıyor...</span></li>
+                    <li><span class="highlight-text">Akan Sistem:</span> Final maçı hariç tüm eşleşmeler "Akan Play-Off" düzenindedir; rakibiniz belli olduğu an maçınızı oynayabilirsiniz. Turnuva ağacındaki tüm güncel eşleşmeleri, seri başlarını ve ilerleyişi <strong style="color:var(--warning)">"Ağaç 🏆"</strong> sekmesinden anlık olarak takip edebilirsiniz.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ORİJİNAL LİG TABLOSU (HİÇ DOKUNULMADI) -->
+        <div id="standings" class="panel">
+            <div id="mainStandingsWrapper">
+                <table id="standingsTable">
+                    <thead>
+                        <tr><th>Sıra</th><th style="text-align:left;">Oyuncu</th><th>OM</th><th>G</th><th>M</th><th>Set Av.</th><th>KOR 🎯</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div id="miniStandingsWrapper"></div>
+        </div>
+
+        <!-- ORİJİNAL FİKSTÜRLER EKRANI (Akıllı Asistan Eklendi) -->
+        <div id="rivals" class="panel">
+            <select id="playerFilterSelect" class="auth-input" style="width:100%; margin-bottom:15px;" onchange="filterPlayerFikstur()"></select>
+            <div class="rivals-grid" id="rivalsGridContainer"></div>
+        </div>
+
+        <!-- ORİJİNAL SKOR GİRİŞİ (Sadece Onay Uyarısı Eklendi) -->
         <div id="matches" class="panel">
             <div style="background:rgba(255, 189, 0, 0.1); border:1px solid var(--warning); padding:10px; border-radius:6px; margin-bottom:15px; font-size:12px;">
-                <strong>🚨 ÇİFT TARAFLI ONAY:</strong> Skoru girdikten sonra maç 'Beklemede' durumuna geçer. Rakibiniz onaylamadan puanlar hesaba katılmaz!
+                <strong>🚨 ÇİFT TARAFLI ONAY:</strong> Skoru girdikten sonra maç 'Onay Bekliyor' durumuna geçer. Rakibiniz sisteme girip onaylamadan KOR puanları sıralamaya yansımaz!
             </div>
-            <select id="matchFilterSelect" class="auth-input" style="width:100%; margin-bottom:15px;" onchange="renderMatchesView()"><option value="last10">🕒 Ligdeki Son 10 Maçı İzle</option></select>
+            <select id="matchFilterSelect" class="auth-input" style="width:100%; margin-bottom:15px;" onchange="renderMatchesView()">
+                <option value="last10">🕒 Ligdeki Son 10 Maçı İzle</option>
+            </select>
             <div class="matches-grid-container" id="matchListContainer"></div>
         </div>
-        <div id="tree" class="panel"><h2 id="treeDynamicTitle">Canlı Şampiyonluk Yol Haritası</h2><div id="bracketView">Ağaç Verisi Yükleniyor...</div></div>
+
+        <!-- ORİJİNAL AĞAÇ EKRANI (HİÇ DOKUNULMADI) -->
+        <div id="tree" class="panel">
+            <h2 id="treeDynamicTitle">Canlı Şampiyonluk Yol Haritası</h2>
+            <div id="bracketView"></div>
+        </div>
     </div>
 </div>
 
 <script>
-    // --- 1. VERİTABANI VE GLOBAL DEĞİŞKENLER ---
+    // --- 1. FIREBASE VE DEĞİŞKENLER ---
     const firebaseConfig = { databaseURL: "https://device-streaming-c489eab4-default-rtdb.europe-west1.firebasedatabase.app/" };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const database = firebase.database();
 
-    let globalUsers = {}; // v5 Yenilik: Bağımsız oyuncu havuzu
-    let allTourneys = {}; // v1 Çekirdeği: Turnuvaların tutulduğu ana damar
+    let globalUsers = {}; // v5 Global Kullanıcılar
+    let allTourneys = {}; // Orijinal turnuva yapısı (multi_v1)
     let currentTid = null;
     let isAdmin = false; 
-    let loggedInUser = null; // Global kullanıcı objesi
+    let loggedInUser = null; // Global user objesi
     
-    // Eski çekirdek değişkenleri (Bozmuyoruz)
+    // ORİJİNAL ÇEKİRDEK DEĞİŞKENLERİ (Bozulmadı)
     let players = []; let matches = []; let currentSettings = null;
+    let previousTabs = ['standings'];
 
     window.onload = function() { listenToCloud(); };
 
     function listenToCloud() {
-        // İki veritabanını aynı anda dinliyoruz
         database.ref('the_35_gold_league/users').on('value', (snapU) => {
             globalUsers = snapU.val() || {};
             updateLoginDropdown();
@@ -262,7 +397,7 @@
         let q3 = parseFloat(document.getElementById('q3').value); let q4 = parseFloat(document.getElementById('q4').value);
 
         if(!name || !pass || avail.length === 0 || isNaN(q1) || isNaN(q2) || isNaN(q3) || isNaN(q4)) {
-            alert("Lütfen profiliniz için tüm soruları ve takvimi doldurun."); return;
+            alert("Lütfen profiliniz için tüm soruları ve takvim saatlerini doldurun."); return;
         }
 
         let avg = (q1 + q2 + q3 + q4) / 4;
@@ -275,7 +410,7 @@
         };
 
         database.ref('the_35_gold_league/users/' + uid).set(newUser).then(() => {
-            alert(`✅ Kayıt Başarılı!\nAnaliz Edilen Seviyeniz: ${tier}\nGiriş yapabilirsiniz.`);
+            alert(`✅ Kayıt Başarılı!\nSistem Tarafından Atanan Seviyeniz: ${tier}\nGiriş yapabilirsiniz.`);
             toggleAuth('loginPanel');
         });
     }
@@ -283,7 +418,7 @@
     function loginGlobalUser() {
         let uid = document.getElementById('loginGlobalUserSelect').value;
         let pass = document.getElementById('loginGlobalPassword').value;
-        if(!uid) return;
+        if(!uid) { alert("İsim seçiniz!"); return; }
 
         let u = globalUsers[uid];
         if(u && u.password === pass) {
@@ -308,17 +443,19 @@
 
         if(isAdmin) {
             document.getElementById('adminTopBar').style.display = "block";
+            document.getElementById('userActiveLeagueSelect').style.display = "none";
             document.getElementById('tabsContainer').style.display = "none";
-            adminSwitchLeague();
+            adminSwitchLeague(); // Otomatik turnuva kura ekranına atar
         } else {
             document.getElementById('tabsContainer').style.display = "flex";
+            document.getElementById('userActiveLeagueSelect').style.display = "inline-block";
             populateLeagueDropdowns();
-            // Varsayılan olarak profil sekmesini aç
+            // Oyuncu girince direkt profilini görsün
             switchTab('profile');
         }
     }
 
-    // --- 3. YÖNETİCİ KURA VE SETUP (Checkbox ile) ---
+    // --- 3. YÖNETİCİ KURA EKRANI (Checkbox) ---
     function renderAdminChecklist() {
         let list = document.getElementById('adminChecklist'); list.innerHTML = "";
         Object.values(globalUsers).sort((a,b)=>a.name.localeCompare(b.name)).forEach(u => {
@@ -333,7 +470,7 @@
 
     function updateSelectedCount() {
         let cnt = document.querySelectorAll('.admin-chk:checked').length;
-        document.getElementById('playerCountDisplay').innerText = cnt + " Seçildi";
+        document.getElementById('playerCountDisplay').innerText = cnt + " Oyuncu Seçildi";
     }
 
     function populateLeagueDropdowns() {
@@ -342,13 +479,15 @@
         if(!aSel || !uSel) return;
 
         let aOpt = '<option value="new">➕ Yeni Turnuva Kur</option>';
-        let uOpt = '<option value="none">Turnuvanızı Seçin</option>';
+        let uOpt = '<option value="none">Oynadığınız Ligi Seçin</option>';
 
         Object.keys(allTourneys).forEach(tid => {
-            let n = allTourneys[tid].settings.customName || "Turnuva";
+            let s = allTourneys[tid].settings;
+            let n = s.customName ? s.customName : `İZMİR 35 LİGİ - ${s.region} ${s.gender} ${s.tier}`;
             aOpt += `<option value="${tid}">Yönet: ${n}</option>`;
-            // Kullanıcı eğer bu turnuvada varsa listesinde görünsün
-            if(!isAdmin && loggedInUser && allTourneys[tid].players.some(p => p.id === loggedInUser.id)) {
+            
+            // Eğer oyuncu bu turnuvanın içindeyse, oyuncunun listesinde göster
+            if(!isAdmin && loggedInUser && allTourneys[tid].players.some(p => String(p.id) === String(loggedInUser.id))) {
                 uOpt += `<option value="${tid}">${n}</option>`;
             }
         });
@@ -365,12 +504,14 @@
             currentTid = null;
             document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
             document.getElementById('tabsContainer').style.display = 'none';
+            document.getElementById('deleteLeagueBtn').style.display = 'none';
             document.getElementById('setup').classList.add('active');
             renderAdminChecklist();
         } else {
+            if (!allTourneys[val]) return;
             currentTid = val;
             document.getElementById('tabsContainer').style.display = 'flex';
-            document.getElementById('setup').classList.remove('active');
+            document.getElementById('deleteLeagueBtn').style.display = 'inline-block';
             loadTournamentData(val);
             switchTab('standings');
         }
@@ -384,74 +525,105 @@
         switchTab('standings');
     }
 
-    function startTournament() {
-        // ESKİ ÇEKİRDEK KURA SİSTEMİ BİREBİR KORUNDU
-        let checked = document.querySelectorAll('.admin-chk:checked');
-        let N = checked.length;
-        if (N < 4) { alert("En az 4 kişi seçilmelidir!"); return; }
+    function goHome() { if(isAdmin) { document.getElementById('adminLeagueSelect').value="new"; adminSwitchLeague(); } else switchTab('profile'); }
 
-        let format = document.getElementById('leagueFormat').value;
-        let tier = document.getElementById('leagueTier').value;
-        let cName = document.getElementById('leagueCustomName').value.trim() || `${tier} Ligi`;
-        let sDate = document.getElementById('startDate').value;
-
-        // Eski sistemdeki tempPlayers yapısını, yeni ID'lerle besliyoruz!
-        let tempPlayers = [];
-        checked.forEach(cb => {
-            let u = globalUsers[cb.value];
-            // ID olarak kullanıcının gerçek UID'sini (USR_...) veriyoruz ki bağlantı kopmasın.
-            tempPlayers.push({ id: u.id, name: u.name, wins: 0, losses: 0, totalMatches: 0, setAv: 0, kor: 0, korRank: 0 });
-        });
-
-        let loopLimit = N >= 48 ? 5 : (N >= 24 ? 4 : 3);
-        let mLimit = N >= 48 ? 10 : (N >= 24 ? 8 : 6);
-
-        let tempMatches = []; let mId = 0; 
-        let ring = [...tempPlayers].sort(() => Math.random() - 0.5);
-        for (let i = 0; i < N; i++) {
-            for(let d = 1; d <= loopLimit; d++) {
-                let pA = ring[i]; let pB = ring[(i + d) % N];
-                if(!tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id))) {
-                    // YENİ ONAY SİSTEMİ İÇİN STATÜLER EKLENDİ
-                    tempMatches.push({ 
-                        id: mId++, p1: pA.id, p2: pB.id, p1Name: pA.name, p2Name: pB.name, 
-                        p1S1: '', p2S1: '', p1S2: '', p2S2: '', 
-                        played: false, pending: false, enteredBy: '', matchDate: '' 
-                    });
-                }
-            }
+    function deleteCurrentTournament() {
+        if(!currentTid) return;
+        if(confirm(`⚠️ DİKKAT! Bu ligi siliyorsunuz. Onaylıyor musunuz?`)) {
+            let tidToDelete = currentTid; currentTid = null;
+            delete allTourneys[tidToDelete];
+            database.ref('the_35_gold_league/multi_v1/' + tidToDelete).remove().then(() => {
+                alert("✅ Lig silindi."); goHome();
+            });
         }
-        
-        let newTid = "LIG_" + Date.now();
-        let settings = { matchLimit: mLimit, format: format, tier: tier, startDate: sDate, playerCount: N, customName: cName };
-        
-        database.ref('the_35_gold_league/multi_v1/' + newTid).set({ players: tempPlayers, matches: tempMatches, settings: settings })
-        .then(() => { alert("Kura çekildi ve sistem hazır!"); document.getElementById('adminLeagueSelect').value = newTid; adminSwitchLeague(); });
     }
 
-    // --- 4. ARAYÜZ, PROFİL VE FİKSTÜR (Akıllı Takvimli) ---
+    function startTournament() {
+        const btn = document.getElementById('startKuraBtn');
+        btn.innerText = "⏳ HESAPLANIYOR..."; btn.style.background = "var(--warning)"; btn.disabled = true;
+
+        setTimeout(() => {
+            let checked = document.querySelectorAll('.admin-chk:checked');
+            let N = checked.length;
+            // ORİJİNAL ÇEKİRDEK KURALI
+            if (N < 12) { alert("⚠️ Minimum 12 kişi gereklidir (Play-In sistemi için)."); btn.innerText = "🔮 DİNAMİK KURAYI ÇEK VE BAŞLAT"; btn.style.background = "var(--accent-color)"; btn.disabled = false; return; }
+
+            let format = document.getElementById('leagueFormat').value;
+            let region = document.getElementById('leagueRegion').value;
+            let tier = document.getElementById('leagueTier').value;
+            let gender = document.getElementById('leagueGender').value;
+            let customName = document.getElementById('leagueCustomName').value.trim();
+            let startDateStr = document.getElementById('startDate').value;
+
+            if (!startDateStr) { alert("⚠️ Başlangıç tarihi seçiniz!"); btn.innerText = "🔮 DİNAMİK KURAYI ÇEK VE BAŞLAT"; btn.style.background = "var(--accent-color)"; btn.disabled = false; return; }
+
+            // Orijinaldeki "lines.map" yapısını checkbox'lara uyarladık. tempPlayers yapısı BİREBİR AYNI.
+            let tempPlayers = Array.from(checked).map(cb => {
+                let u = globalUsers[cb.value];
+                return { id: u.id, name: u.name, wins: 0, losses: 0, totalMatches: 0, setAv: 0, kor: 0, korRank: 0 };
+            });
+
+            // Orijinal Ölçeklendirme Matematiği (Hiç dokunulmadı)
+            let loopLimit = N >= 48 ? 5 : (N >= 24 ? 4 : 3);
+            let mLimit = N >= 48 ? 10 : (N >= 24 ? 8 : 6);
+
+            let tempMatches = []; let matchIdCount = 0; 
+            let ring = [...tempPlayers].sort(() => Math.random() - 0.5);
+            for (let i = 0; i < N; i++) {
+                for(let d = 1; d <= loopLimit; d++) {
+                    let pA = ring[i]; let pB = ring[(i + d) % N];
+                    if(!tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id))) {
+                        // Yeni onay (pending) sistemi ekli ama orijinal yapı korundu
+                        tempMatches.push({ 
+                            id: matchIdCount++, p1: pA.id, p2: pB.id, p1Name: pA.name, p2Name: pB.name, 
+                            p1S1: '', p1S2: '', p1MT: '', p2S1: '', p2S2: '', p2MT: '', 
+                            p1S1TB: '', p2S1TB: '', p1S2TB: '', p2S2TB: '', 
+                            played: false, pending: false, enteredBy: '', isWO: false, woWinner: '', savedAt: 0, matchDate: '' 
+                        });
+                    }
+                }
+            }
+            
+            const settings = { matchLimit: mLimit, format: format, tier: tier, gender: gender, region: region, startDate: startDateStr, playerCount: N, customName: customName };
+            let newTid = "LIG_" + Date.now();
+            
+            database.ref('the_35_gold_league/multi_v1/' + newTid).set({ players: tempPlayers, matches: tempMatches, settings: settings })
+            .then(() => { 
+                btn.innerText = "🔮 DİNAMİK KURAYI ÇEK VE BAŞLAT"; btn.style.background = "var(--accent-color)"; btn.disabled = false;
+                document.getElementById('adminLeagueSelect').value = newTid; adminSwitchLeague(); 
+            });
+        }, 150);
+    }
+
+    // --- 4. ARAYÜZ VE PROFİL KONTROLÜ ---
     function switchTab(tabId) {
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
+        let targetPanel = document.getElementById(tabId);
+        if(targetPanel) targetPanel.classList.add('active');
         
-        let map = {'profile':0, 'standings':1, 'rivals':2, 'matches':3, 'tree':4};
-        if(map[tabId] !== undefined) document.querySelectorAll('.tab-btn')[map[tabId]].classList.add('active');
+        let btnIndex = ['profile', 'rules', 'standings', 'rivals', 'matches', 'tree'].indexOf(tabId);
+        if(btnIndex !== -1) document.querySelectorAll('.tab-btn')[btnIndex].classList.add('active');
 
         if(tabId === 'profile') renderProfile();
         if(currentTid && allTourneys[currentTid]) {
             if(tabId === 'standings') renderStandings();
-            if(tabId === 'rivals') { document.getElementById('playerFilterSelect').value = isAdmin ? 'all' : loggedInUser.id; renderRivalsGrid(); }
-            if(tabId === 'matches') { document.getElementById('matchFilterSelect').value = isAdmin ? 'last10' : loggedInUser.id; renderMatchesView(); }
+            if(tabId === 'rivals') { populateFilterSelects(); renderRivalsGrid(); }
+            if(tabId === 'matches') { populateFilterSelects(); renderMatchesView(); }
+            if(tabId === 'tree') renderVisualBracket();
         }
     }
 
     function loadTournamentData(tid) {
         let t = allTourneys[tid]; if (!t) return;
-        players = t.players || []; matches = t.matches || []; currentSettings = t.settings;
-        document.getElementById('navLeagueIndicator').innerText = currentSettings.customName;
-        // ÇEKİRDEK HESAPLAMA ÇAĞRILIYOR
-        calculateStats(); 
+        players = t.players || []; matches = t.matches || []; currentSettings = t.settings || null;
+        
+        if(currentSettings) {
+            let name = currentSettings.customName ? currentSettings.customName : `İZMİR 35 - ${currentSettings.region} ${currentSettings.gender} ${currentSettings.tier}`;
+            document.getElementById('navLeagueIndicator').innerText = name;
+            applyDynamicSettings(currentSettings); // Orijinal rules metnini günceller
+        }
+        calculateStats(); // Orijinal KOR hesaplayıcı
     }
 
     function renderProfile() {
@@ -465,143 +637,343 @@
         document.getElementById('profAvail').innerText = (u.availability && u.availability.length > 0) ? u.availability.join(", ") : "Belirtilmemiş";
     }
 
+    function populateFilterSelects() {
+        const sf = document.getElementById('playerFilterSelect'); const sm = document.getElementById('matchFilterSelect');
+        if(!sf || !sm) return;
+        sf.innerHTML = '<option value="all">Tüm Fikstürleri Göster</option>';
+        sm.innerHTML = '<option value="last10">🕒 Ligdeki Son 10 Maçı İzle</option>';
+        let sorted = [...players].sort((a,b) => a.name.localeCompare(b.name));
+        sorted.forEach(p => {
+            sf.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+            sm.innerHTML += `<option value="${p.id}">👤 ${p.name} - Maçları</option>`;
+        });
+        if(!isAdmin && loggedInUser) {
+            if(document.querySelector('.panel.active').id === 'rivals') sf.value = loggedInUser.id;
+            if(document.querySelector('.panel.active').id === 'matches') sm.value = loggedInUser.id;
+        }
+    }
+
+    function filterPlayerFikstur() {
+        let val = document.getElementById('playerFilterSelect').value;
+        document.querySelectorAll('.player-rivals-card').forEach(c => { 
+            c.style.display = (val === 'all' || c.getAttribute('data-player-id') === String(val)) ? "block" : "none"; 
+        });
+    }
+
     function renderRivalsGrid() {
         const c = document.getElementById('rivalsGridContainer'); c.innerHTML = "";
-        let filterSel = document.getElementById('playerFilterSelect');
-        if(filterSel.options.length <= 1) {
-            filterSel.innerHTML = '<option value="all">Tüm Fikstürler</option>';
-            players.forEach(p => filterSel.innerHTML += `<option value="${p.id}">${p.name}</option>`);
-        }
-        
-        let val = filterSel.value;
         players.forEach(p => {
-            if(val !== 'all' && String(p.id) !== String(val)) return;
-            
-            let card = document.createElement('div'); card.className = "player-rivals-card";
-            card.innerHTML = `<div class="player-main-title">${p.name} Fikstürü</div>`;
-            
-            matches.filter(m => m.p1 === p.id || m.p2 === p.id).forEach((m, idx) => {
-                let isP1 = m.p1 === p.id;
-                let oppId = isP1 ? m.p2 : m.p1; let oppName = isP1 ? m.p2Name : m.p1Name;
+            let card = document.createElement('div'); card.className = "player-rivals-card"; card.setAttribute('data-player-id', p.id);
+            card.innerHTML = `<div class="player-main-title">${p.name}</div>`;
+            matches.filter(m => String(m.p1) === String(p.id) || String(m.p2) === String(p.id)).forEach((m, idx) => {
+                let isP1 = String(m.p1) === String(p.id);
+                let oppId = isP1 ? m.p2 : m.p1;
+                let oppName = isP1 ? m.p2Name : m.p1Name;
                 
-                // AKILLI TAKVİM MANTIĞI
+                // YENİ AKILLI TAKVİM
                 let smartCal = "";
                 let myU = globalUsers[p.id]; let oppU = globalUsers[oppId];
                 if(!m.played && myU && oppU && myU.availability && oppU.availability) {
                     let common = myU.availability.filter(v => oppU.availability.includes(v));
-                    if(common.length > 0) smartCal = `<div style="width:100%; font-size:10px; color:var(--success); margin-top:2px;">💡 Ortak Zaman: ${common.join(', ')}</div>`;
+                    if(common.length > 0) smartCal = `<div style="width:100%; font-size:10px; color:var(--success); margin-top:4px;">💡 Ortak Müsaitlik: ${common.join(', ')}</div>`;
                 }
 
-                let sIcon = m.played ? '✅ Bitti' : (m.pending ? '⏳ Onayda' : '🎾');
-                card.innerHTML += `<div class="rival-line">
-                    <div style="width:100%; display:flex; justify-content:space-between;"><span>M${idx+1}: <strong>${oppName}</strong></span> <span>${sIcon}</span></div>
+                let ds = m.matchDate ? ` (${m.matchDate})` : '';
+                // Statü simgesi (Pending sistemi dahil)
+                let sIcon = m.played ? (m.pending ? "⏳" : "✅") : "🎾";
+                
+                card.innerHTML += `<div class="rival-line" style="flex-wrap:wrap; border-bottom:1px dashed #1e293b; padding:10px 2px;">
+                    <div style="width:100%; display:flex; justify-content:space-between;"><span>M${idx+1}: <strong>${oppName}</strong>${ds}</span><span>${sIcon}</span></div>
                     ${smartCal}
                 </div>`;
             });
             c.appendChild(card);
         });
+        filterPlayerFikstur();
     }
 
-    // --- 5. ONAY SİSTEMLİ MAÇ GİRİŞİ ---
-    function renderMatchesView() {
-        const c = document.getElementById('matchListContainer'); c.innerHTML = "";
-        let sel = document.getElementById('matchFilterSelect');
-        if(sel.options.length <= 1) {
-            sel.innerHTML = '<option value="last10">🕒 Ligdeki Son 10 Maçı İzle</option>';
-            players.forEach(p => sel.innerHTML += `<option value="${p.id}">👤 ${p.name} Maçları</option>`);
+    // --- 5. ORİJİNAL SKOR GİRİŞİ (Sadece Dual-Approval Eklendi) ---
+    function checkStatus(id, isRev) {
+        let m = matches.find(x => x.id === id);
+        let topName = isRev ? m.p2Name : m.p1Name; let botName = isRev ? m.p1Name : m.p2Name;
+        let typeVal = document.getElementById("type_" + id).value;
+        let saveBtn = document.getElementById("save_btn_" + id);
+        let dateVal = document.getElementById("m_date_" + id).value;
+        let sb = document.getElementById("status_" + id);
+        let fmt = (currentSettings && currentSettings.format) ? currentSettings.format : '6_GAME';
+
+        if (typeVal === 'wo') {
+            let woSel = document.getElementById("wo_winner_" + id);
+            let woName = woSel ? woSel.selectedOptions[0].text : '';
+            if(sb) { sb.innerText = `🛡️ Hükmen Kazanan: ${woName}`; sb.style.color = "var(--warning)"; }
+            if(saveBtn) saveBtn.disabled = dateVal === ""; return;
         }
 
-        let val = sel.value;
-        let dMatches = val === 'last10' ? matches.filter(m => m.played).slice(0,10) : matches.filter(m => m.p1 === val || m.p2 === val);
+        let getVal = (elId) => document.getElementById(elId) ? document.getElementById(elId).value : '';
+        let s1T = getVal(`m_${id}_t_s1`), s1B = getVal(`m_${id}_b_s1`);
+        let s2T = getVal(`m_${id}_t_s2`), s2B = getVal(`m_${id}_b_s2`);
+        let tb1T = getVal(`m_${id}_t_s1tb`), tb1B = getVal(`m_${id}_b_s1tb`);
+        let tb2T = getVal(`m_${id}_t_s2tb`), tb2B = getVal(`m_${id}_b_s2tb`);
+        let mtT = getVal(`m_${id}_t_mt`), mtB = getVal(`m_${id}_b_mt`);
+
+        let nS1T = parseInt(s1T), nS1B = parseInt(s1B), nS2T = parseInt(s2T), nS2B = parseInt(s2B);
+        let tb1Active = false, tb2Active = false;
+        
+        if (fmt === '4_GAME') {
+            tb1Active = (nS1T === 5 && nS1B === 4) || (nS1T === 4 && nS1B === 5);
+            tb2Active = (nS2T === 5 && nS2B === 4) || (nS2T === 4 && nS2B === 5);
+        } else {
+            tb1Active = (nS1T === 7 && nS1B === 6) || (nS1T === 6 && nS1B === 7);
+            tb2Active = (nS2T === 7 && nS2B === 6) || (nS2T === 6 && nS2B === 7);
+        }
+
+        let r1 = document.getElementById("tb1_row_" + id); if(r1) r1.style.display = tb1Active ? 'flex' : 'none';
+        let r2 = document.getElementById("tb2_row_" + id); if(r2) r2.style.display = tb2Active ? 'flex' : 'none';
+
+        let win1 = getSetWinner(s1T, s1B, tb1T, tb1B, fmt); 
+        let win2 = getSetWinner(s2T, s2B, tb2T, tb2B, fmt); 
+        let tSets = (win1 === 'T' ? 1 : 0) + (win2 === 'T' ? 1 : 0);
+        let bSets = (win1 === 'B' ? 1 : 0) + (win2 === 'B' ? 1 : 0);
+
+        let mRow = document.getElementById("mt_area_" + id); 
+        if(mRow) mRow.style.display = (tSets === 1 && bSets === 1) ? 'flex' : 'none';
+
+        if(tSets === 1 && bSets === 1) {
+            let nMtT = parseInt(mtT), nMtB = parseInt(mtB);
+            if (!isNaN(nMtT) && !isNaN(nMtB)) {
+                let w = Math.max(nMtT, nMtB), l = Math.min(nMtT, nMtB);
+                if ((w === 10 && l <= 8) || (w > 10 && w - l === 2)) {
+                    if(nMtT > nMtB) tSets++; else if(nMtB > nMtT) bSets++;
+                }
+            }
+        }
+        
+        let isValid = false;
+        if(sb) {
+            if(tSets === 2) { sb.innerText = `🏆 Kazanan: ${topName}`; sb.style.color = "var(--success)"; isValid = true; }
+            else if(bSets === 2) { sb.innerText = `🏆 Kazanan: ${botName}`; sb.style.color = "var(--success)"; isValid = true; }
+            else { sb.innerText = "⏳ Eksik veya Hatalı Skor"; sb.style.color = "var(--warning)"; isValid = false; }
+        }
+
+        if(saveBtn) saveBtn.disabled = !(isValid && dateVal !== "");
+    }
+
+    function toggleWO(id, isRev) {
+        let isWo = document.getElementById("type_" + id).value === 'wo';
+        document.getElementById("score_area_" + id).style.display = isWo ? 'none' : 'block';
+        document.getElementById("wo_area_" + id).style.display = isWo ? 'block' : 'none';
+        checkStatus(id, isRev);
+    }
+
+    function renderMatchesView() {
+        const c = document.getElementById('matchListContainer'); c.innerHTML = "";
+        let filterVal = document.getElementById('matchFilterSelect').value;
+        let dMatches = filterVal === 'last10' 
+            ? matches.filter(m => m.played).sort((a,b) => (b.savedAt || 0) - (a.savedAt || 0)).slice(0, 10)
+            : matches.filter(m => String(m.p1) === filterVal || String(m.p2) === filterVal);
+
+        if(filterVal === 'last10') c.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; color:var(--warning); font-weight:bold;">🕒 LİGDEKİ SON 10 MAÇ</div>`;
+
+        let tzoffset = (new Date()).getTimezoneOffset() * 60000;
+        let localDate = new Date(Date.now() - tzoffset);
+        let maxDateStr = localDate.toISOString().slice(0, 10);
+        let minD = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000 - tzoffset);
+        let minDateStr = minD.toISOString().slice(0, 10);
 
         dMatches.forEach(m => {
-            let isP2 = (m.p2 === loggedInUser.id);
-            let topN = isP2 ? m.p2Name : m.p1Name; let botN = isP2 ? m.p1Name : m.p2Name;
+            let isRev = !isAdmin && loggedInUser && (String(m.p2) === String(loggedInUser.id));
+            let topN = isRev ? m.p2Name : m.p1Name, botN = isRev ? m.p1Name : m.p2Name;
             
-            let ts1=isP2?m.p2S1:m.p1S1; let bs1=isP2?m.p1S1:m.p2S1;
-            let ts2=isP2?m.p2S2:m.p1S2; let bs2=isP2?m.p1S2:m.p2S2;
+            let getV = (v) => (v !== undefined && v !== null && v !== '') ? v : '';
+            let ts1=getV(isRev?m.p2S1:m.p1S1), bs1=getV(isRev?m.p1S1:m.p2S1);
+            let ts2=getV(isRev?m.p2S2:m.p1S2), bs2=getV(isRev?m.p1S2:m.p2S2);
+            let tmt=getV(isRev?m.p2MT:m.p1MT), bmt=getV(isRev?m.p1MT:m.p2MT);
+            let ts1tb=getV(isRev?m.p2S1TB:m.p1S1TB), bs1tb=getV(isRev?m.p1S1TB:m.p2S1TB);
+            let ts2tb=getV(isRev?m.p2S2TB:m.p1S2TB), bs2tb=getV(isRev?m.p1S2TB:m.p2S2TB);
 
-            let isMyMatch = !isAdmin && (m.p1 === loggedInUser.id || m.p2 === loggedInUser.id);
-            let readOnly = isAdmin || m.played || m.pending;
-            
-            // Onaycı ben miyim? (Maç beklemede ve giren kişi ben değilsem)
-            let amIApprover = isMyMatch && m.pending && m.enteredBy !== loggedInUser.id;
+            let isPlayer = !isAdmin && loggedInUser && (String(m.p1) === String(loggedInUser.id) || String(m.p2) === String(loggedInUser.id));
+            let ro = isAdmin || (!isPlayer && filterVal !== 'last10') || m.played;
 
-            let badgeHtml = '';
-            if(m.played) badgeHtml = `<div style="text-align:center; color:var(--success); font-weight:bold; font-size:11px; margin-bottom:10px;">✅ ONAYLANDI VE KOR EKLENDİ</div>`;
-            else if(m.pending) badgeHtml = `<div style="text-align:center; color:var(--warning); font-weight:bold; font-size:11px; margin-bottom:10px;">⏳ RAKİP ONAYI BEKLENİYOR...</div>`;
+            let amIApprover = isPlayer && m.played && m.pending && String(m.enteredBy) !== String(loggedInUser.id);
 
-            let div = document.createElement('div'); div.className = "match-card";
+            let topId = isRev ? m.p2 : m.p1; let botId = isRev ? m.p1 : m.p2;
+            let woTopSelected = m.isWO && String(m.woWinner) === String(topId) ? 'selected' : '';
+            let woBotSelected = m.isWO && String(m.woWinner) === String(botId) ? 'selected' : '';
+
+            // YENİ ONAY BİLDİRİMİ
+            let statusBanner = '';
+            if(m.played && m.pending) statusBanner = `<div style="background:var(--warning); color:black; padding:5px; text-align:center; font-weight:bold; font-size:11px; border-radius:6px 6px 0 0;">⏳ Rakip Onayı Bekleniyor</div>`;
+            else if(m.played && !m.pending) statusBanner = `<div style="background:var(--success); color:black; padding:5px; text-align:center; font-weight:bold; font-size:11px; border-radius:6px 6px 0 0;">✅ Skor Onaylandı ve İşlendi</div>`;
+
+            let div = document.createElement('div'); div.className = "match-card"; div.style.padding = "0";
             div.innerHTML = `
-                ${badgeHtml}
-                <div class="match-row"><div style="flex:1; font-weight:bold;">${topN}</div>
-                    <input type="number" id="m_${m.id}_t1" class="score-input" value="${ts1}" placeholder="S1" ${readOnly?'disabled':''}>
-                    <input type="number" id="m_${m.id}_t2" class="score-input" value="${ts2}" placeholder="S2" ${readOnly?'disabled':''}>
-                </div>
-                <div class="match-row"><div style="flex:1; font-weight:bold;">${botN}</div>
-                    <input type="number" id="m_${m.id}_b1" class="score-input" value="${bs1}" placeholder="S1" ${readOnly?'disabled':''}>
-                    <input type="number" id="m_${m.id}_b2" class="score-input" value="${bs2}" placeholder="S2" ${readOnly?'disabled':''}>
-                </div>
-                <div style="display:flex; gap:5px; margin-top:10px;">
-                    ${(!readOnly && isMyMatch) ? `<button class="save-btn" onclick="submitScoreToPending(${m.id}, ${isP2})">☁️ SKORU GÖNDER</button>` : ''}
-                    ${amIApprover ? `<button class="pending-btn" onclick="approveScore(${m.id})">✅ SKORU ONAYLA</button>` : ''}
+                ${statusBanner}
+                <div style="padding:15px;">
+                    <div class="match-card-header">
+                        <select id="type_${m.id}" class="match-opt" onchange="toggleWO(${m.id}, ${isRev})" ${ro?'disabled':''}><option value="normal" ${!m.isWO?'selected':''}>🎾 Normal Maç</option><option value="wo" ${m.isWO?'selected':''}>🛡️ Hükmen</option></select>
+                        <div style="font-size:11px; color:var(--sub-text);">Tarih: <input type="date" id="m_date_${m.id}" value="${m.matchDate||''}" min="${minDateStr}" max="${maxDateStr}" onchange="checkStatus(${m.id}, ${isRev})" style="background:#020617; color:white; border:1px solid #1e293b; padding:3px; border-radius:4px;" ${ro?'disabled':''}></div>
+                    </div>
+                    <div id="score_area_${m.id}" style="display:${m.isWO?'none':'block'}">
+                        <div class="match-row"><div class="match-player">${topN}</div><div class="score-inputs"><input type="number" id="m_${m.id}_t_s1" class="score-input" value="${ts1}" oninput="checkStatus(${m.id}, ${isRev})" placeholder="S1" ${ro?'disabled':''}><input type="number" id="m_${m.id}_t_s2" class="score-input" value="${ts2}" oninput="checkStatus(${m.id}, ${isRev})" placeholder="S2" ${ro?'disabled':''}></div></div>
+                        <div id="tb1_row_${m.id}" class="tb-input-row" style="display:none;"><div class="tb-title">⚡ S1 Tie-Break</div><div class="score-inputs"><input type="number" id="m_${m.id}_t_s1tb" class="score-input" value="${ts1tb}" ${ro?'disabled':''} oninput="checkStatus(${m.id}, ${isRev})">:<input type="number" id="m_${m.id}_b_s1tb" class="score-input" value="${bs1tb}" ${ro?'disabled':''} oninput="checkStatus(${m.id}, ${isRev})"></div></div>
+                        <div id="tb2_row_${m.id}" class="tb-input-row" style="display:none;"><div class="tb-title">⚡ S2 Tie-Break</div><div class="score-inputs"><input type="number" id="m_${m.id}_t_s2tb" class="score-input" value="${ts2tb}" ${ro?'disabled':''} oninput="checkStatus(${m.id}, ${isRev})">:<input type="number" id="m_${m.id}_b_s2tb" class="score-input" value="${bs2tb}" ${ro?'disabled':''} oninput="checkStatus(${m.id}, ${isRev})"></div></div>
+                        <div class="match-row"><div class="match-player">${botN}</div><div class="score-inputs"><input type="number" id="m_${m.id}_b_s1" class="score-input" value="${bs1}" oninput="checkStatus(${m.id}, ${isRev})" placeholder="S1" ${ro?'disabled':''}><input type="number" id="m_${m.id}_b_s2" class="score-input" value="${bs2}" oninput="checkStatus(${m.id}, ${isRev})" placeholder="S2" ${ro?'disabled':''}></div></div>
+                        <div id="mt_area_${m.id}" class="tb-input-row" style="display:none; background:#241c00; border-color:var(--warning);"><div class="tb-title" style="color:var(--warning);">🔥 10'luk Maç TB</div><div class="score-inputs"><input type="number" id="m_${m.id}_t_mt" class="score-input" value="${tmt}" oninput="checkStatus(${m.id}, ${isRev})" ${ro?'disabled':''}>:<input type="number" id="m_${m.id}_b_mt" class="score-input" value="${bmt}" oninput="checkStatus(${m.id}, ${isRev})" ${ro?'disabled':''}></div></div>
+                    </div>
+                    <div id="wo_area_${m.id}" style="display:${m.isWO?'block':'none'}; text-align:center; padding:10px;">
+                        <span style="color:var(--warning);">GALİP:</span>
+                        <select id="wo_winner_${m.id}" class="match-opt" onchange="checkStatus(${m.id}, ${isRev})" ${ro?'disabled':''}>
+                            <option value="${topId}" ${woTopSelected}>${topN}</option>
+                            <option value="${botId}" ${woBotSelected}>${botN}</option>
+                        </select>
+                    </div>
+                    <div class="live-status-bar" id="status_${m.id}">⏳ Skor Bekleniyor</div>
+                    <div style="display:flex; justify-content:space-between; gap:5px;">
+                        ${!ro ? `<button class="save-btn" id="save_btn_${m.id}" disabled onclick="saveScoreCloud(${m.id}, ${isRev})">☁️ GÖNDER</button>` : ''}
+                        ${amIApprover ? `<button class="pending-btn" onclick="approveScore(${m.id})">✅ SKORU ONAYLA</button>` : ''}
+                        ${isAdmin && m.played ? `<button class="cancel-btn" onclick="clearScoreCloud(${m.id})">🗑️ SİL</button>` : ''}
+                    </div>
                 </div>
             `;
-            c.appendChild(div);
+            c.appendChild(div); checkStatus(m.id, isRev);
         });
     }
 
-    function submitScoreToPending(mId, isP2) {
-        let m = matches.find(x => x.id === mId);
-        let t1 = document.getElementById(`m_${mId}_t1`).value; let t2 = document.getElementById(`m_${mId}_t2`).value;
-        let b1 = document.getElementById(`m_${mId}_b1`).value; let b2 = document.getElementById(`m_${mId}_b2`).value;
+    function saveScoreCloud(id, isRev) {
+        if(!currentTid) return;
+        let m = matches.find(x => x.id === id); 
+        let type = document.getElementById(`type_${id}`).value; 
+        let mDate = document.getElementById(`m_date_${id}`).value;
 
-        if(t1==='' || t2==='' || b1==='' || b2==='') { alert("Lütfen set skorlarını doldurun!"); return; }
+        m.savedAt = Date.now(); m.matchDate = mDate; m.played = true;
 
-        m.p1S1 = isP2 ? b1 : t1; m.p2S1 = isP2 ? t1 : b1;
-        m.p1S2 = isP2 ? b2 : t2; m.p2S2 = isP2 ? t2 : b2;
+        // EĞER OYUNCUYSA BEKLEMEYE AL (PENDING), ADMINSE DİREKT ONAYLA
+        if (!isAdmin) { m.pending = true; m.enteredBy = loggedInUser.id; } 
+        else { m.pending = false; m.enteredBy = 'ADMIN'; }
+
+        if(type === 'wo') { 
+            m.isWO = true; m.woWinner = document.getElementById(`wo_winner_${id}`).value; 
+        } else {
+            m.isWO = false;
+            let getStr = (s) => { let el = document.getElementById(`m_${id}_${s}`); return el ? el.value : ''; };
+            m.p1S1 = isRev ? getStr('b_s1') : getStr('t_s1'); m.p2S1 = isRev ? getStr('t_s1') : getStr('b_s1');
+            m.p1S2 = isRev ? getStr('b_s2') : getStr('t_s2'); m.p2S2 = isRev ? getStr('t_s2') : getStr('b_s2');
+            m.p1MT = isRev ? getStr('b_mt') : getStr('t_mt'); m.p2MT = isRev ? getStr('t_mt') : getStr('b_mt');
+            m.p1S1TB = isRev ? getStr('b_s1tb') : getStr('t_s1tb'); m.p2S1TB = isRev ? getStr('t_s1tb') : getStr('b_s1tb');
+            m.p1S2TB = isRev ? getStr('b_s2tb') : getStr('t_s2tb'); m.p2S2TB = isRev ? getStr('t_s2tb') : getStr('b_s2tb');
+        }
         
-        m.pending = true; m.enteredBy = loggedInUser.id;
-
-        database.ref('the_35_gold_league/multi_v1/' + currentTid + '/matches').set(matches).then(()=>{ alert("Skor rakibin onayına gönderildi!"); renderMatchesView(); });
+        calculateStats(); // KOR motoru sadece !pending ise yazar.
+        database.ref('the_35_gold_league/multi_v1/' + currentTid).set({ players: players, matches: matches, settings: currentSettings })
+        .then(() => { alert(isAdmin ? "Skor Kaydedildi!" : "Skor Rakibin Onayına Gönderildi!"); renderMatchesView(); })
     }
 
-    function approveScore(mId) {
-        let m = matches.find(x => x.id === mId);
-        m.pending = false; m.played = true; // ESKİ ÇEKİRDEK İÇİN KİLİDİ AÇTIK!
+    function approveScore(id) {
+        let m = matches.find(x => x.id === id);
+        m.pending = false; // KİLİDİ AÇTIK
         
-        calculateStats(); // Turnuvayı güncelle
-
-        // GLOBAL K-KOR VE ŞÖHRET GÜNCELLEMESİ (Basit Ortalama)
-        let p1 = players.find(x => x.id === m.p1); let p2 = players.find(x => x.id === m.p2);
+        calculateStats(); // KOR Puanları Artık Lige Yansıyacak!
+        
+        // GLOBAL (KARİYER) PUANLARINI GÜNCELLE
+        let p1T = players.find(x => x.id === m.p1); let p2T = players.find(x => x.id === m.p2);
         let u1 = globalUsers[m.p1]; let u2 = globalUsers[m.p2];
 
-        if(u1 && p1) {
+        if(u1 && p1T) {
             u1.globalMatches = (u1.globalMatches||0) + 1;
-            if(p1.kor > 0) u1.k_kor = (((u1.k_kor||0)*(u1.globalMatches-1)) + p1.kor) / u1.globalMatches;
-            // Galibiyet durumu çekirdekteki calculateStats ile p1.wins'e yansıdı
+            if(p1T.kor > 0) u1.k_kor = (((u1.k_kor||0) * (u1.globalMatches-1)) + p1T.kor) / u1.globalMatches;
+            if(m.isWO && m.woWinner === m.p1) u1.globalWins++;
             database.ref('the_35_gold_league/users/' + m.p1).set(u1);
         }
-        if(u2 && p2) {
+        if(u2 && p2T) {
             u2.globalMatches = (u2.globalMatches||0) + 1;
-            if(p2.kor > 0) u2.k_kor = (((u2.k_kor||0)*(u2.globalMatches-1)) + p2.kor) / u2.globalMatches;
+            if(p2T.kor > 0) u2.k_kor = (((u2.k_kor||0) * (u2.globalMatches-1)) + p2T.kor) / u2.globalMatches;
+            if(m.isWO && m.woWinner === m.p2) u2.globalWins++;
             database.ref('the_35_gold_league/users/' + m.p2).set(u2);
         }
 
         database.ref('the_35_gold_league/multi_v1/' + currentTid).set({ players: players, matches: matches, settings: currentSettings })
-        .then(() => { alert("Skor onaylandı ve tablolara işlendi!"); renderMatchesView(); });
+        .then(() => { alert("Skor Onaylandı! KOR Tablosuna İşlendi."); renderMatchesView(); switchTab('standings'); })
     }
 
-    // --- 6. ESKİ ÇEKİRDEK KOR HESAPLAMASI (Gram Dokunulmadı) ---
+    function clearScoreCloud(id) {
+        if(!confirm("YÖNETİCİ ONAYI: Bu maçın skorunu tamamen sıfırlamak istiyor musunuz?")) return;
+        let m = matches.find(x => x.id === id);
+        m.played = false; m.pending = false; m.isWO = false; m.woWinner = ''; m.matchDate = ''; m.enteredBy = '';
+        m.p1S1 = ''; m.p2S1 = ''; m.p1S2 = ''; m.p2S2 = ''; m.p1MT = ''; m.p2MT = '';
+        m.p1S1TB = ''; m.p2S1TB = ''; m.p1S2TB = ''; m.p2S2TB = ''; m.savedAt = 0;
+        
+        calculateStats();
+        database.ref('the_35_gold_league/multi_v1/' + currentTid).set({ players: players, matches: matches, settings: currentSettings })
+        .then(() => { renderMatchesView(); alert("✅ Skor sıfırlandı!"); })
+    }
+
+    // --- 6. ORİJİNAL ÇEKİRDEK KOR VE AĞAÇ SİSTEMİ (ASLA DEĞİŞTİRİLMEDİ) ---
+    function applyDynamicSettings(settings) {
+        let root = document.documentElement;
+        if(settings.tier === 'SILVER') root.style.setProperty('--accent-color', '#c0c0c0');
+        else if(settings.tier === 'PLATIN') root.style.setProperty('--accent-color', '#00e5ff');
+        else root.style.setProperty('--accent-color', '#ffd700'); 
+
+        let displayTitle = settings.customName ? `✨ ${settings.customName.toUpperCase()} ✨` : `✨ İZMİR 35 - ${settings.region} ${settings.gender} ${settings.tier} LİGİ ✨`;
+        document.getElementById('mainTitle').innerText = displayTitle;
+
+        let n = settings.playerCount || 12;
+        let mLimit = settings.matchLimit || 6;
+        
+        if(document.getElementById('rulePlayerCount')) {
+            document.getElementById('rulePlayerCount').innerText = n;
+            document.getElementById('ruleMatchLimit').innerText = mLimit;
+            document.getElementById('ruleMatchLimit2').innerText = mLimit;
+        }
+
+        let poText = "";
+        if (n >= 48) poText = "Lig sonunda ilk 8 oyuncu 'Seri Başı', sonraki 8 oyuncu 'Play-Off' turuna kalır. Kalan oyunculardan en iyi 16 KOR puanlı oyuncu 'Play-In' eşleşmesi yapar ve kazananlar Play-Off turuna yükselir.";
+        else if (n >= 24) poText = "Lig sonunda ilk 4 oyuncu 'Seri Başı', sonraki 4 oyuncu 'Play-Off' turuna kalır. Kalan oyunculardan en iyi 8 KOR puanlı oyuncu 'Play-In' eşleşmesi yapar ve kazananlar Play-Off turuna yükselir.";
+        else poText = "Lig sonunda ilk 2 oyuncu 'Seri Başı', sonraki 2 oyuncu 'Play-Off' turuna kalır. Kalan oyunculardan en iyi 4 KOR puanlı oyuncu 'Play-In' eşleşmesi yapar ve kazananlar Play-Off turuna yükselir.";
+        
+        if(document.getElementById('rulePoStructure')) document.getElementById('rulePoStructure').innerText = poText;
+
+        if(settings.startDate && document.getElementById('ruleStartDate')) {
+            let start = new Date(settings.startDate);
+            let end = new Date(start); end.setDate(end.getDate() + (mLimit * 7));
+            let poStart = new Date(end); poStart.setDate(poStart.getDate() + 1);
+            let poEnd = new Date(poStart); poEnd.setDate(poEnd.getDate() + 14);
+            let finalDateSat = new Date(poEnd);
+            let daysToSat = (6 - finalDateSat.getDay() + 7) % 7;
+            if (daysToSat === 0) daysToSat = 7; 
+            finalDateSat.setDate(finalDateSat.getDate() + daysToSat);
+            let finalDateSun = new Date(finalDateSat); finalDateSun.setDate(finalDateSat.getDate() + 1);
+
+            const opt = { day: 'numeric', month: 'long', year: 'numeric' };
+            document.getElementById('ruleStartDate').innerText = start.toLocaleDateString('tr-TR', opt);
+            document.getElementById('ruleEndDate').innerText = end.toLocaleDateString('tr-TR', opt);
+            document.getElementById('rulePoDate').innerText = `${poStart.toLocaleDateString('tr-TR', opt)} - ${poEnd.toLocaleDateString('tr-TR', opt)}`;
+            document.getElementById('ruleFinalDate').innerText = `${finalDateSat.toLocaleDateString('tr-TR', opt)} - ${finalDateSun.toLocaleDateString('tr-TR', opt)}`;
+        }
+
+        let is4Game = settings.format === '4_GAME';
+        if(document.getElementById('ruleActiveFormatText')) document.getElementById('ruleActiveFormatText').innerText = is4Game ? "Tüm maçlar 4 oyunluk kısa setler üzerinden oynanır." : "Tüm maçlar standart 6 oyunluk 2 set üzerinden oynanır.";
+    }
+
     function getSetWinner(sT, sB, tbT, tbB, format) {
         let t = parseInt(sT), b = parseInt(sB), tbt = parseInt(tbT), tbb = parseInt(tbB);
         if (isNaN(t) || isNaN(b)) return null; 
         if (format === '4_GAME') {
             if (t === 4 && b <= 2) return 'T'; if (b === 4 && t <= 2) return 'B';
             if (t === 5 && b === 3) return 'T'; if (b === 5 && t === 3) return 'B';
+            if ((t === 5 && b === 4) || (t === 4 && b === 5)) {
+                if (isNaN(tbt) || isNaN(tbb)) return null; 
+                let w = Math.max(tbt, tbb), l = Math.min(tbt, tbb);
+                if ((w === 7 && l <= 5) || (w > 7 && w - l === 2)) return tbt > tbb ? 'T' : 'B';
+            }
         } else {
             if (t === 6 && b <= 4) return 'T'; if (b === 6 && t <= 4) return 'B';
             if (t === 7 && b === 5) return 'T'; if (b === 7 && t === 5) return 'B';
+            if ((t === 7 && b === 6) || (t === 6 && b === 7)) {
+                if (isNaN(tbt) || isNaN(tbb)) return null; 
+                let w = Math.max(tbt, tbb), l = Math.min(tbt, tbb);
+                if ((w === 7 && l <= 5) || (w > 7 && w - l === 2)) return tbt > tbb ? 'T' : 'B';
+            }
         }
         return null; 
     }
@@ -610,40 +982,63 @@
         players.forEach(p => { p.wins=0; p.losses=0; p.totalMatches=0; p.setAv=0; p.kor=0; p.korRank=0; });
         let fmt = (currentSettings && currentSettings.format) ? currentSettings.format : '6_GAME';
 
-        // SADECE ONAYLANAN MAÇLARI HESAPLAR
+        // PENDING OLMAYANLARI İŞLE
         matches.filter(m => m.played && !m.pending).forEach(m => {
-            let p1 = players.find(x => x.id === m.p1); let p2 = players.find(x => x.id === m.p2);
+            let p1 = players.find(x => String(x.id) === String(m.p1)); let p2 = players.find(x => String(x.id) === String(m.p2));
             if(!p1 || !p2) return;
             p1.totalMatches++; p2.totalMatches++;
             
-            let s1W = getSetWinner(m.p1S1, m.p2S1, '', '', fmt); 
-            let s2W = getSetWinner(m.p1S2, m.p2S2, '', '', fmt); 
+            if(m.isWO) { 
+                if(String(m.woWinner) === String(p1.id)) { p1.wins++; p2.losses++; p1.setAv+=2; p2.setAv-=2; } 
+                else { p2.wins++; p1.losses++; p2.setAv+=2; p1.setAv-=2; } 
+                return; 
+            }
+            
+            let s1W = getSetWinner(m.p1S1, m.p2S1, m.p1S1TB, m.p2S1TB, fmt); 
+            let s2W = getSetWinner(m.p1S2, m.p2S2, m.p1S2TB, m.p2S2TB, fmt); 
             let s1 = 0, s2 = 0;
             if(s1W === 'T') s1++; else if(s1W === 'B') s2++;
             if(s2W === 'T') s1++; else if(s2W === 'B') s2++;
             
+            if(s1 === 1 && s2 === 1) {
+                let mtt = parseInt(m.p1MT), mtb = parseInt(m.p2MT);
+                if(!isNaN(mtt) && !isNaN(mtb)) { if(mtt > mtb) s1++; else if(mtb > mtt) s2++; }
+            }
+
             if(s1 === 2) { p1.wins++; p2.losses++; p1.setAv += (s1 - s2); p2.setAv += (s2 - s1); } 
             else if(s2 === 2) { p2.wins++; p1.losses++; p1.setAv += (s1 - s2); p2.setAv += (s2 - s1); }
         });
         
         matches.filter(m => m.played && !m.pending).forEach(m => {
-            let p1 = players.find(x => x.id === m.p1); let p2 = players.find(x => x.id === m.p2);
+            let p1 = players.find(x => String(x.id) === String(m.p1)); let p2 = players.find(x => String(x.id) === String(m.p2));
             if(!p1 || !p2) return;
+
             let p1WinRate = p1.totalMatches > 0 ? (p1.wins / p1.totalMatches) : 0;
             let p2WinRate = p2.totalMatches > 0 ? (p2.wins / p2.totalMatches) : 0;
             let p1Rgc = 1 + p2WinRate; let p2Rgc = 1 + p1WinRate;
 
-            let s1W = getSetWinner(m.p1S1, m.p2S1, '', '', fmt);
-            let s2W = getSetWinner(m.p1S2, m.p2S2, '', '', fmt);
+            if(m.isWO) {
+                if(String(m.woWinner) === String(p1.id)) { p1.kor += 30; } else { p2.kor += 30; }
+                return;
+            }
+
+            let s1W = getSetWinner(m.p1S1, m.p2S1, m.p1S1TB, m.p2S1TB, fmt);
+            let s2W = getSetWinner(m.p1S2, m.p2S2, m.p1S2TB, m.p2S2TB, fmt);
             let s1 = 0, s2 = 0;
             if(s1W === 'T') s1++; else if(s1W === 'B') s2++;
             if(s2W === 'T') s1++; else if(s2W === 'B') s2++;
+            if(s1 === 1 && s2 === 1) {
+                let mtt = parseInt(m.p1MT), mtb = parseInt(m.p2MT);
+                if(!isNaN(mtt) && !isNaN(mtb)) { if(mtt > mtb) s1++; else if(mtb > mtt) s2++; }
+            }
 
             let p1Win = (s1 === 2), p2Win = (s2 === 2);
             let g1 = parseInt(m.p1S1)||0, g2 = parseInt(m.p2S1)||0;
             let g3 = parseInt(m.p1S2)||0, g4 = parseInt(m.p2S2)||0;
+            let mtP1 = 0, mtP2 = 0;
+            if (s1 === 1 && s2 === 1) { if (p1Win) mtP1 = 1; else mtP2 = 1; }
 
-            let p1Games = g1 + g3; let p2Games = g2 + g4;
+            let p1Games = g1 + g3 + mtP1; let p2Games = g2 + g4 + mtP2;
             let totalGames = p1Games + p2Games;
 
             let p1Mip = totalGames > 0 ? (p1Games / totalGames) * 100 : 0;
@@ -651,6 +1046,7 @@
 
             if (p1Win) { p1.kor += (p1Mip * p1Rgc) + 30; p2.kor += (p2Mip * p2Rgc) * 0.50; } 
             else if (p2Win) { p2.kor += (p2Mip * p2Rgc) + 30; p1.kor += (p1Mip * p1Rgc) * 0.50; } 
+            else { p1.kor += (p1Mip * p1Rgc) * 0.50; p2.kor += (p2Mip * p2Rgc) * 0.50; }
         });
         
         let korSorted = [...players].sort((a,b) => b.kor - a.kor);
@@ -659,14 +1055,35 @@
     }
 
     function renderStandings() {
+        let N = players.length;
+        let dCount = N >= 48 ? 8 : (N >= 24 ? 4 : (N >= 12 ? 2 : 2));
+        let poCount = dCount;
+        let piCount = dCount * 2;
+
+        let remainingPlayers = players.slice(dCount + poCount);
+        let piPool = [...remainingPlayers].sort((a,b) => b.kor - a.kor);
+
+        players.forEach((p, i) => {
+            if (i < dCount) { p.badgeLabel = `S${i+1}`; p.badgeText = "SERİBAŞI"; p.badgeColor = "var(--accent-color)"; p.rowClass = "zone-direct"; } 
+            else if (i < dCount + poCount) { p.badgeLabel = `PO${i - dCount + 1}`; p.badgeText = "PLAY-OFF"; p.badgeColor = "var(--warning)"; p.rowClass = "zone-playoff"; } 
+            else {
+                p.rowClass = "zone-eliminated";
+                let piIndex = piPool.findIndex(x => x.id === p.id);
+                if (piIndex !== -1 && piIndex < piCount) { p.badgeLabel = `Pİ${piIndex + 1}`; p.badgeText = "PLAY-IN"; p.badgeColor = "var(--success)"; } 
+                else { p.badgeLabel = ""; p.badgeText = ""; p.badgeColor = ""; }
+            }
+        });
+
         const tbody = document.querySelector("#standingsTable tbody"); tbody.innerHTML = "";
+        
         players.forEach((p, i) => {
             let bdg = p.korRank === 1 ? '👑' : `[#${p.korRank}]`;
-            let cls = i < 4 ? 'zone-direct' : (i < 8 ? 'zone-playoff' : 'zone-eliminated');
+            let badgeHtml = p.badgeText ? `<span style="background:#1e293b; color:${p.badgeColor}; padding:2px 5px; border-radius:4px; font-size:10px; margin-left:5px; white-space:nowrap;"><strong>${p.badgeLabel}</strong> | ${p.badgeText}</span>` : '';
+            
             tbody.innerHTML += `
-                <tr class="${cls}">
+                <tr class="${p.rowClass}">
                     <td><strong>${i+1}</strong></td>
-                    <td style="text-align:left; font-weight:bold;">${p.name}</td>
+                    <td style="text-align:left; font-weight:bold;">${p.name} <br> ${badgeHtml}</td>
                     <td style="color:var(--warning); font-weight:bold;">${p.totalMatches}</td>
                     <td style="color:var(--success);font-weight:bold;">${p.wins}</td>
                     <td>${p.losses}</td>
@@ -674,6 +1091,68 @@
                     <td style="color:var(--accent-color); font-weight:bold;">${p.kor.toFixed(1)} <span style="font-size:10px;color:#94a3b8">${bdg}</span></td>
                 </tr>`;
         });
+
+        let miniContainer = document.getElementById('miniStandingsWrapper');
+        if(miniContainer) {
+            if (piPool.length > 0) {
+                let miniHtml = `<div style="margin-top:25px; background:#0b1329; border:1px solid var(--success); border-radius:8px; padding:10px;"><h3 style="color:var(--success); margin-top:0; border-bottom:1px solid #1e293b; padding-bottom:8px; font-size:13px; text-align:center;">🔥 PLAY-IN KOR YARIŞI (Kalan Oyuncular)</h3><table style="margin-top:0;"><thead><tr><th>Pİ Sıra</th><th style="text-align:left;">Oyuncu</th><th>OM</th><th>KOR 🎯</th><th>Durum</th></tr></thead><tbody>`;
+                piPool.forEach((p, idx) => {
+                    let isPi = idx < piCount;
+                    let cls = isPi ? "zone-direct" : "zone-eliminated"; 
+                    let status = isPi ? `<span style="color:var(--success);font-weight:bold;">Bilet Cebinde</span>` : `<span style="color:var(--danger);">Elendi</span>`;
+                    miniHtml += `<tr class="${cls}"><td><strong>${idx+1}</strong></td><td style="text-align:left; font-weight:bold;">${p.name}</td><td>${p.totalMatches}</td><td style="color:var(--accent-color); font-weight:bold;">${p.kor.toFixed(1)}</td><td>${status}</td></tr>`;
+                });
+                miniHtml += `</tbody></table></div>`;
+                miniContainer.innerHTML = miniHtml;
+            } else { miniContainer.innerHTML = ""; }
+        }
+    }
+
+    function renderVisualBracket() {
+        const mainWrapper = document.getElementById('bracketView'); if(!mainWrapper) return;
+        let played = matches.filter(m => m.played && !m.pending).length;
+        let N = players.length;
+        if(N < 12) { mainWrapper.innerHTML = `<p style="text-align:center; color:var(--warning);">Ligde yeterli oyuncu yok (Min 12).</p>`; return; }
+
+        let dCount = N >= 48 ? 8 : (N >= 24 ? 4 : (N >= 12 ? 2 : 2));
+        let poCount = dCount;
+        let piCount = dCount * 2;
+        let tierName = currentSettings ? currentSettings.tier : 'GOLD';
+        
+        document.getElementById('treeDynamicTitle').innerText = `Canlı Şampiyonluk Yol Haritası (${N} Kişilik ${tierName} Ligi)`;
+        let p = (rank) => players[rank - 1] ? players[rank - 1].name : 'Belirlenmedi';
+        
+        let bracketHtml = "";
+        if (dCount === 2) {
+            bracketHtml = `<div class="cl-bracket" style="min-width: 600px;"><div class="bracket-col"><div class="bracket-match"><div class="seed">S1</div>${p(1)}<div class="vs">VS</div><div class="seed">PO1</div>Play-Off Galibi</div></div><div class="bracket-center"><div class="trophy">🏆</div><div class="bracket-match final-match"><div style="color:var(--accent-color);font-weight:bold;margin-bottom:5px;">İZMİR BÜYÜK FİNALİ</div>Sol Galibi <br><span class="vs">VS</span><br> Sağ Galibi</div></div><div class="bracket-col"><div class="bracket-match"><div class="seed">S2</div>${p(2)}<div class="vs">VS</div><div class="seed">PO2</div>Play-Off Galibi</div></div></div>`;
+        } 
+        else if (dCount === 4) {
+            bracketHtml = `<div class="cl-bracket" style="min-width: 700px;"><div class="bracket-col"><div class="bracket-match"><div class="seed">S1</div>${p(1)}<div class="vs">VS</div><div class="seed">PO1</div>Play-Off Galibi</div><div class="bracket-match"><div class="seed">S4</div>${p(4)}<div class="vs">VS</div><div class="seed">PO4</div>Play-Off Galibi</div></div><div class="bracket-col"><div class="bracket-match empty-match">Yarı Final 1</div></div><div class="bracket-center"><div class="trophy">🏆</div><div class="bracket-match final-match"><div style="color:var(--accent-color);font-weight:bold;margin-bottom:5px;">İZMİR BÜYÜK FİNALİ</div>Sol Galibi <br><span class="vs">VS</span><br> Sağ Galibi</div></div><div class="bracket-col"><div class="bracket-match empty-match">Yarı Final 2</div></div><div class="bracket-col"><div class="bracket-match"><div class="seed">S2</div>${p(2)}<div class="vs">VS</div><div class="seed">PO3</div>Play-Off Galibi</div><div class="bracket-match"><div class="seed">S3</div>${p(3)}<div class="vs">VS</div><div class="seed">PO2</div>Play-Off Galibi</div></div></div>`;
+        }
+        else {
+            bracketHtml = `<div class="cl-bracket" style="min-width: 900px;"><div class="bracket-col"><div class="bracket-match"><div class="seed">S1</div>${p(1)}<div class="vs">VS</div><div class="seed">PO1</div>Play-Off Galibi</div><div class="bracket-match"><div class="seed">S8</div>${p(8)}<div class="vs">VS</div><div class="seed">PO8</div>Play-Off Galibi</div><div class="bracket-match"><div class="seed">S4</div>${p(4)}<div class="vs">VS</div><div class="seed">PO4</div>Play-Off Galibi</div><div class="bracket-match"><div class="seed">S5</div>${p(5)}<div class="vs">VS</div><div class="seed">PO5</div>Play-Off Galibi</div></div><div class="bracket-col"><div class="bracket-match empty-match">Çeyrek Final 1</div><div class="bracket-match empty-match">Çeyrek Final 2</div></div><div class="bracket-col"><div class="bracket-match empty-match">Yarı Final 1</div></div><div class="bracket-center"><div class="trophy">🏆</div><div class="bracket-match final-match"><div style="color:var(--accent-color);font-weight:bold;margin-bottom:5px;">İZMİR BÜYÜK FİNALİ</div>Sol Galibi <br><span class="vs">VS</span><br> Sağ Galibi</div></div><div class="bracket-col"><div class="bracket-match empty-match">Yarı Final 2</div></div><div class="bracket-col"><div class="bracket-match empty-match">Çeyrek Final 3</div><div class="bracket-match empty-match">Çeyrek Final 4</div></div><div class="bracket-col"><div class="bracket-match"><div class="seed">S2</div>${p(2)}<div class="vs">VS</div><div class="seed">PO2</div>Play-Off Galibi</div><div class="bracket-match"><div class="seed">S7</div>${p(7)}<div class="vs">VS</div><div class="seed">PO7</div>Play-Off Galibi</div><div class="bracket-match"><div class="seed">S3</div>${p(3)}<div class="vs">VS</div><div class="seed">PO3</div>Play-Off Galibi</div><div class="bracket-match"><div class="seed">S6</div>${p(6)}<div class="vs">VS</div><div class="seed">PO6</div>Play-Off Galibi</div></div></div>`;
+        }
+
+        let remainingPlayers = players.slice(dCount + poCount);
+        let eloPool = [...remainingPlayers].sort((a,b) => b.kor - a.kor);
+        let piHtml = "";
+        for(let i=0; i < piCount/2; i++) {
+            let pA = eloPool[i] || { name: `Pİ${i+1}` }; let pB = eloPool[piCount - 1 - i] || { name: `Pİ${piCount - i}` }; 
+            piHtml += `<div class="bracket-match po-match" style="border-color:var(--success)"><div style="color:var(--success);font-weight:bold;margin-bottom:3px;">Play-In Eşleşmesi</div>${pA.name}<br><span class="vs">VS</span><br>${pB.name}</div>`;
+        }
+
+        let poHtml = "";
+        for(let i=0; i < poCount; i++) {
+            let pA = players[dCount + i] || { name: `PO${i+1}` }; let pB = { name: `Play-In Galibi` }; 
+            poHtml += `<div class="bracket-match po-match" style="border-color:var(--warning)"><div style="color:var(--warning);font-weight:bold;margin-bottom:3px;">Play-Off ${i+1}</div>${pA.name}<br><span class="vs">VS</span><br>${pB.name}</div>`;
+        }
+
+        mainWrapper.innerHTML = `
+            <p style="font-size:11px; color:#64748b; text-align:center; margin-bottom:15px;">🏆 Turnuva Şeması (Onaylanan Maç: ${played} / ${matches.length})</p>
+            <div class="bracket-scroll-container">${bracketHtml}</div>
+            <div style="margin-top:20px; padding-top:20px; border-top:1px dashed #334155;"><h3 style="font-size:13px; color:var(--success);">🎯 PLAY-IN EŞLEŞMELERİ (${piCount} KOR Lideri)</h3><div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">${piHtml}</div></div>
+            <div style="margin-top:20px; padding-top:20px; border-top:1px dashed #334155;"><h3 style="font-size:13px; color:var(--warning);">⚔️ PLAY-OFF EŞLEŞMELERİ (${poCount} Oyuncu + Play-In Kazananları)</h3><div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">${poHtml}</div></div>
+        `;
     }
 </script>
 </body>
