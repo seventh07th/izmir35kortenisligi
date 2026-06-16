@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>İzmir 35 KorTenis Ligi</title>
+    <meta name="description" content="İzmir 35 KorTenis Ligi — KOR Sistemi" />
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
@@ -13,28 +14,30 @@
             --danger: #ef4444; --border-color: #1e293b; --sub-text: #94a3b8; --divider: #334155; 
         }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 10px; transition: 0.3s; }
-        .container { max-width: 100%; margin: 0 auto; }
-        h1, h2, h3 { text-align: center; color: var(--accent-color); text-transform: uppercase; margin: 10px 0; letter-spacing: 1px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1, h2, h3 { text-align: center; color: var(--accent-color); margin: 10px 0; letter-spacing: 1px; }
         
         .nav-bar { display: none; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px; }
         .nav-btn { background: #1e293b; color: white; border: 1px solid var(--border-color); padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.3s; }
         
-        /* GİRİŞ & KAYIT */
-        #authWrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; }
+        /* AUTH EKRANI */
+        #authWrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; margin-top: 20px;}
         .auth-card { background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.5); width: 100%; max-width: 400px; text-align: center; display: none; margin-bottom: 20px; }
         .auth-input, .auth-select { padding: 12px; width: 100%; border-radius: 6px; border: 1px solid var(--border-color); background: #020617; color: white; text-align: center; font-size: 14px; margin-bottom: 12px; box-sizing: border-box; }
         .auth-btn { background: var(--accent-color); color: #000; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; margin: 5px 0; font-size: 14px; transition: 0.3s; width: 100%; }
         .switch-link { color: var(--sub-text); font-size: 12px; cursor: pointer; text-decoration: underline; margin-top: 15px; display: inline-block; }
         .chk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: left; font-size: 12px; margin-bottom: 15px; }
-        
-        /* SEKMELER & PANELLER */
+        .chk-label { background: #1e293b; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; gap: 5px; }
+
+        /* PANELLER VE SEKMELER */
         #mainApp { display: none; }
         #adminTopBar { display: none; background: #1e293b; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 15px; border: 1px dashed var(--accent-color); }
         .tabs { display: flex; gap: 4px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
         .tab-btn { background-color: var(--card-bg); color: var(--sub-text); border: 1px solid var(--border-color); padding: 11px 8px; cursor: pointer; border-radius: 6px; font-weight: bold; flex: 1; text-align: center; font-size: 12px; white-space: nowrap; transition: 0.3s; }
         .tab-btn.active { background-color: var(--accent-color); color: #000; border-color: var(--accent-color); }
-        .panel { display: none; background-color: var(--card-bg); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); }
+        .panel { display: none; background-color: var(--card-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); }
         .panel.active { display: block; }
+        
         button.action-btn { background-color: var(--accent-color); color: #000; border: none; padding: 12px; font-size: 15px; font-weight: bold; cursor: pointer; border-radius: 8px; width: 100%; margin-top: 8px; transition: 0.3s; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
@@ -44,33 +47,35 @@
         .zone-playoff { background-color: rgba(255, 189, 0, 0.08); border-left: 3px solid var(--warning); }
         .zone-eliminated { background-color: rgba(239, 68, 68, 0.05); border-left: 3px solid var(--danger); }
         
-        /* LİSTE & KARTLAR */
-        .admin-player-list { max-height: 250px; overflow-y: auto; background: #020617; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); text-align: left; margin-bottom: 10px; }
+        /* LİSTELER VE KARTLAR */
+        .admin-player-list { max-height: 300px; overflow-y: auto; background: #020617; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); text-align: left; margin-bottom: 10px; }
         .admin-player-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--divider); }
+        .action-sm { background: #334155; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; margin-left: 4px;}
+        
         .rivals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
         .player-rivals-card { background: #020617; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; }
         .player-main-title { background: #1e293b; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; color: var(--accent-color); font-size: 14px; }
         .rival-line { display: flex; justify-content: space-between; padding: 8px 2px; border-bottom: 1px solid #1e293b; font-size: 12px; align-items: center; flex-wrap:wrap;}
         
-        /* MAÇ & SKOR */
         .matches-grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-top: 15px; }
-        .match-card { background: #020617; padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .match-card { background: #020617; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.5); overflow: hidden; }
         .match-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed var(--divider); }
         .score-input { width: 34px; text-align: center; background: #1e293b; color: white; border: 1px solid #475569; padding: 6px; font-weight: bold; border-radius: 6px; font-size: 13px; }
         .save-btn { background: var(--success); border: none; padding: 10px; color: black; font-weight: bold; cursor: pointer; border-radius: 6px; flex: 1; font-size: 12px; }
         .pending-btn { background: var(--warning); border: none; padding: 10px; color: black; font-weight: bold; cursor: pointer; border-radius: 6px; flex: 1; font-size: 12px; }
-        .action-sm { background: #334155; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; }
         .date-box { background: #1e293b; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 12px; border-left: 3px solid var(--accent-color); }
         
-        /* AĞAÇ & KURALLAR */
+        /* AĞAÇ VE KURALLAR */
         .bracket-scroll-container { width: 100%; overflow-x: auto; padding-bottom: 15px; margin-top:20px; }
         .cl-bracket { display: flex; justify-content: space-between; align-items: center; margin: 0 auto; padding: 20px 0; }
         .bracket-col { display: flex; flex-direction: column; justify-content: space-around; gap: 15px; height: 100%; }
         .bracket-match { background: #0b1329; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; width: 140px; text-align: center; font-size: 11px; font-weight: bold; }
         .bracket-center { display: flex; flex-direction: column; align-items: center; padding: 0 20px; }
+        
         .rules-content { padding: 15px; font-size: 13px; line-height: 1.7; color: #cbd5e1; }
         .rules-content h3 { color: var(--accent-color); border-bottom: 1px solid var(--divider); padding-bottom: 5px; margin-top: 25px; }
-        .example-box { background: rgba(255, 215, 0, 0.05); border-left: 3px solid var(--accent-color); padding: 12px; margin-top: 15px; border-radius: 0 6px 6px 0; }
+        .example-box { background: rgba(255, 215, 0, 0.05); border-left: 3px solid var(--accent-color); padding: 15px; margin-top: 15px; border-radius: 0 6px 6px 0; }
+        .highlight-text { color: white; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -78,21 +83,19 @@
 <div class="container">
     <div class="nav-bar" id="appNavBar">
         <div>
-            <select id="userActiveLeagueSelect" class="auth-input" style="width:auto; margin:0; padding:6px; font-size:12px; display:none;" onchange="userSwitchLeague()">
+            <button class="nav-btn" onclick="goHome()" id="homeBtn" style="display:none;">🏠 Ana Sayfa</button>
+            <select id="userActiveLeagueSelect" class="auth-input" style="width:auto; margin:0 0 0 5px; padding:6px; font-size:12px; display:none;" onchange="userSwitchLeague()">
                 <option value="none">Turnuva Seçin</option>
             </select>
-            <button class="nav-btn" id="homeBtn" onclick="goHome()" style="display:none;">🏠 Ana Sayfa</button>
         </div>
         <div style="font-size: 11px; font-weight: bold; color: var(--accent-color);" id="navLeagueIndicator">İZMİR 35 LİGİ</div>
         <button class="nav-btn" style="background: var(--danger); border-color: var(--danger);" onclick="logoutSession()">🚪 Çıkış</button>
     </div>
 
-    <!-- AUTHENTICATION -->
     <div id="authWrapper">
         <h1 id="mainTitle">✨ İZMİR 35 KORTENİS ✨</h1>
-        <p style="text-align:center; margin:0 0 15px 0; font-size:12px; color:var(--sub-text);">Kariyer ve Lig Yönetim Sistemi</p>
+        <p style="text-align:center; margin:0 0 15px 0; font-size:12px; color:var(--sub-text);" id="subTitleText">Kariyer ve Lig Yönetim Sistemi</p>
 
-        <!-- OYUNCU GİRİŞİ -->
         <div class="auth-card" id="loginPanel" style="display: block;">
             <h3 style="margin-top:0;">Oyuncu Girişi</h3>
             <select id="loginGlobalUserSelect" class="auth-select"><option value="">Kullanıcı Yükleniyor...</option></select>
@@ -102,7 +105,6 @@
             <p class="switch-link" style="color:var(--danger);" onclick="toggleAuth('adminLoginPanel')">Yönetici Paneli</p>
         </div>
 
-        <!-- KAYIT EKRANI -->
         <div class="auth-card" id="registerPanel">
             <h3 style="margin-top:0;">Kariyerini Oluştur</h3>
             <input type="text" id="regName" class="auth-input" placeholder="Ad Soyad (Örn: Oğuz Uzun)">
@@ -126,7 +128,6 @@
             <p class="switch-link" onclick="toggleAuth('loginPanel')">Geri Dön</p>
         </div>
 
-        <!-- ADMIN LOGIN -->
         <div class="auth-card" id="adminLoginPanel">
             <h3 style="margin-top:0; color:var(--danger)">Yönetici Girişi</h3>
             <input type="password" id="adminPassword" class="auth-input" placeholder="Yönetici Şifresi">
@@ -135,7 +136,6 @@
         </div>
     </div>
 
-    <!-- MAIN APP -->
     <div id="mainApp">
         <div id="adminTopBar">
             <span style="color:var(--warning); font-size:13px; font-weight:bold; margin-right:5px;">⚙️ KONTROL MERKEZİ:</span>
@@ -154,7 +154,6 @@
             <button class="tab-btn" onclick="switchTab('tree')">Ağaç 🏆</button>
         </div>
 
-        <!-- PROFİL EKRANI -->
         <div id="profile" class="panel">
             <div style="text-align:center; padding:20px; background:#020617; border-radius:12px; border:1px solid var(--border-color);">
                 <div style="font-size:40px; margin-bottom:10px;">👤</div>
@@ -174,7 +173,6 @@
             </div>
         </div>
 
-        <!-- KURULUM (GELİŞMİŞ ARAMA VE YÖNETİM) -->
         <div id="setup" class="panel">
             <h2>Gelişmiş Kura Motoru</h2>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 10px;">
@@ -197,32 +195,41 @@
             </div>
             
             <div class="admin-player-list" id="adminChecklist"></div>
-            <button class="action-btn" id="startKuraBtn" onclick="startTournament()">🔮 DİNAMİK KURAYI ÇEK</button>
+            <button class="action-btn" id="startKuraBtn" onclick="startTournament()">🔮 DİNAMİK KURAYI ÇEK VE BAŞLAT</button>
         </div>
 
-        <!-- KURALLAR -->
         <div id="rules" class="panel">
             <h2>📜 TURNUVA KURALLARI VE LİG FORMATI</h2>
             <div class="rules-content">
                 <h3>🗓️ 1. TURNUVA TAKVİMİ</h3>
                 <ul>
-                    <li><span class="highlight-text">Lig Aşaması (<span id="ruleStartDate">⏳</span> - <span id="ruleEndDate">⏳</span>):</span> <span id="rulePlayerCount"></span> oyuncu arası, rastgele atamalı esnek fikstür.</li>
+                    <li><span class="highlight-text">Lig Aşaması (<span id="ruleStartDate">⏳</span> - <span id="ruleEndDate">⏳</span>):</span> <span id="rulePlayerCount"></span> oyuncu arasında, her bir oyuncunun <span id="ruleMatchLimit"></span> farklı rakiple eşleşeceği ve <span id="ruleMatchLimit2"></span> haftalık bir süreçte tamamlanan rastgele atamalı lig fikstürü.</li>
                     <li><span class="highlight-text">Play-Off ve Final:</span> <strong style="color:var(--warning)"><span id="rulePoDate">⏳</span></strong> arası Play-Off, <strong style="color:var(--success)"><span id="ruleFinalDate">⏳</span></strong> Büyük Final.</li>
                 </ul>
                 
-                <h3>🎾 2. KOR VE YENİLİKÇİ PUANLAMA</h3>
+                <h3>🎾 2. LİG FORMATI VE ZAMAN YÖNETİMİ</h3>
+                <ul>
+                    <li><span class="highlight-text">Maç Formatı:</span> <span id="ruleActiveFormatText" style="color: var(--success); font-weight: bold;">Yükleniyor...</span> Setlerde 1-1'lik eşitlik olması durumunda 10 puanlık maç tie-break'i oynanır.</li>
+                    <li><span class="highlight-text">Zaman Yönetimi:</span> Süreyi verimli kullanmak adına "Avantaj" yerine <strong style="color:white">"Karar Puanı (Altın Puan)"</strong> oynanabilir.</li>
+                </ul>
+
+                <h3>📊 3. KOR VE YENİLİKÇİ PUANLAMA</h3>
                 <p>Klasik oyun averajı yerine maçtaki performansı (MİP) ve rakibin gücünü (RGÇ) çarparak hesaplanan puanlama.</p>
                 <div style="background:#1e293b; padding:10px; border-radius:6px; font-family:monospace; margin:10px 0;">
                     <span style="color:var(--success)">🏆 KAZANAN:</span> (MİP × RGÇ) + 30 Puan<br>
                     <span style="color:var(--danger)">🛡️ KAYBEDEN:</span> (MİP × RGÇ) × 0.50
                 </div>
-                <!-- KOR ÖRNEĞİ GERİ GELDİ -->
+                
                 <div class="example-box" id="ruleKorExample"></div>
+
+                <h3>⚔️ 4. KATMANLI PLAY-OFF SİSTEMİ</h3>
+                <ul>
+                    <li><span class="highlight-text">Play-Off Yapısı:</span> <span id="rulePoStructure">⏳ Hesaplanıyor...</span></li>
+                </ul>
             </div>
         </div>
 
-        <!-- LİG TABLOSU -->
-        <div id="standings" class="panel">
+        <div id="standings" class="panel active">
             <table id="standingsTable">
                 <thead><tr><th>#</th><th style="text-align:left;">Oyuncu</th><th>O</th><th>G</th><th>M</th><th>S.Av</th><th>KOR 🎯</th></tr></thead>
                 <tbody></tbody>
@@ -230,27 +237,27 @@
             <div id="miniStandingsWrapper"></div>
         </div>
 
-        <!-- FİKSTÜR -->
         <div id="rivals" class="panel">
             <select id="playerFilterSelect" class="auth-input" style="width:100%; margin-bottom:15px;" onchange="filterPlayerFikstur()"></select>
             <div class="rivals-grid" id="rivalsGridContainer"></div>
         </div>
 
-        <!-- SKOR VE TARİH GİRİŞİ (ÇİFT ONAY) -->
         <div id="matches" class="panel">
             <div style="background:rgba(255, 189, 0, 0.1); border:1px solid var(--warning); padding:10px; border-radius:6px; margin-bottom:15px; font-size:12px;">
-                <strong>🚨 ÇİFT TARAFLI ONAY:</strong> Tarih planlaması veya Skor girişi yaptığınızda rakibinizin onayı gerekir. (Yöneticiler direkt onaylayabilir).
+                <strong>🚨 ÇİFT TARAFLI ONAY:</strong> Tarih planlaması veya Skor girişi yaptığınızda rakibinizin onayı gerekir. Yöneticiler direkt onay yetkisine sahiptir.
             </div>
             <select id="matchFilterSelect" class="auth-input" style="width:100%; margin-bottom:15px;" onchange="renderMatchesView()"><option value="last10">🕒 Ligdeki Son 10 Maçı İzle</option></select>
             <div class="matches-grid-container" id="matchListContainer"></div>
         </div>
 
-        <!-- AĞAÇ -->
         <div id="tree" class="panel"><h2 id="treeDynamicTitle">Canlı Şampiyonluk Haritası</h2><div id="bracketView"></div></div>
     </div>
 </div>
 
 <script>
+    // ==========================================
+    // 1. FIREBASE BAĞLANTISI VE GLOBAL DEĞİŞKENLER
+    // ==========================================
     const firebaseConfig = { databaseURL: "https://device-streaming-c489eab4-default-rtdb.europe-west1.firebasedatabase.app/" };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const database = firebase.database();
@@ -274,7 +281,9 @@
         });
     }
 
-    /* --- AUTHENTICATION --- */
+    // ==========================================
+    // 2. KİMLİK DOĞRULAMA (AUTH) & PROFİL
+    // ==========================================
     function toggleAuth(id) { document.querySelectorAll('.auth-card').forEach(c=>c.style.display='none'); document.getElementById(id).style.display='block'; }
 
     function updateLoginDropdown() {
@@ -329,7 +338,9 @@
         }
     }
 
-    /* --- ADMIN YÖNETİMİ & KURA --- */
+    // ==========================================
+    // 3. YÖNETİCİ KURA VE FİLTRELEME
+    // ==========================================
     function adminFilterPlayers() {
         let nameQ = document.getElementById('adminSearchName').value.toLowerCase();
         let tierQ = document.getElementById('adminFilterTier').value;
@@ -356,10 +367,10 @@
     function updateSelectedCount() { document.getElementById('playerCountDisplay').innerText = document.querySelectorAll('.admin-chk:checked').length + " Seçildi"; }
     
     function resetUserPass(uid) {
-        let p = prompt("Yeni Şifre:"); if(p) database.ref(`the_35_gold_league/users/${uid}/password`).set(p).then(()=>alert("Şifre güncellendi."));
+        let p = prompt("Yeni Şifre Belirleyin:"); if(p) database.ref(`the_35_gold_league/users/${uid}/password`).set(p).then(()=>alert("Şifre güncellendi."));
     }
     function deleteUser(uid) {
-        if(confirm("Oyuncuyu silmek istediğinize emin misiniz?")) database.ref(`the_35_gold_league/users/${uid}`).remove();
+        if(confirm("DİKKAT: Oyuncuyu silmek istediğinize emin misiniz?")) database.ref(`the_35_gold_league/users/${uid}`).remove();
     }
 
     function populateLeagueDropdowns() {
@@ -394,7 +405,7 @@
         currentTid = val; loadTournamentData(val); switchTab('standings');
     }
 
-    function goHome() { if(isAdmin) { document.getElementById('adminLeagueSelect').value="new"; adminSwitchLeague(); } }
+    function goHome() { if(isAdmin) { document.getElementById('adminLeagueSelect').value="new"; adminSwitchLeague(); } else { switchTab('profile'); } }
 
     function deleteCurrentTournament() {
         if(!currentTid || !confirm("Bu ligi kalıcı olarak silmek istiyor musunuz?")) return;
@@ -417,7 +428,7 @@
             for(let d = 1; d <= loopLimit; d++) {
                 let pA = ring[i]; let pB = ring[(i + d) % N];
                 if(!tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id))) {
-                    tempMatches.push({ id: matchIdCount++, p1: pA.id, p2: pB.id, p1Name: pA.name, p2Name: pB.name, p1S1:'', p1S2:'', p1MT:'', p2S1:'', p2S2:'', p2MT:'', p1S1TB:'', p2S1TB:'', p1S2TB:'', p2S2TB:'', played:false, pending:false, enteredBy:'', isWO:false, woWinner:'', matchDate:'', proposedDate:'', proposedBy:'' });
+                    tempMatches.push({ id: mId++, p1: pA.id, p2: pB.id, p1Name: pA.name, p2Name: pB.name, p1S1:'', p1S2:'', p1MT:'', p2S1:'', p2S2:'', p2MT:'', p1S1TB:'', p2S1TB:'', p1S2TB:'', p2S2TB:'', played:false, pending:false, enteredBy:'', isWO:false, woWinner:'', matchDate:'', proposedDate:'', proposedBy:'' });
                 }
             }
         }
@@ -426,7 +437,11 @@
         .then(() => { alert("Kura çekildi!"); document.getElementById('adminLeagueSelect').value = newTid; adminSwitchLeague(); });
     }
 
-    /* --- SEKME VE VERİ YÜKLEME --- */
+    // ==========================================
+    // 4. SEKME GEÇİŞLERİ VE GÜVENLİ VERİ YAZMA
+    // ==========================================
+    let safeSet = (id, val) => { let el = document.getElementById(id); if(el) el.innerHTML = val; };
+
     function switchTab(t) {
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         if(document.getElementById(t)) document.getElementById(t).classList.add('active');
@@ -447,13 +462,32 @@
         players = t.players || []; matches = t.matches || []; currentSettings = t.settings;
         document.getElementById('navLeagueIndicator').innerText = currentSettings.customName;
         
-        let fmt = currentSettings.format === '4_GAME' ? "Tüm maçlar 4 oyunluk kısa setler üzerinden oynanır." : "Tüm maçlar standart 6 oyunluk 2 set üzerinden oynanır.";
-        if(document.getElementById('ruleActiveFormatText')) document.getElementById('ruleActiveFormatText').innerText = fmt;
+        // KURALLAR EKRANINI GÜVENLİ GÜNCELLEME (HTML Çökmesini Önler)
+        let n = currentSettings.playerCount || 12; let mLimit = currentSettings.matchLimit || 6;
+        safeSet('rulePlayerCount', n); safeSet('ruleMatchLimit', mLimit); safeSet('ruleMatchLimit2', mLimit);
+        
+        let fmtText = currentSettings.format === '4_GAME' ? "Tüm maçlar 4 oyunluk kısa setler üzerinden oynanır." : "Tüm maçlar standart 6 oyunluk 2 set üzerinden oynanır.";
+        safeSet('ruleActiveFormatText', fmtText);
         
         let exText = currentSettings.format === '4_GAME' ? "Kazanırsa 4-0 (Tam Puan), kaybederse 4-2 (Direnç Puanı)" : "Kazanırsa 6-0 (Tam Puan), kaybederse 6-4 (Direnç Puanı)";
-        if(document.getElementById('ruleKorExample')) document.getElementById('ruleKorExample').innerHTML = `<strong>KOR MANTIĞI:</strong> MİP (Maç İçi Performans) oyun yüzdesidir. ${exText}. Kaybeden dahi aldığı her oyunda puan kazanır.`;
+        safeSet('ruleKorExample', `<strong>🎾 KOR MANTIĞI:</strong> MİP (Maç İçi Performans) oyun yüzdesidir. ${exText}. Kaybeden taraf aldığı her oyunda direnç puanı kazanır.`);
 
-        calculateStats();
+        if(currentSettings.startDate) {
+            let start = new Date(currentSettings.startDate); let end = new Date(start); end.setDate(end.getDate() + (mLimit * 7));
+            let poStart = new Date(end); poStart.setDate(poStart.getDate() + 1); let poEnd = new Date(poStart); poEnd.setDate(poEnd.getDate() + 14);
+            let finalDateSat = new Date(poEnd); let daysToSat = (6 - finalDateSat.getDay() + 7) % 7; if (daysToSat === 0) daysToSat = 7; 
+            finalDateSat.setDate(finalDateSat.getDate() + daysToSat); let finalDateSun = new Date(finalDateSat); finalDateSun.setDate(finalDateSat.getDate() + 1);
+
+            const opt = { day: 'numeric', month: 'long' };
+            safeSet('ruleStartDate', start.toLocaleDateString('tr-TR', opt)); safeSet('ruleEndDate', end.toLocaleDateString('tr-TR', opt));
+            safeSet('rulePoDate', `${poStart.toLocaleDateString('tr-TR', opt)} - ${poEnd.toLocaleDateString('tr-TR', opt)}`);
+            safeSet('ruleFinalDate', `${finalDateSat.toLocaleDateString('tr-TR', opt)}`);
+        }
+
+        let poText = n >= 48 ? "Lig sonunda ilk 8 Seribaşı, sonraki 8 Play-Off, en iyi 16 Play-In oynar." : (n >= 24 ? "Lig sonunda ilk 4 Seribaşı, sonraki 4 Play-Off, en iyi 8 Play-In oynar." : "Lig sonunda ilk 2 Seribaşı, sonraki 2 Play-Off, en iyi 4 Play-In oynar.");
+        safeSet('rulePoStructure', poText);
+
+        calculateStats(); // Çekirdek matematik hesaplaması
     }
 
     function renderProfile() {
@@ -467,10 +501,12 @@
         document.getElementById('profAvail').innerText = (u.availability && u.availability.length) ? u.availability.join(", ") : "Belirtilmemiş";
         
         let tCount = 0; Object.values(allTourneys).forEach(t => { if(t.players.some(p => p.id === u.id)) tCount++; });
-        document.getElementById('profTournaments').innerText = `Katıldığı Turnuva: ${tCount}`;
+        document.getElementById('profTournaments').innerText = `Kariyer Turnuva Katılımı: ${tCount}`;
     }
 
-    /* --- FİKSTÜR VE MAÇLAR --- */
+    // ==========================================
+    // 5. FİKSTÜR, TARİH ONAYI VE SKOR GİRİŞİ
+    // ==========================================
     function populateFilterSelects() {
         let sf = document.getElementById('playerFilterSelect'); let sm = document.getElementById('matchFilterSelect');
         if(!sf || !sm) return;
@@ -500,11 +536,10 @@
         filterPlayerFikstur();
     }
 
-    // TARİH VE SKOR ONAY SİSTEMİ
     function renderMatchesView() {
         const c = document.getElementById('matchListContainer'); c.innerHTML = "";
         let val = document.getElementById('matchFilterSelect').value;
-        let dMatches = val === 'last10' ? matches.filter(m => m.played).slice(0,10) : matches.filter(m => m.p1 === val || m.p2 === val);
+        let dMatches = val === 'last10' ? matches.filter(m => m.played).sort((a,b) => (b.savedAt || 0) - (a.savedAt || 0)).slice(0,10) : matches.filter(m => m.p1 === val || m.p2 === val);
 
         dMatches.forEach(m => {
             let isRev = !isAdmin && loggedInUser && (m.p2 === loggedInUser.id);
@@ -514,15 +549,17 @@
             let ts2=isRev?m.p2S2:m.p1S2, bs2=isRev?m.p1S2:m.p2S2;
 
             let isMyMatch = !isAdmin && loggedInUser && (m.p1 === loggedInUser.id || m.p2 === loggedInUser.id);
-            let ro = isAdmin || (!isMyMatch && val !== 'last10') || (m.played && !m.pending); // Sadece pending ise edit yok, onay var
-            if(m.played) ro = true;
+            let ro = isAdmin || (!isMyMatch && val !== 'last10') || (m.played && !m.pending); // Onaylanmışsa readonly
+            if(m.played && m.pending) ro = true; // Beklemedeyse skor değiştirilemez, sadece onaylanır veya silinir
 
-            let amIScoreApprover = isMyMatch && m.played && m.pending && m.enteredBy !== loggedInUser.id;
-            let amIDateApprover = isMyMatch && !m.played && m.proposedDate && m.proposedBy !== loggedInUser.id;
+            let amIScoreApprover = (isMyMatch || isAdmin) && m.played && m.pending && m.enteredBy !== (isAdmin ? 'ADMIN' : loggedInUser.id);
+            if(isAdmin && m.pending) amIScoreApprover = true; // Admin her pendingi onaylar
+            
+            let amIDateApprover = (isMyMatch || isAdmin) && !m.played && m.proposedDate && m.proposedBy !== (isAdmin ? 'ADMIN' : loggedInUser.id);
 
             let sBanner = '';
-            if(m.played && m.pending) sBanner = `<div style="background:var(--warning); color:black; padding:5px; text-align:center; font-weight:bold; font-size:11px; border-radius:6px 6px 0 0;">⏳ Rakip Skor Onayı Bekliyor</div>`;
-            else if(m.played && !m.pending) sBanner = `<div style="background:var(--success); color:black; padding:5px; text-align:center; font-weight:bold; font-size:11px; border-radius:6px 6px 0 0;">✅ Skor İşlendi</div>`;
+            if(m.played && m.pending) sBanner = `<div style="background:var(--warning); color:black; padding:5px; text-align:center; font-weight:bold; font-size:11px; border-radius:11px 11px 0 0;">⏳ Skor Onayı Bekliyor</div>`;
+            else if(m.played && !m.pending) sBanner = `<div style="background:var(--success); color:black; padding:5px; text-align:center; font-weight:bold; font-size:11px; border-radius:11px 11px 0 0;">✅ Skor Onaylandı ve İşlendi</div>`;
 
             let dateBox = '';
             if(!m.played) {
@@ -530,14 +567,15 @@
                     dateBox = `<div class="date-box">✅ Kesinleşen Maç Tarihi: <strong>${m.matchDate}</strong></div>`;
                 } else if (m.proposedDate) {
                     if(amIDateApprover) {
-                        dateBox = `<div class="date-box" style="border-color:var(--warning);">⏳ Rakibin Önerisi: <strong>${m.proposedDate}</strong><br><button class="action-sm" style="background:var(--success); margin-top:5px;" onclick="acceptDate(${m.id})">Onayla</button> <button class="action-sm" style="background:var(--danger);" onclick="clearDateProposal(${m.id})">Reddet</button></div>`;
+                        dateBox = `<div class="date-box" style="border-color:var(--warning);">⏳ Rakibin Tarih Önerisi: <strong style="color:var(--warning)">${m.proposedDate}</strong><br><div style="margin-top:5px;"><button class="action-sm" style="background:var(--success);" onclick="acceptDate(${m.id})">Kabul Et</button> <button class="action-sm" style="background:var(--danger);" onclick="clearDateProposal(${m.id})">Reddet</button></div></div>`;
                     } else {
                         dateBox = `<div class="date-box" style="border-color:var(--warning);">⏳ Tarih Öneriniz (${m.proposedDate}) rakip onayını bekliyor.</div>`;
                     }
                 } else if (isMyMatch || isAdmin) {
-                    dateBox = `<div class="date-box">📅 Tarih Öner/Belirle: <input type="date" id="prop_date_${m.id}" style="background:#020617; color:white; border:1px solid #1e293b;"> <button class="action-sm" onclick="proposeDate(${m.id})">Gönder</button></div>`;
+                    // Min date kısıtlamasını esnettik, rahatça tarih girilebilir
+                    dateBox = `<div class="date-box" style="display:flex; justify-content:space-between; align-items:center;"><span>📅 Tarih Öner/Belirle:</span> <div><input type="date" id="prop_date_${m.id}" style="background:#020617; color:white; border:1px solid #1e293b; padding:4px; border-radius:4px;"> <button class="action-sm" onclick="proposeDate(${m.id})">Gönder</button></div></div>`;
                 }
-            } else { dateBox = `<div class="date-box">📅 Oynandığı Tarih: ${m.matchDate || 'Belirtilmedi'}</div>`; }
+            } else { dateBox = `<div class="date-box" style="border-left-color:var(--success);">📅 Oynandığı Tarih: ${m.matchDate || 'Belirtilmedi'}</div>`; }
 
             let div = document.createElement('div'); div.className = "match-card"; div.style.padding = "0";
             div.innerHTML = `
@@ -547,9 +585,9 @@
                     <div class="match-row"><div class="match-player">${topN}</div><div class="score-inputs"><input type="number" id="m_${m.id}_t1" class="score-input" value="${ts1||''}" placeholder="S1" ${ro?'disabled':''}><input type="number" id="m_${m.id}_t2" class="score-input" value="${ts2||''}" placeholder="S2" ${ro?'disabled':''}></div></div>
                     <div class="match-row"><div class="match-player">${botN}</div><div class="score-inputs"><input type="number" id="m_${m.id}_b1" class="score-input" value="${bs1||''}" placeholder="S1" ${ro?'disabled':''}><input type="number" id="m_${m.id}_b2" class="score-input" value="${bs2||''}" placeholder="S2" ${ro?'disabled':''}></div></div>
                     <div style="display:flex; justify-content:space-between; gap:5px; margin-top:10px;">
-                        ${(!ro && (isMyMatch || isAdmin)) ? `<button class="save-btn" onclick="submitScore(${m.id}, ${isRev})">${isAdmin?'Skoru Kaydet':'Skoru Gönder (Onay)'}</button>` : ''}
+                        ${(!ro && (isMyMatch || isAdmin)) ? `<button class="save-btn" onclick="submitScore(${m.id}, ${isRev})">${isAdmin?'Skoru İşle':'Skoru Gönder (Onay)'}</button>` : ''}
                         ${amIScoreApprover ? `<button class="pending-btn" onclick="approveScore(${m.id})">✅ SKORU ONAYLA</button>` : ''}
-                        ${isAdmin && m.played ? `<button class="action-sm" style="background:var(--danger);" onclick="clearScoreCloud(${m.id})">Sil</button>` : ''}
+                        ${(isAdmin && m.played) || (isMyMatch && m.pending) ? `<button class="action-sm" style="background:var(--danger); padding:10px;" onclick="clearScoreCloud(${m.id})">İptal/Sil</button>` : ''}
                     </div>
                 </div>`;
             c.appendChild(div);
@@ -561,10 +599,10 @@
         if(!d) return;
         if(isAdmin) { m.matchDate = d; m.proposedDate = ''; } 
         else { m.proposedDate = d; m.proposedBy = loggedInUser.id; }
-        saveToDb("Tarih talebi gönderildi!");
+        saveToDb("Tarih durumu güncellendi!");
     }
-    function acceptDate(mId) { let m = matches.find(x => x.id === mId); m.matchDate = m.proposedDate; m.proposedDate = ''; saveToDb("Tarih onaylandı!"); }
-    function clearDateProposal(mId) { let m = matches.find(x => x.id === mId); m.proposedDate = ''; m.proposedBy = ''; saveToDb("Tarih reddedildi!"); }
+    function acceptDate(mId) { let m = matches.find(x => x.id === mId); m.matchDate = m.proposedDate; m.proposedDate = ''; saveToDb("Tarih karşılıklı onaylandı!"); }
+    function clearDateProposal(mId) { let m = matches.find(x => x.id === mId); m.proposedDate = ''; m.proposedBy = ''; saveToDb("Tarih reddedildi."); }
 
     function submitScore(mId, isP2) {
         let m = matches.find(x => x.id === mId);
@@ -583,33 +621,33 @@
 
     function approveScore(mId) {
         let m = matches.find(x => x.id === mId); m.pending = false;
+        calculateStats(); // Çekirdeği çalıştır ve KOR'u hesapla
         
-        calculateStats(); // Kor Puanlarını Hesaplatalım
-        
-        // Kariyer Güncelleme
         let p1T = players.find(x => x.id === m.p1); let p2T = players.find(x => x.id === m.p2);
         let u1 = globalUsers[m.p1]; let u2 = globalUsers[m.p2];
 
         if(u1 && p1T) { u1.globalMatches = (u1.globalMatches||0)+1; if(p1T.kor>0) u1.k_kor = (((u1.k_kor||0)*(u1.globalMatches-1))+p1T.kor)/u1.globalMatches; if(p1T.wins > 0) u1.globalWins++; else u1.globalLosses = (u1.globalLosses||0)+1; database.ref('the_35_gold_league/users/' + m.p1).set(u1); }
         if(u2 && p2T) { u2.globalMatches = (u2.globalMatches||0)+1; if(p2T.kor>0) u2.k_kor = (((u2.k_kor||0)*(u2.globalMatches-1))+p2T.kor)/u2.globalMatches; if(p2T.wins > 0) u2.globalWins++; else u2.globalLosses = (u2.globalLosses||0)+1; database.ref('the_35_gold_league/users/' + m.p2).set(u2); }
 
-        saveToDb("Skor Onaylandı ve KOR Tablosuna İşlendi!");
+        saveToDb("Skor Onaylandı ve Tabloya İşlendi!");
     }
 
     function clearScoreCloud(id) {
-        if(!confirm("Bu maçın skorunu sıfırlamak istiyor musunuz?")) return;
+        if(!confirm("Bu maçın skorunu iptal etmek/sıfırlamak istiyor musunuz?")) return;
         let m = matches.find(x => x.id === id);
         m.played = false; m.pending = false; m.p1S1 = ''; m.p2S1 = ''; m.p1S2 = ''; m.p2S2 = '';
         saveToDb("Skor sıfırlandı!");
     }
 
     function saveToDb(msg) {
-        calculateStats(); // Motoru çalıştır
+        calculateStats();
         database.ref('the_35_gold_league/multi_v1/' + currentTid).set({ players: players, matches: matches, settings: currentSettings })
         .then(() => { alert(msg); renderMatchesView(); if(document.querySelector('.panel.active').id === 'standings') renderStandings(); });
     }
 
-    /* --- ÇEKİRDEK HESAPLAMALAR VE AĞAÇ (ORİJİNAL) --- */
+    // ==========================================
+    // 6. ÇEKİRDEK KOR HESAPLAMALARI (ASLA BOZULMAZ)
+    // ==========================================
     function getSetWinner(sT, sB, tbT, tbB, format) {
         let t = parseInt(sT), b = parseInt(sB); if (isNaN(t) || isNaN(b)) return null; 
         if (format === '4_GAME') { if (t === 4 && b <= 2) return 'T'; if (b === 4 && t <= 2) return 'B'; if (t === 5 && b === 3) return 'T'; if (b === 5 && t === 3) return 'B'; } 
