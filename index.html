@@ -112,7 +112,7 @@
             <p class="switch-link" style="color:var(--danger);" onclick="toggleAuth('adminLoginPanel')">Yönetici Paneli</p>
         </div>
 
-        <div class="auth-card" id="registerPanel">
+        <div class="auth-card" id="registerPanel" style="max-width: 500px;">
             <h3 style="margin-top:0;">Kariyerini Oluştur</h3>
             <input type="text" id="regName" class="auth-input force-upper" placeholder="AD SOYAD (ÖRN: OĞUZ UZUN)" oninput="this.value = this.value.toLocaleUpperCase('tr-TR')">
             <input type="password" id="regPassword" class="auth-input" placeholder="Şifrenizi Belirleyin">
@@ -125,11 +125,13 @@
                 <label class="chk-label"><input type="checkbox" class="avail-chk" value="H.Sonu Akşam"> H.Sonu Akşam</label>
             </div>
 
-            <div style="font-size:12px; color:var(--warning); font-weight:bold; margin-top:10px; margin-bottom:5px;">📊 Seviye Belirleme Anketi</div>
+            <div style="font-size:12px; color:var(--warning); font-weight:bold; margin-top:10px; margin-bottom:5px;">📊 6 Aşamalı Seviye Anketi</div>
             <select id="q1" class="auth-select" style="font-size:11px; padding:8px;"><option value="">1. Forehand/Backhand İstikrarı?</option><option value="2.0">Sadece topu karşıya atıyorum</option><option value="4.0">Güvenilir ve yönlendirebilirim</option><option value="6.5">Çok sert ve spinli silahımdır</option></select>
             <select id="q2" class="auth-select" style="font-size:11px; padding:8px;"><option value="">2. Servis ve Çift Hata?</option><option value="2.0">İkinci serviste zorlanırım</option><option value="4.0">Birincim iyi, ikinciyi oyuna sokarım</option><option value="6.5">Servisimle direkt puan alırım</option></select>
             <select id="q3" class="auth-select" style="font-size:11px; padding:8px;"><option value="">3. File Önü (Vole/Smaç)?</option><option value="2.0">Fileye çıkmam, geride kalırım</option><option value="4.0">Fırsat buldukça çıkar bitiririm</option><option value="6.5">Agresif oynar, fileyi domine ederim</option></select>
             <select id="q4" class="auth-select" style="font-size:11px; padding:8px;"><option value="">4. Maç ve Stres Yönetimi?</option><option value="2.0">Pek maça çıkmadım, çabuk düşerim</option><option value="4.0">Düzenli maç yaparım, taktik kurarım</option><option value="6.5">Turnuva oyuncusuyum, baskıyı severim</option></select>
+            <select id="q5" class="auth-select" style="font-size:11px; padding:8px;"><option value="">5. Kondisyon ve Ayak Çalışması?</option><option value="2.0">Çabuk yorulurum, kortu tam kaplayamam</option><option value="4.0">Maç boyu idare ederim, fena koşmam</option><option value="6.5">Kortun her yerine yetişirim, tükenmem</option></select>
+            <select id="q6" class="auth-select" style="font-size:11px; padding:8px;"><option value="">6. Taktik ve Oyun Okuma?</option><option value="2.0">Sadece kendi vuruşuma odaklanırım</option><option value="4.0">Rakibin zayıf yönüne oynamaya çalışırım</option><option value="6.5">Anında strateji değiştirir, rakibi kilitlerim</option></select>
 
             <button class="auth-btn" style="background:var(--success);" onclick="registerNewUser()">KAYDINI TAMAMLA</button>
             <p class="switch-link" onclick="toggleAuth('loginPanel')">Geri Dön</p>
@@ -287,17 +289,22 @@
         let name = document.getElementById('regName').value.trim().toLocaleUpperCase('tr-TR'); 
         let pass = document.getElementById('regPassword').value;
         let avail = []; document.querySelectorAll('.avail-chk:checked').forEach(c => avail.push(c.value));
+        
         let q1=parseFloat(document.getElementById('q1').value), q2=parseFloat(document.getElementById('q2').value);
         let q3=parseFloat(document.getElementById('q3').value), q4=parseFloat(document.getElementById('q4').value);
+        let q5=parseFloat(document.getElementById('q5').value), q6=parseFloat(document.getElementById('q6').value);
 
-        if(!name || !pass || avail.length===0 || isNaN(q1)||isNaN(q2)||isNaN(q3)||isNaN(q4)) return alert("Tüm alanları doldurun.");
-        let tier = ((q1+q2+q3+q4)/4) >= 5.5 ? "PLATIN" : (((q1+q2+q3+q4)/4) >= 3.5 ? "GOLD" : "SILVER");
+        if(!name || !pass || avail.length===0 || isNaN(q1)||isNaN(q2)||isNaN(q3)||isNaN(q4)||isNaN(q5)||isNaN(q6)) return alert("Lütfen anketin tüm sorularını yanıtlayın ve alanları doldurun.");
+        
+        let avg = (q1+q2+q3+q4+q5+q6)/6;
+        let tier = avg >= 5.5 ? "PLATIN" : (avg >= 3.5 ? "GOLD" : "SILVER");
+        let sysScore = avg.toFixed(1);
         let uid = "USR_" + Date.now();
         
         database.ref('the_35_gold_league/users/' + uid).set({
-            id: uid, name: name, password: pass, availability: avail, tier: tier, 
+            id: uid, name: name, password: pass, availability: avail, tier: tier, sysScore: sysScore,
             k_kor: 0, fame: 0, globalWins: 0, globalLosses: 0, globalMatches: 0
-        }).then(() => { alert("Kayıt Başarılı!"); toggleAuth('loginPanel'); });
+        }).then(() => { alert(`Kayıt Başarılı!\nSistem Analiz Puanınız: ${sysScore} (${tier})\nGiriş yapabilirsiniz.`); toggleAuth('loginPanel'); });
     }
 
     function loginGlobalUser() {
@@ -344,7 +351,7 @@
         Object.values(globalUsers).sort((a,b)=>a.name.localeCompare(b.name)).forEach(u => {
             list.innerHTML += `
                 <div class="admin-player-item" data-name="${u.name}" data-tier="${u.tier}">
-                    <label style="cursor:pointer; flex:1;"><input type="checkbox" class="admin-chk" value="${u.id}" onchange="updateSelectedCount()"> <strong style="color:white;">${u.name}</strong> <span style="font-size:10px; color:var(--accent-color);">(${u.tier})</span></label>
+                    <label style="cursor:pointer; flex:1;"><input type="checkbox" class="admin-chk" value="${u.id}" onchange="updateSelectedCount()"> <strong style="color:white;">${u.name}</strong> <span style="font-size:10px; color:var(--accent-color);">(${u.tier} - Puan: ${u.sysScore || '-'})</span></label>
                     <div><button class="action-sm" onclick="resetUserPass('${u.id}')">🔑 Şifre</button><button class="action-sm" style="background:var(--danger);" onclick="deleteUser('${u.id}')">🗑️ Sil</button></div>
                 </div>`;
         });
@@ -441,8 +448,7 @@
         players = t.players || []; matches = t.matches || []; currentSettings = t.settings;
         document.getElementById('navLeagueIndicator').innerText = currentSettings.customName;
         
-        generateDynamicRules(currentSettings);
-        calculateStats(); 
+        generateDynamicRules(currentSettings); calculateStats(); 
     }
 
     function generateDynamicRules(s) {
@@ -502,7 +508,7 @@
         if(isAdmin || !loggedInUser) return;
         let u = globalUsers[loggedInUser.id] || loggedInUser;
         document.getElementById('profName').innerText = u.name;
-        document.getElementById('profTier').innerText = `${u.tier} LİGİ OYUNCUSU`;
+        document.getElementById('profTier').innerText = `${u.tier} LİGİ OYUNCUSU (${u.sysScore || 'N/A'})`;
         document.getElementById('profKKor').innerText = (u.k_kor || 0).toFixed(1);
         document.getElementById('profFame').innerText = u.fame || 0;
         document.getElementById('profWinLoss').innerText = `${u.globalWins || 0}G - ${(u.globalLosses || 0)}M`;
@@ -580,14 +586,14 @@
         filterPlayerFikstur();
     }
 
-    // YENİ UI TOGGLE (Sadece kutuları göster/gizle, doğrulama Submit'te)
+    // TİE-BREAK GÖRÜNÜRLÜK (KUSURSUZ MANTIK)
     function checkStatus(id, isRev) {
         let m = matches.find(x => x.id === id); let fmt = (currentSettings && currentSettings.format) ? currentSettings.format : '6_GAME';
         let getVal = (elId) => document.getElementById(elId) ? document.getElementById(elId).value : '';
         let nS1T = parseInt(getVal(`m_${id}_t_s1`)), nS1B = parseInt(getVal(`m_${id}_b_s1`));
         let nS2T = parseInt(getVal(`m_${id}_t_s2`)), nS2B = parseInt(getVal(`m_${id}_b_s2`));
 
-        // TIE-BREAK SADECE 7-6 veya 5-4 GİRİLDİĞİNDE AÇILIR (6-6'DA AÇILMAZ!)
+        // TIE-BREAK SADECE 7-6 veya 5-4 GİRİLDİĞİNDE AÇILIR (6-6 VEYA 4-4 GİRİLDİĞİNDE ASLA AÇILMAZ!)
         let tb1Active = false, tb2Active = false;
         if (fmt === '4_GAME') { 
             tb1Active = (nS1T === 5 && nS1B === 4) || (nS1T === 4 && nS1B === 5); 
@@ -698,7 +704,7 @@
                     </div>
 
                     <div style="display:flex; justify-content:space-between; gap:5px; margin-top:10px;">
-                        ${(!ro && (isMyMatch || isAdmin)) ? `<button class="save-btn" onclick="submitScore(${m.id}, ${isRev})">${isAdmin?'Skoru İşle':'Skoru Gönder (Onay)'}</button>` : ''}
+                        ${(!ro && (isMyMatch || isAdmin)) ? `<button class="save-btn" onclick="submitScore(${m.id}, ${isRev})">${isAdmin?'Skoru İşle':'Skoru Gönder'}</button>` : ''}
                         ${amIScoreApprover ? `<button class="pending-btn" onclick="approveScore(${m.id})">✅ SKORU ONAYLA</button>` : ''}
                         ${(isAdmin && m.played) || (isMyMatch && m.pending) ? `<button class="action-sm" style="background:var(--danger); padding:10px;" onclick="clearScoreCloud(${m.id})">İptal/Sil</button>` : ''}
                     </div>
@@ -712,8 +718,7 @@
         let d1 = document.getElementById(`p_d1_${mId}`).value; let d2 = document.getElementById(`p_d2_${mId}`).value; let d3 = document.getElementById(`p_d3_${mId}`).value;
         let arr = [d1, d2, d3].filter(v => v !== '');
         if(arr.length === 0) return alert("Lütfen en az 1 tarih seçiniz.");
-        if(isAdmin) { m.matchDate = arr[0]; m.proposedDates = []; } 
-        else { m.proposedDates = arr; m.proposedBy = loggedInUser.id; }
+        if(isAdmin) { m.matchDate = arr[0]; m.proposedDates = []; } else { m.proposedDates = arr; m.proposedBy = loggedInUser.id; }
         saveToDb("Tarih önerileri rakibe gönderildi!");
     }
     function acceptDate(mId, dateVal) { let m = matches.find(x => x.id === mId); m.matchDate = dateVal; m.proposedDates = []; saveToDb("Tarih karşılıklı onaylandı!"); }
@@ -751,8 +756,8 @@
                 return null;
             };
 
-            let w1 = checkSet(t1, b1); if(!w1) return alert("HATA: 1. Set skoru tenisin kurallarına uygun değil! Lütfen doğru giriniz.");
-            let w2 = checkSet(t2, b2); if(!w2) return alert("HATA: 2. Set skoru tenisin kurallarına uygun değil! Lütfen doğru giriniz.");
+            let w1 = checkSet(t1, b1); if(!w1) return alert("HATA: 1. Set skoru tenisin kurallarına uygun değil! (Örn: 6-4, 7-5, 7-6)");
+            let w2 = checkSet(t2, b2); if(!w2) return alert("HATA: 2. Set skoru tenisin kurallarına uygun değil!");
 
             let tbCheck = (t, b, isT1) => {
                 let tT = document.getElementById(`m_${mId}_t_s${isT1?1:2}tb`).value; let tB = document.getElementById(`m_${mId}_b_s${isT1?1:2}tb`).value;
@@ -764,7 +769,7 @@
                 let res = tbCheck(t1, b1, true); if(res==='boş') return alert("HATA: 1. Set Tie-Break skorunu girmediniz!"); if(res==='hata') return alert("HATA: 1. Set Tie-Break skoru kuraldışı (En az 7'de biter, 2 fark olmalı).");
             }
             if((fmt==='6_GAME' && ((t2==7&&b2==6)||(b2==7&&t2==6))) || (fmt==='4_GAME' && ((t2==5&&b2==4)||(b2==5&&t2==4)))) {
-                let res = tbCheck(t2, b2, false); if(res==='boş') return alert("HATA: 2. Set Tie-Break skorunu girmediniz!"); if(res==='hata') return alert("HATA: 2. Set Tie-Break skoru kuraldışı (En az 7'de biter, 2 fark olmalı).");
+                let res = tbCheck(t2, b2, false); if(res==='boş') return alert("HATA: 2. Set Tie-Break skorunu girmediniz!"); if(res==='hata') return alert("HATA: 2. Set Tie-Break skoru kuraldışı.");
             }
 
             if(w1 !== w2) {
@@ -774,6 +779,7 @@
                 if(max < 10 || (max - min) < 2) return alert("HATA: Maç Tie-Break skoru kuraldışı (En az 10'da biter, 2 fark olmalı).");
             }
 
+            // Doğrulama bittiyse kaydet
             let getStr = (s) => { let el = document.getElementById(`m_${mId}_${s}`); return el ? el.value : ''; };
             m.p1S1 = isP2 ? getStr('b_s1') : getStr('t_s1'); m.p2S1 = isP2 ? getStr('t_s1') : getStr('b_s1');
             m.p1S2 = isP2 ? getStr('b_s2') : getStr('t_s2'); m.p2S2 = isP2 ? getStr('t_s2') : getStr('b_s2');
@@ -789,7 +795,7 @@
 
     function approveScore(mId) {
         let m = matches.find(x => x.id === mId); m.pending = false;
-        calculateStats(); 
+        calculateStats(); // Kazananı ve KOR'u hesapla
         
         let p1T = players.find(x => x.id === m.p1); let p2T = players.find(x => x.id === m.p2);
         let u1 = globalUsers[m.p1]; let u2 = globalUsers[m.p2];
@@ -803,7 +809,7 @@
     function clearScoreCloud(id) {
         if(!confirm("Bu maçın skorunu iptal etmek/sıfırlamak istiyor musunuz?")) return;
         let m = matches.find(x => x.id === id);
-        m.played = false; m.pending = false; m.isWO = false; m.woWinner = ''; m.enteredBy = '';
+        m.played = false; m.pending = false; m.isWO = false; m.woWinner = '';
         m.p1S1 = ''; m.p2S1 = ''; m.p1S2 = ''; m.p2S2 = ''; m.p1S1TB = ''; m.p2S1TB = ''; m.p1S2TB = ''; m.p2S2TB = ''; m.p1MT = ''; m.p2MT = '';
         saveToDb("Skor sıfırlandı!");
     }
@@ -833,7 +839,7 @@
                 let p1 = players.find(x => String(x.id) === String(m.p1)); let p2 = players.find(x => String(x.id) === String(m.p2));
                 if(!p1 || !p2) return; p1.totalMatches++; p2.totalMatches++;
 
-                // YENİ: WO (Hükmen) Mantığı - Set averajı hesaplanmaz
+                // YENİ: WO (Hükmen) Mantığı - Kazanan 1G, Kaybeden 1M. Başka puan veya averaj YOK.
                 if(m.isWO) {
                     if(String(m.woWinner) === String(p1.id)) { p1.wins++; p2.losses++; m.winnerId = p1.id; } 
                     else { p2.wins++; p1.losses++; m.winnerId = p2.id; }
@@ -858,7 +864,7 @@
             let p1WinRate = p1.totalMatches > 0 ? (p1.wins / p1.totalMatches) : 0; let p2WinRate = p2.totalMatches > 0 ? (p2.wins / p2.totalMatches) : 0;
             let p1Rgc = 1 + p2WinRate; let p2Rgc = 1 + p1WinRate;
 
-            // WO KOR Mantığı: KOR PUANI EKLENMEZ
+            // WO MAÇLARINDA KOR EKLENMEZ
             if(m.isWO) return; 
 
             let p1Win = (m.winnerId === m.p1), p2Win = (m.winnerId === m.p2);
@@ -899,7 +905,6 @@
         });
     }
 
-    // AĞAÇ GÖRÜNÜMÜ TAMİR EDİLDİ
     function renderVisualBracket() {
         const mainWrapper = document.getElementById('bracketView'); if(!mainWrapper) return;
         let played = matches.filter(m => m.played && !m.pending).length; let N = players.length;
