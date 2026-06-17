@@ -80,6 +80,7 @@
         .rules-content h3 { color: var(--accent-color); border-bottom: 1px solid var(--divider); padding-bottom: 5px; margin-top: 25px; text-align: left; }
         .rules-content p, .rules-content ul { text-align: left; margin: 10px 0; }
         .example-box { background: rgba(255, 215, 0, 0.05); border-left: 3px solid var(--accent-color); padding: 15px; margin-top: 15px; border-radius: 0 6px 6px 0; text-align: left;}
+        .guide-box { background: #1e293b; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 12px; border-left: 4px solid var(--warning); text-align: left;}
         
         .notification-card { background:rgba(245, 158, 11, 0.1); border-left:4px solid var(--warning); padding:12px; margin-top:10px; font-size:12px; text-align:left; border-radius:4px; }
         .admin-notif-row { padding: 10px; border-bottom: 1px solid var(--divider); font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
@@ -323,6 +324,7 @@
                 <thead><tr><th>#</th><th style="text-align:left;">OYUNCU</th><th>O</th><th>G</th><th>M</th><th>S.AV</th><th>KOR 🎯</th></tr></thead>
                 <tbody></tbody>
             </table>
+            <div id="miniStandingsWrapper"></div>
         </div>
 
         <div id="rivals" class="panel">
@@ -357,11 +359,13 @@
 
     function listenToCloud() {
         database.ref('the_35_gold_league/users').on('value', (s) => {
-            globalUsers = s.val() || {}; updateLoginDropdown();
+            globalUsers = s.val() || {};
+            updateLoginDropdown();
             if(isAdmin && document.getElementById('setup').classList.contains('active')) renderAdminChecklist();
         });
         database.ref('the_35_gold_league/multi_v1').on('value', (s) => {
-            allTourneys = s.val() || {}; populateLeagueDropdowns();
+            allTourneys = s.val() || {};
+            populateLeagueDropdowns();
             if (currentTid && allTourneys[currentTid]) { loadTournamentData(currentTid); }
         });
         database.ref('the_35_gold_league/password_resets').on('value', (s) => {
@@ -398,7 +402,7 @@
         if(!name || !pass || avail.length===0 || isNaN(q1)||isNaN(q2)||isNaN(q3)||isNaN(q4)||isNaN(q5)||isNaN(q6)) return alert("Lütfen anketin tüm sorularını yanıtlayın ve alanları doldurun.");
         
         let avg = (q1+q2+q3+q4+q5+q6)/6;
-        // Yeni Seviye Belirleme Sınırları: PLATIN >= 6.0 | GOLD > 3.5 | SILVER <= 3.5
+        // YENİ SEVİYE ARALIKLARI: PLATIN >= 6.0 | GOLD 3.6-5.9 | SILVER <= 3.5
         let tier = avg >= 6.0 ? "PLATIN" : (avg > 3.5 ? "GOLD" : "SILVER");
         let sysScore = avg.toFixed(1);
         let uid = "USR_" + Date.now();
@@ -565,6 +569,8 @@
         .then(() => { alert("Kura çekildi!"); document.getElementById('adminLeagueSelect').value = newTid; adminSwitchLeague(); });
     }
 
+    let safeSet = (id, val) => { let el = document.getElementById(id); if(el) el.innerHTML = val; };
+
     function switchTab(t) {
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         if(document.getElementById(t)) document.getElementById(t).classList.add('active');
@@ -616,9 +622,9 @@
 
         let html = `<ul style="list-style-type:none; padding-left:0;">
             <li><strong style="color:var(--accent-color); font-size:14px;">🗓️ 1. TURNUVA TAKVİMİ VE İŞLEYİŞ</strong></li>
-            <li>• <strong>Lig Aşaması (${sDateStr} - ${eDateStr}):</strong> ${n} oyuncu arasında, her bir oyuncunun ${mLimit} farklı rakiple eşleşeceği ve ${mLimit} haftalık bir süreçte tamamlanan rastgele atamalı lig fikstürü.</li>
+            <li>• <strong>Lig Aşaması (<strong style="color:var(--danger);">${sDateStr} - ${eDateStr}</strong>):</strong> ${n} oyuncu arasında, her bir oyuncunun ${mLimit} farklı rakiple eşleşeceği ve ${mLimit} haftalık bir süreçte tamamlanan rastgele atamalı lig fikstürü.</li>
             <li>• <strong>Esnek Fikstür:</strong> Belirtilen haftalık süreç boyunca dilediğiniz rakiple, dilediğiniz sırayla korta çıkabilirsiniz. Bu esnek yapı, tüm oyuncularımıza kendi programlarına uygun bir rekabet alanı sunmak ve maçların (WO) kaçırılma ihtimalini en aza indirerek ligin dinamizmini kesintisiz kılmak amacıyla tasarlanmıştır.</li>
-            <li>• <strong>Play-Off ve Final Takvimi:</strong> Lig aşaması tamamlandıktan sonra Play-Off süreci başlar. Büyük Final hariç tüm Play-Off turlarının ${poDateStr} içerisinde tamamlanması hedeflenmektedir. Büyük Final Şöleni ise bu sürenin bitimindeki ilk hafta sonu olan ${finalStr} tarihinde oynanacaktır.</li>
+            <li>• <strong>Play-Off ve Final Takvimi:</strong> Lig aşaması tamamlandıktan sonra Play-Off süreci başlar. Büyük Final hariç tüm Play-Off turlarının <strong style="color:var(--danger);">${poDateStr}</strong> içerisinde tamamlanması hedeflenmektedir. Büyük Final Şöleni ise bu sürenin bitimindeki ilk hafta sonu olan <strong style="color:var(--danger);">${finalStr}</strong> tarihinde oynanacaktır.</li>
             <br>
             <li><strong style="color:var(--accent-color); font-size:14px;">🎾 2. LİG FORMATI VE ZAMAN YÖNETİMİ</strong></li>
             <li>• <strong>Maç Formatı:</strong> ${fmtText} Setlerde 1-1'lik eşitlik olması durumunda 10 puanlık maç tie-break'i oynanır.</li>
@@ -626,6 +632,7 @@
             <br>
             <li><strong style="color:var(--accent-color); font-size:14px;">📊 3. KOR (KORT OYUN REYTİNGİ) VE YENİLİKÇİ PUANLAMA</strong></li>
             <li>• Klasik "oyun averajı" sisteminin ötesine geçen KOR; maçın sonucuna, oyunun bütününe ve gösterilen performansa değer veren, tenisin rekabetçi ruhunu ödüllendiren yenilikçi bir performans analizidir. Sıralama önceliği: 1) Galibiyet Sayısı, 2) Set Averajı, 3) KOR Puanı şeklindedir.</li>
+            <li>• <strong style="color:var(--warning);">Dinamik KOR ve Sıralama Uyarısı:</strong> Lig aşamasında maç oynama sırası zorunluluğu yoktur. Oynadığınız bir rakip, siz onunla oynadıktan haftalar sonra bile maç kazanmaya devam ederse, <strong>RGÇ (Rakip Güç Çarpanı) artacağı için sizin KOR puanınız da otomatik ve canlı olarak yükselir.</strong> Bu yüzden Puan Tablosu ve Sıralamalar <u style="color:var(--warning);">ligin son gününe, hatta oynanacak son maça kadar her an değişebilir!</u> Rekabet son ana kadar canlıdır.</li>
             <li>• <strong>MİP (Maç İçi Performans):</strong> [Kazandığınız Oyun / Toplam Oynanan Oyun] × 100</li>
             <li>• <strong>RGÇ (Rakip Güç Çarpanı):</strong> 1 + [Rakibin Güncel Galibiyet Oranı]</li>
             <li>• <strong>Hükmen (WO) Maçlar:</strong> Hükmen biten maçlarda kazanan oyuncu sadece 1 Galibiyet, kaybeden oyuncu ise sadece 1 Mağlubiyet alır. Her iki tarafa da Set Averajı veya KOR Puanı <strong>verilmez/hesaplanmaz.</strong> Bu kural, oyuncuların KOR veya Set Averajı manipülasyonu yapmak amacıyla kortta oynamadan skor girmelerini kesin olarak engellemek için geliştirilmiştir. Gerçek puan kortta ter dökerek kazanılır!</li>
@@ -752,7 +759,6 @@
         filterPlayerFikstur();
     }
 
-    // UI TOGGLE KONTROLÜ
     function checkStatus(id, isRev) {
         let m = matches.find(x => x.id === id); let fmt = (currentSettings && currentSettings.format) ? currentSettings.format : '6_GAME';
         let getVal = (elId) => document.getElementById(elId) ? document.getElementById(elId).value : '';
@@ -873,7 +879,7 @@
                     </div>
 
                     <div style="display:flex; justify-content:space-between; gap:5px; margin-top:10px;">
-                        ${(!ro && (isMyMatch || isAdmin)) ? `<button class="save-btn" onclick="submitScore(${m.id}, ${isRev})">${isAdmin?'Skoru İşle':'Skoru Gönder'}</button>` : ''}
+                        ${(!ro && (isMyMatch || isAdmin)) ? `<button class="save-btn" onclick="submitScore(${m.id}, ${isRev})">${isAdmin?'Skoru İşle':'Skoru Gönder (Onay)'}</button>` : ''}
                         ${amIScoreApprover ? `<button class="pending-btn" onclick="approveScore(${m.id})">✅ SKORU ONAYLA</button>` : ''}
                         ${(isAdmin && m.played) || (isMyMatch && m.pending) ? `<button class="action-sm" style="background:var(--danger); padding:10px;" onclick="clearScoreCloud(${m.id})">İptal/Sil</button>` : ''}
                     </div>
@@ -904,7 +910,7 @@
         saveToDb("Mevcut tarih iptal edildi. Lütfen yeni bir tarih önerin.");
     }
 
-    // TAM KORUMALI SKOR DOĞRULAMA (VALIDATION)
+    // TAM KORUMALI SKOR DOĞRULAMA
     function submitScore(mId, isP2) {
         let m = matches.find(x => x.id === mId);
         let type = document.getElementById(`type_${mId}`).value;
@@ -1001,7 +1007,7 @@
     }
 
     // ==========================================
-    // 6. ÇEKİRDEK KOR VE WO HESAPLAMALARI
+    // 6. ÇEKİRDEK KOR HESAPLAMALARI
     // ==========================================
     function isSetValid(t, b, format) {
         if(isNaN(t) || isNaN(b)) return false;
@@ -1081,6 +1087,25 @@
             let badgeHtml = p.badgeText ? `<span style="background:#1e293b; color:${p.badgeColor}; padding:2px 5px; border-radius:4px; font-size:10px; margin-left:5px; white-space:nowrap;"><strong>${p.badgeLabel}</strong> | ${p.badgeText}</span>` : '';
             tbody.innerHTML += `<tr class="${p.rowClass}"><td><strong>${i+1}</strong></td><td style="text-align:left; font-weight:bold;">${p.name} <br> ${badgeHtml}</td><td style="color:var(--warning); font-weight:bold;">${p.totalMatches}</td><td style="color:var(--success);font-weight:bold;">${p.wins}</td><td>${p.losses}</td><td>${p.setAv>0?'+'+p.setAv:p.setAv}</td><td style="color:var(--accent-color); font-weight:bold;">${p.kor.toFixed(1)} <span style="font-size:10px;color:#94a3b8">${bdg}</span></td></tr>`;
         });
+
+        // YENİ: Pİ PUAN TABLOSU
+        let miniContainer = document.getElementById('miniStandingsWrapper');
+        if(!miniContainer) {
+            miniContainer = document.createElement('div');
+            miniContainer.id = 'miniStandingsWrapper';
+            document.getElementById('standings').appendChild(miniContainer);
+        }
+        if (piPool.length > 0) {
+            let miniHtml = `<div style="margin-top:25px; background:#0b1329; border:1px solid var(--success); border-radius:8px; padding:10px;"><h3 style="color:var(--success); margin-top:0; border-bottom:1px solid #1e293b; padding-bottom:8px; font-size:13px; text-align:center;">🔥 PLAY-IN KOR YARIŞI (Ana Tablo Dışı)</h3><table style="margin-top:0;"><thead><tr><th>Sıra</th><th style="text-align:left;">Oyuncu</th><th>OM</th><th>KOR 🎯</th><th>Durum</th></tr></thead><tbody>`;
+            piPool.forEach((p, idx) => {
+                let isPi = idx < piCount;
+                let cls = isPi ? "zone-direct" : "zone-eliminated";
+                let status = isPi ? `<span style="color:var(--success);font-weight:bold;">Bilet Cebinde</span>` : `<span style="color:var(--danger);">Elendi</span>`;
+                miniHtml += `<tr class="${cls}"><td><strong>${idx+1}</strong></td><td style="text-align:left; font-weight:bold;">${p.name}</td><td>${p.totalMatches}</td><td style="color:var(--accent-color); font-weight:bold;">${p.kor.toFixed(1)}</td><td>${status}</td></tr>`;
+            });
+            miniHtml += `</tbody></table></div>`;
+            miniContainer.innerHTML = miniHtml;
+        } else { miniContainer.innerHTML = ""; }
     }
 
     function renderVisualBracket() {
