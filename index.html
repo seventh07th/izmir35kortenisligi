@@ -96,7 +96,7 @@
         .global-alert { text-align:center; padding:30px; border: 1px dashed var(--warning); border-radius:8px; color:var(--warning); background:#1e293b; margin-top:20px; font-weight:bold;}
 
         /* MODALS */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box;}
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99999; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box;}
         .modal-content { background: #0f172a; padding: 30px; border-radius: 12px; border: 2px solid var(--accent-color); text-align: center; width: 100%; max-width: 450px; color: white; box-shadow: 0 0 30px rgba(255, 215, 0, 0.2); position:relative; }
         .modal-btn { background: var(--success); color: black; font-weight: bold; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-top: 20px; width: 100%; }
         .player-link { cursor: pointer; text-decoration: underline; color: inherit; transition: 0.2s; }
@@ -118,7 +118,7 @@
     <div class="modal-content" style="max-width:350px;">
         <button style="position:absolute; top:10px; right:15px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer;" onclick="closePublicProfile()">✖</button>
         <div style="font-size:35px; margin-bottom:10px;">👤</div>
-        <h2 id="pubName" style="margin:0; color:white; text-transform:uppercase;">İSİM YÜKLENİYOR...</h2>
+        <h2 id="pubName" style="margin:0; color:white; text-transform:uppercase;">İSİM</h2>
         <div style="margin-top:5px; display:flex; justify-content:center; gap:5px;">
             <span id="pubTier" style="background:var(--accent-color); color:black; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px;">SEVİYE</span>
             <span id="pubGender" style="background:#1e293b; color:white; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px; border:1px solid var(--border-color);">CİNSİYET</span>
@@ -185,6 +185,7 @@
             </div>
 
             <div style="font-size:12px; color:var(--warning); font-weight:bold; margin-top:10px; margin-bottom:5px;">📊 NTRP Standart Seviye Anketi</div>
+            
             <select id="q1" class="auth-select" style="font-size:11px; padding:8px;"><option value="">1. Temel Vuruşlar & Ralli?</option><option value="2.0">Sadece topu oyunda tutmaya çalışırım</option><option value="3.0">Yavaş/orta tempolu ralli yapabilirim</option><option value="3.5">Yön ve tempo kontrolü sağlarım</option><option value="4.0">Güvenilir, sert/spinli vuruşlarım var</option><option value="5.0">Agresif oynar, güçlü vuruşlar yaparım</option><option value="6.5">Üst düzey vuruş ustalığına sahibim</option></select>
             <select id="q2" class="auth-select" style="font-size:11px; padding:8px;"><option value="">2. Servis Becerisi?</option><option value="2.0">Servis atmakta zorlanıyorum</option><option value="3.0">Sadece topu oyuna sokarım</option><option value="3.5">Birinci servisim iyi, ikinciyi yönlendiririm</option><option value="4.0">Servislerimi silah olarak kullanabilirim</option><option value="5.0">Servisle direkt puanlar/ace alırım</option><option value="6.5">Kusursuz ve ölümcül servislerim var</option></select>
             <select id="q3" class="auth-select" style="font-size:11px; padding:8px;"><option value="">3. File Önü ve Vole?</option><option value="2.0">File önüne hiç çıkmam</option><option value="3.0">Sadece mecbur kalırsam vole vururum</option><option value="3.5">Fırsat buldukça yaklaşır, vole denerim</option><option value="4.0">Yaklaşma vuruşu ve vole kombinasyonum iyi</option><option value="5.0">File önünde agresif ve bitiriciyim</option><option value="6.5">File önünde geçilmezim</option></select>
@@ -226,7 +227,7 @@
         <div id="profile" class="panel">
             <div style="text-align:center; padding:20px; background:#020617; border-radius:12px; border:1px solid var(--border-color);">
                 <div style="font-size:40px; margin-bottom:10px;">👤</div>
-                <h2 id="profName" style="margin:0; color:white; text-transform:uppercase;">YÜKLENİYOR...</h2>
+                <h2 id="profName" style="margin:0; color:white; text-transform:uppercase;">İSİM</h2>
                 <div style="margin-top:5px; display:flex; justify-content:center; align-items:center; gap:10px;">
                     <span id="profTier" style="background:var(--accent-color); color:black; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px; text-transform:uppercase;">SEVİYE YÜKLENİYOR...</span>
                     <button class="action-sm" style="background:var(--danger); font-size:10px;" onclick="changeOwnPassword()">🔑 Şifre Değiştir</button>
@@ -367,16 +368,22 @@
     let players = []; let matches = []; let currentSettings = null;
     let passwordResets = {};
     let systemAdminPassword = "admin35";
+    
+    // K-KOR Canlı İstatistikler için Cache
     let derivedGlobalStats = {}; 
 
-    function _arr(obj) { if(!obj) return []; return Array.isArray(obj) ? obj : Object.values(obj); }
+    // GÜVENLİK: Firebase dizilerini koruma altına al (Çökmeyi Engeller)
+    function _arr(obj) {
+        if(!obj) return [];
+        return Array.isArray(obj) ? obj : Object.values(obj);
+    }
 
     window.onload = function() { listenToCloud(); };
 
     function listenToCloud() {
         const errHandler = (error) => {
             console.error("Firebase Bağlantı Hatası:", error);
-            document.getElementById('loginGlobalUserSelect').innerHTML = '<option value="">BAĞLANTI HATASI!</option>';
+            document.getElementById('loginGlobalUserSelect').innerHTML = '<option value="">BAĞLANTI HATASI! (KURALLARI KONTROL EDİN)</option>';
         };
 
         database.ref('the_35_gold_league/admin/password').on('value', (s) => {
@@ -387,8 +394,10 @@
             try {
                 globalUsers = s.val() || {}; 
                 updateLoginDropdown();
+                buildGlobalStats(); 
                 if(isAdmin && document.getElementById('setup').classList.contains('active')) renderAdminChecklist();
                 if(!currentTid && document.getElementById('standings').classList.contains('active')) renderGlobalStandings();
+                if(!isAdmin && loggedInUser && document.getElementById('profile').classList.contains('active')) renderProfile();
             } catch(e) { console.error("Kullanıcı okuma hatası:", e); }
         }, errHandler);
 
@@ -415,8 +424,10 @@
     
     function updateLoginDropdown() { 
         let sel = document.getElementById('loginGlobalUserSelect'); 
-        if(!sel) return; let p = sel.value; 
+        if(!sel) return;
+        let p = sel.value; 
         sel.innerHTML = '<option value="">İSMİNİZİ SEÇİN...</option>'; 
+        // Güvenli Sıralama: İsim yoksa çökmez
         Object.values(globalUsers).filter(u => u && u.name).sort((a,b)=>String(a.name).localeCompare(String(b.name))).forEach(u => sel.innerHTML += `<option value="${u.id}">${u.name}</option>`); 
         if(p) sel.value = p; 
     }
@@ -449,9 +460,12 @@
         if(u && u.password === pass) { 
             isAdmin = false; loggedInUser = u; 
             enterApp(); 
-            if(u.welcomed === false || u.welcomed === undefined) {
-                document.getElementById('welcomeModal').style.display = 'flex';
-            }
+            // İlk Giriş Pop-Up Kontrolü - Gecikmeli Güvenli Tetikleme
+            setTimeout(() => {
+                if(u.welcomed === false || u.welcomed === undefined) {
+                    document.getElementById('welcomeModal').style.display = 'flex';
+                }
+            }, 500);
         } else { alert("❌ Hatalı Şifre!"); } 
     }
     
@@ -462,13 +476,14 @@
         switchTab('rules');
     }
 
+    // YENİ: GENEL PROFİL MODALI AÇICI (PUBLIC)
     function openPublicProfile(uid) {
         let u = globalUsers[uid];
         if (!u) return alert("Oyuncu verisi bulunamadı.");
         let dStats = derivedGlobalStats[uid] || { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0, fame: 0 };
         
-        document.getElementById('pubName').innerText = u.name;
-        document.getElementById('pubTier').innerText = `${u.tier || 'BELİRSİZ'} (${u.sysScore || 'N/A'})`;
+        document.getElementById('pubName').innerText = u.name || 'BİLİNMİYOR';
+        document.getElementById('pubTier').innerText = `${u.tier || 'BELİRSİZ'} (${u.sysScore || '-'})`;
         document.getElementById('pubGender').innerText = u.gender || '-';
         document.getElementById('pubKKor').innerText = (dStats.k_kor || 0).toFixed(1);
         document.getElementById('pubFame').innerText = (u.fame || 0);
@@ -495,6 +510,7 @@
         }
     }
 
+    /* YÖNETİCİ MENÜSÜ FONKSİYONLARI */
     function adminFilterPlayers() {
         let nameQ = document.getElementById('adminSearchName').value.toLocaleUpperCase('tr-TR'); 
         let genQ = document.getElementById('adminFilterGender').value;
@@ -522,7 +538,7 @@
     
     function renderAdminChecklist() {
         let list = document.getElementById('adminChecklist'); list.innerHTML = "";
-        Object.values(globalUsers).filter(u => u && u.name).sort((a,b)=>a.name.localeCompare(b.name)).forEach(u => {
+        Object.values(globalUsers).filter(u => u && u.name).sort((a,b)=>String(a.name).localeCompare(String(b.name))).forEach(u => {
             let gIcon = u.gender === 'KADIN' ? '👩' : '👨';
             list.innerHTML += `<div class="admin-player-item" data-name="${u.name}" data-tier="${u.tier}" data-score="${u.sysScore || 0}" data-gender="${u.gender || 'ERKEK'}"><label style="cursor:pointer; flex:1;"><input type="checkbox" class="admin-chk" value="${u.id}" onchange="updateSelectedCount()"> <strong style="color:white;">${gIcon} ${u.name}</strong> <span style="font-size:10px; color:var(--accent-color);">(${u.tier} ${u.sysScore || '-'})</span></label><div><button class="action-sm" onclick="resetUserPass('${u.id}')">🔑 Şifre</button><button class="action-sm" style="background:var(--danger);" onclick="deleteUser('${u.id}')">🗑️ Sil</button></div></div>`;
         });
@@ -537,7 +553,7 @@
         let aOpt = '<option value="new">➕ YENİ TURNUVA KUR</option>'; let uOpt = '<option value="none">GENEL MOD (TÜM ZAMANLAR)</option>';
         Object.keys(allTourneys).forEach(tid => {
             let t = allTourneys[tid];
-            if(!t || !t.settings) return; 
+            if(!t || !t.settings) return; // Güvenlik Koruması
             let n = t.settings.customName || `İZMİR 35 KORTENİS LİGİ`;
             aOpt += `<option value="${tid}">YÖNET: ${n}</option>`;
             if(!isAdmin && loggedInUser && _arr(t.players).some(p => p.id === loggedInUser.id)) uOpt += `<option value="${tid}">${n}</option>`;
@@ -679,6 +695,7 @@
             if(t === 'rules') renderGlobalRules();
             if(t === 'standings') renderGlobalStandings();
             
+            // PANEL İSKELETİNİ SİLMEDEN GÜVENLİ UYARI GÖSTERİMİ
             if(t === 'rivals') { 
                 if(rf) rf.style.display = 'none'; 
                 document.getElementById('rivalsGridContainer').innerHTML = `<div class="global-alert">⚠️ Bu sekmeyi görüntülemek için lütfen üst menüden oynadığınız bir turnuvayı seçin.</div>`; 
@@ -709,7 +726,7 @@
     function buildGlobalStats() {
         derivedGlobalStats = {};
         Object.keys(globalUsers).forEach(uid => {
-            derivedGlobalStats[uid] = { k_kor: (globalUsers[uid].k_kor_base || 0), gWins: 0, gLoss: 0, gMatch: 0, fame: (globalUsers[uid].fame || 0) };
+            derivedGlobalStats[uid] = { k_kor: (parseFloat(globalUsers[uid].k_kor_base) || 0), gWins: 0, gLoss: 0, gMatch: 0, fame: (globalUsers[uid].fame || 0) };
         });
 
         Object.keys(allTourneys).forEach(tid => {
@@ -872,7 +889,7 @@
             return { id: uid, name: user.name, tier: user.tier || 'BELİRSİZ', sysScore: user.sysScore, k_kor: dStats.k_kor, gMatch: dStats.gMatch, gWins: dStats.gWins, gLoss: dStats.gLoss };
         });
 
-        let sortedUsers = globalArray.sort((a,b) => b.k_kor - a.k_kor);
+        let sortedUsers = globalArray.sort((a,b) => (b.k_kor || 0) - (a.k_kor || 0));
         const tbody = document.querySelector("#standingsTable tbody"); tbody.innerHTML = "";
         
         sortedUsers.forEach((u, i) => {
@@ -1196,8 +1213,10 @@
 
     function proposeDates(mId, btn) {
         let m = matches.find(x => String(x.id) === String(mId));
-        let d1 = document.getElementById(`p_d1_${mId}`).value; let t1s = document.getElementById(`p_t1s_${mId}`).value; let t1e = document.getElementById(`p_t1e_${mId}`).value;
-        let d2 = document.getElementById(`p_d2_${mId}`).value; let t2s = document.getElementById(`p_t2s_${mId}`).value; let t2e = document.getElementById(`p_t2e_${mId}`).value;
+        let getVal = id => { let el = document.getElementById(id); return el ? el.value : null; };
+        
+        let d1 = getVal(`p_d1_${mId}`); let t1s = getVal(`p_t1s_${mId}`); let t1e = getVal(`p_t1e_${mId}`);
+        let d2 = getVal(`p_d2_${mId}`); let t2s = getVal(`p_t2s_${mId}`); let t2e = getVal(`p_t2e_${mId}`);
         
         if (!isAdmin) {
             if (!d1 || !t1s || !t1e || !d2 || !t2s || !t2e) {
@@ -1323,18 +1342,42 @@
         saveToDb("Skor sıfırlandı!");
     }
 
+    // YENİ: Firebase Veri Koruyucu Zırh ve Optimistic UI
     function saveToDb(msg) {
         calculateStats(); 
-        let activePanel = document.querySelector('.panel.active');
-        if(activePanel) {
-            if (activePanel.id === 'matches') renderMatchesView();
-            if (activePanel.id === 'standings') renderLocalStandings();
-            if (activePanel.id === 'profile') renderProfile();
-            if (activePanel.id === 'rivals') renderRivalsGrid();
+        
+        try {
+            // Firebase'in çökmesini engelleyen ZIRH
+            let cleanPlayers = JSON.parse(JSON.stringify(_arr(players)));
+            let cleanMatches = JSON.parse(JSON.stringify(_arr(matches)));
+            
+            let activePanel = document.querySelector('.panel.active');
+            if(activePanel) {
+                if (activePanel.id === 'matches') renderMatchesView();
+                if (activePanel.id === 'standings') renderLocalStandings();
+                if (activePanel.id === 'profile') renderProfile();
+                if (activePanel.id === 'rivals') renderRivalsGrid();
+            }
+
+            database.ref('the_35_gold_league/multi_v1/' + currentTid).set({ 
+                players: cleanPlayers, 
+                matches: cleanMatches, 
+                settings: currentSettings 
+            })
+            .then(() => { 
+                if(msg) alert(msg); 
+                if(activePanel && activePanel.id === 'matches') renderMatchesView(); // Buton kilidini çözer
+            })
+            .catch(err => {
+                console.error("Kayıt Hatası:", err);
+                alert("Bağlantı hatası: Kayıt başarısız oldu. Lütfen internet bağlantınızı kontrol edin.");
+                if(activePanel && activePanel.id === 'matches') renderMatchesView();
+            });
+            
+        } catch(e) {
+            console.error("Veri Temizleme Hatası:", e);
+            alert("Kritik Hata: Veri yapısında bozukluk tespit edildi! İşlem durduruldu.");
         }
-        database.ref('the_35_gold_league/multi_v1/' + currentTid).set({ players: players, matches: matches, settings: currentSettings })
-        .then(() => { if(msg) alert(msg); })
-        .catch(err => alert("Bağlantı hatası: Kayıt başarısız oldu. Lütfen internet bağlantınızı kontrol edin."));
     }
 </script>
 </body>
