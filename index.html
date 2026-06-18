@@ -97,7 +97,7 @@
         
         .global-alert { text-align:center; padding:30px; border: 1px dashed var(--warning); border-radius:8px; color:var(--warning); background:#1e293b; margin-top:20px; font-weight:bold;}
 
-        /* MODAL POPUP */
+        /* MODAL POPUP (HOŞGELDİN & PROFİL) */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box;}
         .modal-content { background: #0f172a; padding: 30px; border-radius: 12px; border: 2px solid var(--accent-color); text-align: center; width: 100%; max-width: 450px; color: white; box-shadow: 0 0 30px rgba(255, 215, 0, 0.2); position:relative; }
         .modal-btn { background: var(--success); color: black; font-weight: bold; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-top: 20px; width: 100%; }
@@ -107,6 +107,7 @@
 </head>
 <body>
 
+<!-- HOŞ GELDİNİZ POP-UP EKRANI -->
 <div id="welcomeModal" class="modal">
     <div class="modal-content">
         <h2 style="color:var(--accent-color); margin-top:0;">🎉 İZMİR 35 KORTENİS LİGİ'NE HOŞ GELDİNİZ!</h2>
@@ -116,6 +117,7 @@
     </div>
 </div>
 
+<!-- OYUNCU PROFİLİ POP-UP (PUBLIC) -->
 <div id="publicProfileModal" class="modal">
     <div class="modal-content" style="max-width:350px;">
         <button style="position:absolute; top:10px; right:15px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer;" onclick="closePublicProfile()">✖</button>
@@ -152,6 +154,7 @@
         <button class="nav-btn" style="background: var(--danger); border-color: var(--danger);" onclick="logoutSession()">🚪 Çıkış</button>
     </div>
 
+    <!-- AUTHENTICATION -->
     <div id="authWrapper">
         <h1 id="mainTitle">✨ İZMİR 35 KORTENİS LİGİ ✨</h1>
         <p style="text-align:center; margin:0 0 15px 0; font-size:12px; color:var(--sub-text);" id="subTitleText">Kariyer ve Lig Yönetim Sistemi</p>
@@ -187,61 +190,12 @@
             </div>
 
             <div style="font-size:12px; color:var(--warning); font-weight:bold; margin-top:10px; margin-bottom:5px;">📊 NTRP Standart Seviye Anketi</div>
-            
-            <select id="q1" class="auth-select" style="font-size:11px; padding:8px;">
-                <option value="">1. Temel Vuruşlar & Ralli?</option>
-                <option value="2.0">Sadece topu oyunda tutmaya çalışırım</option>
-                <option value="3.0">Yavaş/orta tempolu ralli yapabilirim</option>
-                <option value="3.5">Yön ve tempo kontrolü sağlarım</option>
-                <option value="4.0">Güvenilir, sert/spinli vuruşlarım var</option>
-                <option value="5.0">Agresif oynar, güçlü vuruşlar yaparım</option>
-                <option value="6.5">Üst düzey vuruş ustalığına sahibim</option>
-            </select>
-            <select id="q2" class="auth-select" style="font-size:11px; padding:8px;">
-                <option value="">2. Servis Becerisi?</option>
-                <option value="2.0">Servis atmakta zorlanıyorum</option>
-                <option value="3.0">Sadece topu oyuna sokarım</option>
-                <option value="3.5">Birinci servisim iyi, ikinciyi yönlendiririm</option>
-                <option value="4.0">Servislerimi silah olarak kullanabilirim</option>
-                <option value="5.0">Servisle direkt puanlar/ace alırım</option>
-                <option value="6.5">Kusursuz ve ölümcül servislerim var</option>
-            </select>
-            <select id="q3" class="auth-select" style="font-size:11px; padding:8px;">
-                <option value="">3. File Önü ve Vole?</option>
-                <option value="2.0">File önüne hiç çıkmam</option>
-                <option value="3.0">Sadece mecbur kalırsam vole vururum</option>
-                <option value="3.5">Fırsat buldukça yaklaşır, vole denerim</option>
-                <option value="4.0">Yaklaşma vuruşu ve vole kombinasyonum iyi</option>
-                <option value="5.0">File önünde agresif ve bitiriciyim</option>
-                <option value="6.5">File önünde geçilmezim</option>
-            </select>
-            <select id="q4" class="auth-select" style="font-size:11px; padding:8px;">
-                <option value="">4. Maç ve Stres Yönetimi?</option>
-                <option value="2.0">Maç tecrübem yok</option>
-                <option value="3.0">Maçlarda çabuk heyecan yaparım</option>
-                <option value="3.5">Düzenli maç yapar, basit taktikler kurarım</option>
-                <option value="4.0">Zorlu anlarda oyun disiplinimi korurum</option>
-                <option value="5.0">Turnuva tecrübem yüksek, baskıyı severim</option>
-                <option value="6.5">Ulusal maç tecrübem ve çelik gibi sinirim var</option>
-            </select>
-            <select id="q5" class="auth-select" style="font-size:11px; padding:8px;">
-                <option value="">5. Kondisyon ve Ayak Çalışması?</option>
-                <option value="2.0">Çabuk yorulur, toplara yetişemem</option>
-                <option value="3.0">Yavaş tempoda kortu idare ederim</option>
-                <option value="3.5">Maç boyu koşarım ama bazen nefesim kesilir</option>
-                <option value="4.0">Hızlı yön değiştirir, zor toplara yetişirim</option>
-                <option value="5.0">Kortun her yerindeyim, asla tükenmem</option>
-                <option value="6.5">Profesyonel düzeyde atletik ve seriyim</option>
-            </select>
-            <select id="q6" class="auth-select" style="font-size:11px; padding:8px;">
-                <option value="">6. Taktik ve Oyun Okuma?</option>
-                <option value="2.0">Sadece kendi vuruşuma odaklanırım</option>
-                <option value="3.0">Rakibin zayıf yönünü fark edip oynamaya çalışırım</option>
-                <option value="3.5">Maç içinde strateji değiştirebilirim</option>
-                <option value="4.0">Rakibi analiz eder ve oyun planını bozarım</option>
-                <option value="5.0">Rakibin hamlesini önceden sezer ve kilitlerim</option>
-                <option value="6.5">Kusursuz stratejik zekaya ve oyun vizyonuna sahibim</option>
-            </select>
+            <select id="q1" class="auth-select" style="font-size:11px; padding:8px;"><option value="">1. Temel Vuruşlar & Ralli?</option><option value="2.0">Sadece topu oyunda tutmaya çalışırım</option><option value="3.0">Yavaş/orta tempolu ralli yapabilirim</option><option value="3.5">Yön ve tempo kontrolü sağlarım</option><option value="4.0">Güvenilir, sert/spinli vuruşlarım var</option><option value="5.0">Agresif oynar, güçlü vuruşlar yaparım</option><option value="6.5">Üst düzey vuruş ustalığına sahibim</option></select>
+            <select id="q2" class="auth-select" style="font-size:11px; padding:8px;"><option value="">2. Servis Becerisi?</option><option value="2.0">Servis atmakta zorlanıyorum</option><option value="3.0">Sadece topu oyuna sokarım</option><option value="3.5">Birinci servisim iyi, ikinciyi yönlendiririm</option><option value="4.0">Servislerimi silah olarak kullanabilirim</option><option value="5.0">Servisle direkt puanlar/ace alırım</option><option value="6.5">Kusursuz ve ölümcül servislerim var</option></select>
+            <select id="q3" class="auth-select" style="font-size:11px; padding:8px;"><option value="">3. File Önü ve Vole?</option><option value="2.0">File önüne hiç çıkmam</option><option value="3.0">Sadece mecbur kalırsam vole vururum</option><option value="3.5">Fırsat buldukça yaklaşır, vole denerim</option><option value="4.0">Yaklaşma vuruşu ve vole kombinasyonum iyi</option><option value="5.0">File önünde agresif ve bitiriciyim</option><option value="6.5">File önünde geçilmezim</option></select>
+            <select id="q4" class="auth-select" style="font-size:11px; padding:8px;"><option value="">4. Maç ve Stres Yönetimi?</option><option value="2.0">Maç tecrübem yok</option><option value="3.0">Maçlarda çabuk heyecan yaparım</option><option value="3.5">Düzenli maç yapar, basit taktikler kurarım</option><option value="4.0">Zorlu anlarda oyun disiplinimi korurum</option><option value="5.0">Turnuva tecrübem yüksek, baskıyı severim</option><option value="6.5">Ulusal maç tecrübem ve çelik gibi sinirim var</option></select>
+            <select id="q5" class="auth-select" style="font-size:11px; padding:8px;"><option value="">5. Kondisyon ve Ayak Çalışması?</option><option value="2.0">Çabuk yorulur, toplara yetişemem</option><option value="3.0">Yavaş tempoda kortu idare ederim</option><option value="3.5">Maç boyu koşarım ama bazen nefesim kesilir</option><option value="4.0">Hızlı yön değiştirir, zor toplara yetişirim</option><option value="5.0">Kortun her yerindeyim, asla tükenmem</option><option value="6.5">Profesyonel düzeyde atletik ve seriyim</option></select>
+            <select id="q6" class="auth-select" style="font-size:11px; padding:8px;"><option value="">6. Taktik ve Oyun Okuma?</option><option value="2.0">Sadece kendi vuruşuma odaklanırım</option><option value="3.0">Rakibin zayıf yönünü fark edip oynamaya çalışırım</option><option value="3.5">Maç içinde strateji değiştirebilirim</option><option value="4.0">Rakibi analiz eder ve oyun planını bozarım</option><option value="5.0">Rakibin hamlesini önceden sezer ve kilitlerim</option><option value="6.5">Kusursuz stratejik zekaya ve oyun vizyonuna sahibim</option></select>
 
             <button class="auth-btn" style="background:var(--success);" onclick="registerNewUser()">KAYDINI TAMAMLA</button>
             <p class="switch-link" onclick="toggleAuth('loginPanel')">Geri Dön</p>
@@ -255,6 +209,7 @@
         </div>
     </div>
 
+    <!-- MAIN APP YÜZÜ -->
     <div id="mainApp">
         <div id="adminTopBar">
             <span style="color:var(--warning); font-size:13px; font-weight:bold; margin-right:5px;">⚙️ KONTROL MERKEZİ:</span>
@@ -274,6 +229,7 @@
             <button class="tab-btn" id="tabTreeBtn" onclick="switchTab('tree')">Turnuva Ağacı</button>
         </div>
 
+        <!-- 1. PROFİL EKRANI -->
         <div id="profile" class="panel">
             <div style="text-align:center; padding:20px; background:#020617; border-radius:12px; border:1px solid var(--border-color);">
                 <div style="font-size:40px; margin-bottom:10px;">👤</div>
@@ -297,6 +253,7 @@
             </div>
         </div>
 
+        <!-- 2. BİLDİRİMLER (ADMİN) -->
         <div id="admin_notifs" class="panel">
             <h2>🔔 LİG YÖNETİM BİLDİRİMLERİ</h2>
             <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
@@ -316,6 +273,7 @@
             </div>
         </div>
 
+        <!-- 3. SETUP VE KURA -->
         <div id="setup" class="panel">
             <h2>Gelişmiş Kura Motoru</h2>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 10px;">
@@ -373,11 +331,13 @@
             <button class="action-btn" id="startKuraBtn" onclick="startTournament(this)">🔮 DİNAMİK KURAYI ÇEK VE BAŞLAT</button>
         </div>
 
+        <!-- 4. KURALLAR -->
         <div id="rules" class="panel">
             <h2 id="rulesHeaderTitle">📜 SİSTEM REHBERİ VE MANİFESTOSU (BETA)</h2>
             <div id="dynamicRulesContainer" class="rules-content">Yükleniyor...</div>
         </div>
 
+        <!-- 5. SIRALAMA -->
         <div id="standings" class="panel active">
             <h3 id="standingsTitle" style="color:var(--accent-color); text-align:center; margin-top:0;">🏆 GENEL SIRALAMA (TÜM ZAMANLAR)</h3>
             <table id="standingsTable">
@@ -387,16 +347,23 @@
             <div id="miniStandingsWrapper"></div>
         </div>
 
+        <!-- 6. FİKSTÜR -->
         <div id="rivals" class="panel">
             <select id="playerFilterSelect" class="auth-input force-upper" style="width:100%; margin-bottom:15px; display:none;" onchange="filterPlayerFikstur()"></select>
             <div id="rivalsGridContainer"></div>
         </div>
 
+        <!-- 7. SKOR GİRİŞİ -->
         <div id="matches" class="panel">
+            <div style="background:rgba(255, 189, 0, 0.1); border:1px solid var(--warning); padding:10px; border-radius:6px; margin-bottom:15px; font-size:12px;">
+                <strong>🚨 ÇİFT TARAFLI ONAY:</strong> Tarih planlaması veya Skor girişi yaptığınızda rakibinizin onayı gerekir. Yöneticiler direkt onay yetkisine sahiptir.<br>
+                <strong>⚠️ ÖNEMLİ:</strong> Sadece anlaştığınız ve kesinleşen maç tarihinde skor girişi yapabilirsiniz!
+            </div>
             <select id="matchFilterSelect" class="auth-input force-upper" style="width:100%; margin-bottom:15px; display:none;" onchange="renderMatchesView()"><option value="last10">🕒 LİGDEKİ SON 10 MAÇI İZLE</option></select>
             <div id="matchListContainer"></div>
         </div>
 
+        <!-- 8. AĞAÇ -->
         <div id="tree" class="panel">
             <h2 id="treeDynamicTitle" style="display:none;">TURNUVA AĞACI 🏆</h2>
             <div id="bracketView"></div>
@@ -415,7 +382,6 @@
     let passwordResets = {};
     let systemAdminPassword = "admin35";
     
-    // K-KOR Canlı İstatistikler için Cache
     let derivedGlobalStats = {}; 
 
     window.onload = function() { listenToCloud(); };
@@ -459,7 +425,7 @@
         if(!name || !pass || !gender || avail.length===0 || isNaN(q1)||isNaN(q2)||isNaN(q3)||isNaN(q4)||isNaN(q5)||isNaN(q6)) return alert("Lütfen anketin tüm sorularını yanıtlayın ve alanları doldurun.");
         
         let avg = (q1+q2+q3+q4+q5+q6)/6;
-        let tier = avg >= 6.0 ? "PLATIN" : (avg > 3.5 ? "GOLD" : "SILVER");
+        let tier = avg >= 6.0 ? "PLATIN" : (avg >= 3.6 ? "GOLD" : "SILVER");
         let sysScore = avg.toFixed(1); let uid = "USR_" + Date.now();
         
         database.ref('the_35_gold_league/users/' + uid).set({
@@ -669,9 +635,6 @@
         .then(() => { btn.innerHTML = originalText; btn.disabled = false; alert("Tüm torbalardan eşit ve adil şekilde kura çekildi!"); document.getElementById('adminLeagueSelect').value = newTid; adminSwitchLeague(); });
     }
 
-    // ==========================================
-    // DUAL-STATE TAB SWITCHING VE GÜVENLİ ARAYÜZ
-    // ==========================================
     function switchTab(t) {
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); 
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -995,6 +958,14 @@
         `;
     }
 
+    function populateFilterSelects() {
+        let sf = document.getElementById('playerFilterSelect'); let sm = document.getElementById('matchFilterSelect');
+        if(!sf || !sm) return;
+        sf.innerHTML = '<option value="all">TÜM FİKSTÜRLERİ GÖSTER</option>'; sm.innerHTML = '<option value="last10">🕒 LİGDEKİ SON 10 MAÇ</option>';
+        [...players].sort((a,b)=>a.name.localeCompare(b.name)).forEach(p => { sf.innerHTML += `<option value="${p.id}">${p.name}</option>`; sm.innerHTML += `<option value="${p.id}">👤 ${p.name} MAÇLARI</option>`; });
+        if(!isAdmin && loggedInUser) { if(document.querySelector('.panel.active').id==='rivals') sf.value = loggedInUser.id; if(document.querySelector('.panel.active').id==='matches') sm.value = loggedInUser.id; }
+    }
+
     function filterPlayerFikstur() {
         let val = document.getElementById('playerFilterSelect').value;
         document.querySelectorAll('.player-rivals-card').forEach(c => c.style.display = (val === 'all' || c.getAttribute('data-player-id') === val) ? 'block' : 'none');
@@ -1117,7 +1088,7 @@
                         let btnHtml = m.proposedDates.map(d => `<button class="action-sm" style="background:var(--success); margin:2px;" onclick="acceptDate('${m.id}', '${d}', this)">${d}</button>`).join('');
                         dateBox = `<div class="date-box" style="border-color:var(--warning);">⏳ Rakibin Önerileri:<br><div style="margin-top:5px;">${btnHtml} <button class="action-sm" style="background:var(--danger);" onclick="clearDateProposal('${m.id}', this)">Reddet</button></div></div>`;
                     } else {
-                        dateBox = `<div class="date-box" style="border-color:var(--warning);">⏳ Önerilen Tarihler rakip onayı bekliyor.</div>`;
+                        dateBox = `<div class="date-box" style="border-color:var(--warning);">⏳ Gönderilen Tarih Önerileri rakip onayı bekliyor.</div>`;
                     }
                 } else if (isMyMatch || isAdmin) {
                     dateBox = `<div class="date-box"><span>📅 Tarih ve Tam Saat Öner ${isAdmin ? '(Yöneticiler 1 Tarih Girebilir)' : '(2 Seçenek Zorunlu)'}:</span> 
@@ -1242,7 +1213,6 @@
         saveToDb("Mevcut tarih iptal edildi. Lütfen yeni bir tarih önerin.");
     }
 
-    // TAM KORUMALI TIE-BREAK VALİDASYONU VE YÖNETİCİ KONTROLÜ
     function submitScore(mId, isP2, btn) {
         let m = matches.find(x => String(x.id) === String(mId));
         let type = document.getElementById(`type_${mId}`).value;
@@ -1343,11 +1313,8 @@
         saveToDb("Skor sıfırlandı!");
     }
 
-    // YENİ: OPTIMISTIC UI GÜNCELLEMESİ (SIFIR LAG)
     function saveToDb(msg) {
-        calculateStats(); // Değerleri bellekte hesapla
-        
-        // Kullanıcı beklememesin diye ekranı hemen güncelle (Optimistic Update)
+        calculateStats(); 
         let activePanel = document.querySelector('.panel.active');
         if(activePanel) {
             if (activePanel.id === 'matches') renderMatchesView();
@@ -1355,8 +1322,6 @@
             if (activePanel.id === 'profile') renderProfile();
             if (activePanel.id === 'rivals') renderRivalsGrid();
         }
-
-        // Arka planda sessizce kaydet
         database.ref('the_35_gold_league/multi_v1/' + currentTid).set({ players: players, matches: matches, settings: currentSettings })
         .then(() => { if(msg) alert(msg); })
         .catch(err => alert("Bağlantı hatası: Kayıt başarısız oldu."));
