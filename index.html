@@ -20,7 +20,6 @@
         .nav-btn { background: #1e293b; color: white; border: 1px solid var(--border-color); padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.3s; }
         .nav-btn:hover { background: #334155; }
         
-        /* AUTH VE PROFİL STİLLERİ */
         #authWrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; margin-top: 20px;}
         .auth-card { background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.5); width: 100%; max-width: 480px; text-align: center; display: none; margin-bottom: 20px; }
         .auth-input, .auth-select { padding: 12px; width: 100%; border-radius: 6px; border: 1px solid var(--border-color); background: #020617; color: white; text-align: center; font-size: 13px; margin-bottom: 12px; box-sizing: border-box; }
@@ -34,7 +33,6 @@
         .admin-player-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--divider); }
         .action-sm { background: #334155; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight:bold; margin-left: 4px;}
 
-        /* PANELLER */
         #mainApp { display: none; }
         #adminTopBar { display: none; background: #1e293b; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 15px; border: 1px dashed var(--accent-color); }
         .tabs { display: flex; gap: 4px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
@@ -52,7 +50,6 @@
         .zone-eliminated { background-color: rgba(239, 68, 68, 0.05); border-left: 3px solid var(--danger); }
         .zone-global { background-color: rgba(0, 229, 255, 0.05); border-left: 3px solid #00e5ff; }
         
-        /* KARTLAR VE SKORBOARD */
         .rivals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
         .player-rivals-card { background: #020617; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; }
         .player-main-title { background: #1e293b; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; color: var(--accent-color); font-size: 14px; }
@@ -62,7 +59,6 @@
         .match-card { background: #020617; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.5); overflow: hidden; }
         .match-card-header { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 8px 12px; border-bottom: 1px solid var(--divider); }
         
-        /* TV FORMATI SKORBOARD CSS */
         .scoreboard { display: flex; flex-direction: column; background: #0f172a; border-radius: 8px; border: 1px solid var(--divider); overflow: hidden; margin-bottom: 10px; }
         .sb-row { display: flex; border-bottom: 1px solid var(--divider); }
         .sb-row:last-child { border-bottom: none; }
@@ -79,7 +75,6 @@
         .fair-btn { background: #00e5ff; border: none; padding: 8px; color: black; font-weight: bold; cursor: pointer; border-radius: 6px; width:100%; margin-top:5px; font-size: 11px; transition: 0.3s; }
         .date-box { background: #1e293b; padding: 10px; border-radius: 6px; margin: 10px 15px; font-size: 11px; border-left: 3px solid var(--accent-color); }
         
-        /* AĞAÇ VE KURALLAR */
         .bracket-scroll-container { width: 100%; overflow-x: auto; padding-bottom: 15px; margin-top:20px; }
         .cl-bracket { display: flex; justify-content: space-between; align-items: center; margin: 0 auto; padding: 20px 0; }
         .bracket-col { display: flex; flex-direction: column; justify-content: space-around; gap: 15px; height: 100%; }
@@ -97,7 +92,6 @@
         
         .global-alert { text-align:center; padding:30px; border: 1px dashed var(--warning); border-radius:8px; color:var(--warning); background:#1e293b; margin-top:20px; font-weight:bold;}
 
-        /* MODAL POPUP (HOŞGELDİN & PROFİL) */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box;}
         .modal-content { background: #0f172a; padding: 30px; border-radius: 12px; border: 2px solid var(--accent-color); text-align: center; width: 100%; max-width: 450px; color: white; box-shadow: 0 0 30px rgba(255, 215, 0, 0.2); position:relative; }
         .modal-btn { background: var(--success); color: black; font-weight: bold; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-top: 20px; width: 100%; }
@@ -120,7 +114,7 @@
     <div class="modal-content" style="max-width:350px;">
         <button style="position:absolute; top:10px; right:15px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer;" onclick="closePublicProfile()">✖</button>
         <div style="font-size:35px; margin-bottom:10px;">👤</div>
-        <h2 id="pubName" style="margin:0; color:white; text-transform:uppercase;">İSİM</h2>
+        <h2 id="pubName" style="margin:0; color:white; text-transform:uppercase;">İSİM YÜKLENİYOR...</h2>
         <div style="margin-top:5px; display:flex; justify-content:center; gap:5px;">
             <span id="pubTier" style="background:var(--accent-color); color:black; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px;">SEVİYE</span>
             <span id="pubGender" style="background:#1e293b; color:white; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px; border:1px solid var(--border-color);">CİNSİYET</span>
@@ -187,61 +181,12 @@
             </div>
 
             <div style="font-size:12px; color:var(--warning); font-weight:bold; margin-top:10px; margin-bottom:5px;">📊 NTRP Standart Seviye Anketi</div>
-            
-            <select id="q1" class="auth-select" style="font-size:11px; padding:8px;">
-                <option value="">1. Temel Vuruşlar & Ralli?</option>
-                <option value="2.0">Sadece topu oyunda tutmaya çalışırım</option>
-                <option value="3.0">Yavaş/orta tempolu ralli yapabilirim</option>
-                <option value="3.5">Yön ve tempo kontrolü sağlarım</option>
-                <option value="4.0">Güvenilir, sert/spinli vuruşlarım var</option>
-                <option value="5.0">Agresif oynar, güçlü vuruşlar yaparım</option>
-                <option value="6.5">Üst düzey vuruş ustalığına sahibim</option>
-            </select>
-            <select id="q2" class="auth-select" style="font-size:11px; padding:8px;">
-                <option value="">2. Servis Becerisi?</option>
-                <option value="2.0">Servis atmakta zorlanıyorum</option>
-                <option value="3.0">Sadece topu oyuna sokarım</option>
-                <option value="3.5">Birinci servisim iyi, ikinciyi yönlendiririm</option>
-                <option value="4.0">Servislerimi silah olarak kullanabilirim</option>
-                <option value="5.0">Servisle direkt puanlar/ace alırım</option>
-                <option value="6.5">Kusursuz ve ölümcül servislerim var</option>
-            </select>
-            <select id="q3" class="auth-select" style="font-size:11px; padding:8px;">
-                <option value="">3. File Önü ve Vole?</option>
-                <option value="2.0">File önüne hiç çıkmam</option>
-                <option value="3.0">Sadece mecbur kalırsam vole vururum</option>
-                <option value="3.5">Fırsat buldukça yaklaşır, vole denerim</option>
-                <option value="4.0">Yaklaşma vuruşu ve vole kombinasyonum iyi</option>
-                <option value="5.0">File önünde agresif ve bitiriciyim</option>
-                <option value="6.5">File önünde geçilmezim</option>
-            </select>
-            <select id="q4" class="auth-select" style="font-size:11px; padding:8px;">
-                <option value="">4. Maç ve Stres Yönetimi?</option>
-                <option value="2.0">Maç tecrübem yok</option>
-                <option value="3.0">Maçlarda çabuk heyecan yaparım</option>
-                <option value="3.5">Düzenli maç yapar, basit taktikler kurarım</option>
-                <option value="4.0">Zorlu anlarda oyun disiplinimi korurum</option>
-                <option value="5.0">Turnuva tecrübem yüksek, baskıyı severim</option>
-                <option value="6.5">Ulusal maç tecrübem ve çelik gibi sinirim var</option>
-            </select>
-            <select id="q5" class="auth-select" style="font-size:11px; padding:8px;">
-                <option value="">5. Kondisyon ve Ayak Çalışması?</option>
-                <option value="2.0">Çabuk yorulur, toplara yetişemem</option>
-                <option value="3.0">Yavaş tempoda kortu idare ederim</option>
-                <option value="3.5">Maç boyu koşarım ama bazen nefesim kesilir</option>
-                <option value="4.0">Hızlı yön değiştirir, zor toplara yetişirim</option>
-                <option value="5.0">Kortun her yerindeyim, asla tükenmem</option>
-                <option value="6.5">Profesyonel düzeyde atletik ve seriyim</option>
-            </select>
-            <select id="q6" class="auth-select" style="font-size:11px; padding:8px;">
-                <option value="">6. Taktik ve Oyun Okuma?</option>
-                <option value="2.0">Sadece kendi vuruşuma odaklanırım</option>
-                <option value="3.0">Rakibin zayıf yönünü fark edip oynamaya çalışırım</option>
-                <option value="3.5">Maç içinde strateji değiştirebilirim</option>
-                <option value="4.0">Rakibi analiz eder ve oyun planını bozarım</option>
-                <option value="5.0">Rakibin hamlesini önceden sezer ve kilitlerim</option>
-                <option value="6.5">Kusursuz stratejik zekaya ve oyun vizyonuna sahibim</option>
-            </select>
+            <select id="q1" class="auth-select" style="font-size:11px; padding:8px;"><option value="">1. Temel Vuruşlar & Ralli?</option><option value="2.0">Sadece topu oyunda tutmaya çalışırım</option><option value="3.0">Yavaş/orta tempolu ralli yapabilirim</option><option value="3.5">Yön ve tempo kontrolü sağlarım</option><option value="4.0">Güvenilir, sert/spinli vuruşlarım var</option><option value="5.0">Agresif oynar, güçlü vuruşlar yaparım</option><option value="6.5">Üst düzey vuruş ustalığına sahibim</option></select>
+            <select id="q2" class="auth-select" style="font-size:11px; padding:8px;"><option value="">2. Servis Becerisi?</option><option value="2.0">Servis atmakta zorlanıyorum</option><option value="3.0">Sadece topu oyuna sokarım</option><option value="3.5">Birinci servisim iyi, ikinciyi yönlendiririm</option><option value="4.0">Servislerimi silah olarak kullanabilirim</option><option value="5.0">Servisle direkt puanlar/ace alırım</option><option value="6.5">Kusursuz ve ölümcül servislerim var</option></select>
+            <select id="q3" class="auth-select" style="font-size:11px; padding:8px;"><option value="">3. File Önü ve Vole?</option><option value="2.0">File önüne hiç çıkmam</option><option value="3.0">Sadece mecbur kalırsam vole vururum</option><option value="3.5">Fırsat buldukça yaklaşır, vole denerim</option><option value="4.0">Yaklaşma vuruşu ve vole kombinasyonum iyi</option><option value="5.0">File önünde agresif ve bitiriciyim</option><option value="6.5">File önünde geçilmezim</option></select>
+            <select id="q4" class="auth-select" style="font-size:11px; padding:8px;"><option value="">4. Maç ve Stres Yönetimi?</option><option value="2.0">Maç tecrübem yok</option><option value="3.0">Maçlarda çabuk heyecan yaparım</option><option value="3.5">Düzenli maç yapar, basit taktikler kurarım</option><option value="4.0">Zorlu anlarda oyun disiplinimi korurum</option><option value="5.0">Turnuva tecrübem yüksek, baskıyı severim</option><option value="6.5">Ulusal maç tecrübem ve çelik gibi sinirim var</option></select>
+            <select id="q5" class="auth-select" style="font-size:11px; padding:8px;"><option value="">5. Kondisyon ve Ayak Çalışması?</option><option value="2.0">Çabuk yorulur, toplara yetişemem</option><option value="3.0">Yavaş tempoda kortu idare ederim</option><option value="3.5">Maç boyu koşarım ama bazen nefesim kesilir</option><option value="4.0">Hızlı yön değiştirir, zor toplara yetişirim</option><option value="5.0">Kortun her yerindeyim, asla tükenmem</option><option value="6.5">Profesyonel düzeyde atletik ve seriyim</option></select>
+            <select id="q6" class="auth-select" style="font-size:11px; padding:8px;"><option value="">6. Taktik ve Oyun Okuma?</option><option value="2.0">Sadece kendi vuruşuma odaklanırım</option><option value="3.0">Rakibin zayıf yönünü fark edip oynamaya çalışırım</option><option value="3.5">Maç içinde strateji değiştirebilirim</option><option value="4.0">Rakibi analiz eder ve oyun planını bozarım</option><option value="5.0">Rakibin hamlesini önceden sezer ve kilitlerim</option><option value="6.5">Kusursuz stratejik zekaya ve oyun vizyonuna sahibim</option></select>
 
             <button class="auth-btn" style="background:var(--success);" onclick="registerNewUser()">KAYDINI TAMAMLA</button>
             <p class="switch-link" onclick="toggleAuth('loginPanel')">Geri Dön</p>
@@ -279,7 +224,7 @@
                 <div style="font-size:40px; margin-bottom:10px;">👤</div>
                 <h2 id="profName" style="margin:0; color:white; text-transform:uppercase;">YÜKLENİYOR...</h2>
                 <div style="margin-top:5px; display:flex; justify-content:center; align-items:center; gap:10px;">
-                    <span id="profTier" style="background:var(--accent-color); color:black; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px; text-transform:uppercase;">SEVİYE BELİRSİZ</span>
+                    <span id="profTier" style="background:var(--accent-color); color:black; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px; text-transform:uppercase;">SEVİYE YÜKLENİYOR...</span>
                     <button class="action-sm" style="background:var(--danger); font-size:10px;" onclick="changeOwnPassword()">🔑 Şifre Değiştir</button>
                 </div>
                 
@@ -419,36 +364,67 @@
     let passwordResets = {};
     let systemAdminPassword = "admin35";
     
-    // K-KOR Canlı İstatistikler
+    // K-KOR Canlı İstatistikler için Cache
     let derivedGlobalStats = {}; 
+
+    // GÜVENLİK: Firebase dizilerini koruma altına al (Çökmeyi Engeller)
+    function _arr(obj) {
+        if(!obj) return [];
+        return Array.isArray(obj) ? obj : Object.values(obj);
+    }
 
     window.onload = function() { listenToCloud(); };
 
     function listenToCloud() {
+        // Hata yakalayıcı eklendi
+        const errHandler = (error) => {
+            console.error("Firebase Bağlantı Hatası:", error);
+            document.getElementById('loginGlobalUserSelect').innerHTML = '<option value="">BAĞLANTI HATASI! (KURALLARI KONTROL EDİN)</option>';
+        };
+
         database.ref('the_35_gold_league/admin/password').on('value', (s) => {
-            if(s.val()) systemAdminPassword = s.val();
-        });
+            try { if(s.val()) systemAdminPassword = s.val(); } catch(e){}
+        }, errHandler);
+
         database.ref('the_35_gold_league/users').on('value', (s) => {
-            globalUsers = s.val() || {}; updateLoginDropdown();
-            if(isAdmin && document.getElementById('setup').classList.contains('active')) renderAdminChecklist();
-            if(!currentTid && document.getElementById('standings').classList.contains('active')) renderGlobalStandings();
-        });
+            try {
+                globalUsers = s.val() || {}; 
+                updateLoginDropdown();
+                if(isAdmin && document.getElementById('setup').classList.contains('active')) renderAdminChecklist();
+                if(!currentTid && document.getElementById('standings').classList.contains('active')) renderGlobalStandings();
+            } catch(e) { console.error("Kullanıcı okuma hatası:", e); }
+        }, errHandler);
+
         database.ref('the_35_gold_league/multi_v1').on('value', (s) => {
-            allTourneys = s.val() || {}; 
-            buildGlobalStats(); 
-            populateLeagueDropdowns();
-            if (currentTid && allTourneys[currentTid]) { loadTournamentData(currentTid); }
-            if(!currentTid && document.getElementById('standings').classList.contains('active')) renderGlobalStandings();
-        });
+            try {
+                allTourneys = s.val() || {}; 
+                buildGlobalStats(); 
+                populateLeagueDropdowns();
+                if (currentTid && allTourneys[currentTid]) { loadTournamentData(currentTid); }
+                if(!currentTid && document.getElementById('standings').classList.contains('active')) renderGlobalStandings();
+            } catch(e) { console.error("Turnuva okuma hatası:", e); }
+        }, errHandler);
+
         database.ref('the_35_gold_league/password_resets').on('value', (s) => {
-            passwordResets = s.val() || {};
-            if(isAdmin && document.getElementById('admin_notifs').classList.contains('active')) renderAdminNotifs();
-        });
+            try {
+                passwordResets = s.val() || {};
+                if(isAdmin && document.getElementById('admin_notifs').classList.contains('active')) renderAdminNotifs();
+            } catch(e){}
+        }, errHandler);
     }
 
     function toggleAuth(id) { document.querySelectorAll('.auth-card').forEach(c=>c.style.display='none'); document.getElementById(id).style.display='block'; }
     function forgotPassword() { let n = prompt("Sisteme kayıtlı Adınızı ve Soyadınızı girin:"); if (!n) return; database.ref('the_35_gold_league/password_resets').push({ name: n.toLocaleUpperCase('tr-TR'), timestamp: Date.now() }).then(() => alert("Şifre sıfırlama talebiniz yöneticiye iletildi. Lütfen yöneticinizle iletişime geçin.")); }
-    function updateLoginDropdown() { let sel = document.getElementById('loginGlobalUserSelect'); let p = sel.value; sel.innerHTML = '<option value="">İSMİNİZİ SEÇİN...</option>'; Object.values(globalUsers).sort((a,b)=>a.name.localeCompare(b.name)).forEach(u => sel.innerHTML += `<option value="${u.id}">${u.name}</option>`); if(p) sel.value = p; }
+    
+    function updateLoginDropdown() { 
+        let sel = document.getElementById('loginGlobalUserSelect'); 
+        if(!sel) return;
+        let p = sel.value; 
+        sel.innerHTML = '<option value="">İSMİNİZİ SEÇİN...</option>'; 
+        // Güvenli Sıralama: İsim yoksa çökmez
+        Object.values(globalUsers).filter(u => u && u.name).sort((a,b)=>String(a.name).localeCompare(String(b.name))).forEach(u => sel.innerHTML += `<option value="${u.id}">${u.name}</option>`); 
+        if(p) sel.value = p; 
+    }
 
     function registerNewUser() {
         let nameRaw = document.getElementById('regName').value.trim();
@@ -478,6 +454,7 @@
         if(u && u.password === pass) { 
             isAdmin = false; loggedInUser = u; 
             enterApp(); 
+            // İlk Giriş Pop-Up Kontrolü
             if(u.welcomed === false || u.welcomed === undefined) {
                 document.getElementById('welcomeModal').style.display = 'flex';
             }
@@ -524,6 +501,7 @@
         }
     }
 
+    /* YÖNETİCİ MENÜSÜ FONKSİYONLARI */
     function adminFilterPlayers() {
         let nameQ = document.getElementById('adminSearchName').value.toLocaleUpperCase('tr-TR'); 
         let genQ = document.getElementById('adminFilterGender').value;
@@ -551,7 +529,7 @@
     
     function renderAdminChecklist() {
         let list = document.getElementById('adminChecklist'); list.innerHTML = "";
-        Object.values(globalUsers).sort((a,b)=>a.name.localeCompare(b.name)).forEach(u => {
+        Object.values(globalUsers).filter(u => u && u.name).sort((a,b)=>a.name.localeCompare(b.name)).forEach(u => {
             let gIcon = u.gender === 'KADIN' ? '👩' : '👨';
             list.innerHTML += `<div class="admin-player-item" data-name="${u.name}" data-tier="${u.tier}" data-score="${u.sysScore || 0}" data-gender="${u.gender || 'ERKEK'}"><label style="cursor:pointer; flex:1;"><input type="checkbox" class="admin-chk" value="${u.id}" onchange="updateSelectedCount()"> <strong style="color:white;">${gIcon} ${u.name}</strong> <span style="font-size:10px; color:var(--accent-color);">(${u.tier} ${u.sysScore || '-'})</span></label><div><button class="action-sm" onclick="resetUserPass('${u.id}')">🔑 Şifre</button><button class="action-sm" style="background:var(--danger);" onclick="deleteUser('${u.id}')">🗑️ Sil</button></div></div>`;
         });
@@ -565,9 +543,11 @@
         let aSel = document.getElementById('adminLeagueSelect'); let uSel = document.getElementById('userActiveLeagueSelect'); if(!aSel || !uSel) return;
         let aOpt = '<option value="new">➕ YENİ TURNUVA KUR</option>'; let uOpt = '<option value="none">GENEL MOD (TÜM ZAMANLAR)</option>';
         Object.keys(allTourneys).forEach(tid => {
-            let s = allTourneys[tid].settings; let n = s.customName || `İZMİR 35 KORTENİS LİGİ`;
+            let t = allTourneys[tid];
+            if(!t || !t.settings) return; // Güvenlik Koruması
+            let n = t.settings.customName || `İZMİR 35 KORTENİS LİGİ`;
             aOpt += `<option value="${tid}">YÖNET: ${n}</option>`;
-            if(!isAdmin && loggedInUser && allTourneys[tid].players.some(p => p.id === loggedInUser.id)) uOpt += `<option value="${tid}">${n}</option>`;
+            if(!isAdmin && loggedInUser && _arr(t.players).some(p => p.id === loggedInUser.id)) uOpt += `<option value="${tid}">${n}</option>`;
         });
         let aPrev = aSel.value, uPrev = uSel.value; aSel.innerHTML = aOpt; uSel.innerHTML = uOpt;
         if(aPrev !== 'new' && allTourneys[aPrev]) aSel.value = aPrev; if(uPrev !== 'none' && allTourneys[uPrev]) uSel.value = uPrev;
@@ -672,6 +652,9 @@
         .then(() => { btn.innerHTML = originalText; btn.disabled = false; alert("Tüm torbalardan eşit ve adil şekilde kura çekildi!"); document.getElementById('adminLeagueSelect').value = newTid; adminSwitchLeague(); });
     }
 
+    // ==========================================
+    // DUAL-STATE TAB SWITCHING
+    // ==========================================
     function switchTab(t) {
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); 
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -723,7 +706,10 @@
 
     function loadTournamentData(tid) {
         let t = allTourneys[tid]; if (!t) return;
-        players = t.players || []; matches = t.matches || []; currentSettings = t.settings;
+        // GÜVENLİK: Her zaman Dizi (Array) olduğundan emin ol
+        players = _arr(t.players); 
+        matches = _arr(t.matches); 
+        currentSettings = t.settings || {};
         
         let formatText = currentSettings.format === '6_GAME' ? '6 OYUNLUK' : '4 OYUNLUK';
         let subText = `${formatText} | ${currentSettings.gender || 'ERKEK'} | ${currentSettings.tier || 'GOLD'} | ${currentSettings.region || 'İZMİR'}`;
@@ -741,24 +727,27 @@
 
         Object.keys(allTourneys).forEach(tid => {
             let t = allTourneys[tid];
-            if(t && t.players) {
-                t.players.forEach(p => {
-                    if (derivedGlobalStats[p.id]) { derivedGlobalStats[p.id].k_kor += (p.kor || 0); }
-                });
-            }
-            if(t && t.matches) {
-                t.matches.forEach(m => {
-                    if(m.played && !m.pending) {
-                        if(derivedGlobalStats[m.p1]) derivedGlobalStats[m.p1].gMatch++;
-                        if(derivedGlobalStats[m.p2]) derivedGlobalStats[m.p2].gMatch++;
-                        if(m.winnerId === m.p1) { if(derivedGlobalStats[m.p1]) derivedGlobalStats[m.p1].gWins++; if(derivedGlobalStats[m.p2]) derivedGlobalStats[m.p2].gLoss++; }
-                        else if(m.winnerId === m.p2) { if(derivedGlobalStats[m.p2]) derivedGlobalStats[m.p2].gWins++; if(derivedGlobalStats[m.p1]) derivedGlobalStats[m.p1].gLoss++; }
-                    }
-                });
-            }
+            let tPlayers = _arr(t.players);
+            let tMatches = _arr(t.matches);
+            
+            tPlayers.forEach(p => {
+                if (derivedGlobalStats[p.id]) { derivedGlobalStats[p.id].k_kor += (p.kor || 0); }
+            });
+            
+            tMatches.forEach(m => {
+                if(m.played && !m.pending) {
+                    if(derivedGlobalStats[m.p1]) derivedGlobalStats[m.p1].gMatch++;
+                    if(derivedGlobalStats[m.p2]) derivedGlobalStats[m.p2].gMatch++;
+                    if(m.winnerId === m.p1) { if(derivedGlobalStats[m.p1]) derivedGlobalStats[m.p1].gWins++; if(derivedGlobalStats[m.p2]) derivedGlobalStats[m.p2].gLoss++; }
+                    else if(m.winnerId === m.p2) { if(derivedGlobalStats[m.p2]) derivedGlobalStats[m.p2].gWins++; if(derivedGlobalStats[m.p1]) derivedGlobalStats[m.p1].gLoss++; }
+                }
+            });
         });
     }
 
+    // ==========================================
+    // KURALLAR VE MANİFESTO
+    // ==========================================
     function renderGlobalRules() {
         document.getElementById('rulesHeaderTitle').innerText = "📜 İZMİR 35 KORTENİS LİGİ - SİSTEM REHBERİ (BETA)";
         let html = `
@@ -889,6 +878,9 @@
         document.getElementById('dynamicRulesContainer').innerHTML = html;
     }
 
+    // ==========================================
+    // SIRALAMALAR VE AĞAÇ
+    // ==========================================
     function renderGlobalStandings() {
         document.getElementById('standingsTitle').innerText = "🏆 GENEL SIRALAMA (TÜM ZAMANLAR)";
         document.getElementById('standingsHead').innerHTML = "<tr><th>#</th><th style='text-align:left;'>OYUNCU</th><th>O</th><th>G</th><th>M</th><th>K-KOR 🌟</th></tr>";
@@ -1003,6 +995,9 @@
         if(!isAdmin && loggedInUser) { if(document.querySelector('.panel.active').id==='rivals') sf.value = loggedInUser.id; if(document.querySelector('.panel.active').id==='matches') sm.value = loggedInUser.id; }
     }
 
+    // ==========================================
+    // FİKSTÜR, SKOR VE ONAY İŞLEMLERİ (GÜVENLİ)
+    // ==========================================
     function filterPlayerFikstur() {
         let val = document.getElementById('playerFilterSelect').value;
         document.querySelectorAll('.player-rivals-card').forEach(c => c.style.display = (val === 'all' || c.getAttribute('data-player-id') === val) ? 'block' : 'none');
@@ -1345,4 +1340,27 @@
         btn.innerHTML = "⏳..."; btn.disabled = true;
         let m = matches.find(x => String(x.id) === String(id));
         m.played = false; m.pending = false; m.isWO = false; m.woWinner = ''; m.enteredBy = '';
-        m.p1S1 = ''; m.p2S1 = ''; m.p1S2 = ''; m.p2
+        m.p1S1 = ''; m.p2S1 = ''; m.p1S2 = ''; m.p2S2 = ''; m.p1S1TB = ''; m.p2S1TB = ''; m.p1S2TB = ''; m.p2S2TB = ''; m.p1MT = ''; m.p2MT = '';
+        m.p1Fair = false; m.p2Fair = false;
+        saveToDb("Skor sıfırlandı!");
+    }
+
+    // YENİ: OPTIMISTIC UI GÜNCELLEMESİ VE ARRAY GÜVENLİĞİ (SIFIR LAG)
+    function saveToDb(msg) {
+        calculateStats(); // Değerleri bellekte hesapla
+        
+        let activePanel = document.querySelector('.panel.active');
+        if(activePanel) {
+            if (activePanel.id === 'matches') renderMatchesView();
+            if (activePanel.id === 'standings') renderLocalStandings();
+            if (activePanel.id === 'profile') renderProfile();
+            if (activePanel.id === 'rivals') renderRivalsGrid();
+        }
+
+        database.ref('the_35_gold_league/multi_v1/' + currentTid).set({ players: _arr(players), matches: _arr(matches), settings: currentSettings })
+        .then(() => { if(msg) alert(msg); })
+        .catch(err => alert("Bağlantı hatası: Kayıt başarısız oldu. Lütfen internet bağlantınızı kontrol edin."));
+    }
+</script>
+</body>
+</html>
