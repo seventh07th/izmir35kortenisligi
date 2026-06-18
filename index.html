@@ -82,6 +82,7 @@
         .rules-content h3 { color: var(--accent-color); border-bottom: 1px solid var(--divider); padding-bottom: 5px; margin-top: 25px; text-align: left; }
         .rules-content p, .rules-content ul { text-align: left; margin: 10px 0; }
         .example-box { background: rgba(255, 215, 0, 0.05); border-left: 3px solid var(--accent-color); padding: 15px; margin-top: 15px; border-radius: 0 6px 6px 0; text-align: left;}
+        .guide-box { background: #1e293b; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 12px; border-left: 4px solid var(--warning); text-align: left;}
         
         .notification-card { background:rgba(245, 158, 11, 0.1); border-left:4px solid var(--warning); padding:12px; margin-top:10px; font-size:12px; text-align:left; border-radius:4px; }
         .admin-notif-row { padding: 10px; border-bottom: 1px solid var(--divider); font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
@@ -89,20 +90,44 @@
         .global-alert { text-align:center; padding:30px; border: 1px dashed var(--warning); border-radius:8px; color:var(--warning); background:#1e293b; margin-top:20px; font-weight:bold;}
 
         /* MODAL POPUP */
-        #welcomeModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box;}
-        .modal-content { background: #0f172a; padding: 30px; border-radius: 12px; border: 2px solid var(--accent-color); text-align: center; max-width: 450px; color: white; box-shadow: 0 0 30px rgba(255, 215, 0, 0.2); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box;}
+        .modal-content { background: #0f172a; padding: 30px; border-radius: 12px; border: 2px solid var(--accent-color); text-align: center; width: 100%; max-width: 450px; color: white; box-shadow: 0 0 30px rgba(255, 215, 0, 0.2); position:relative; }
         .modal-btn { background: var(--success); color: black; font-weight: bold; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-top: 20px; width: 100%; }
+        .player-link { cursor: pointer; text-decoration: underline; color: inherit; transition: 0.2s; }
+        .player-link:hover { color: var(--success); }
     </style>
 </head>
 <body>
 
 <!-- HOŞ GELDİNİZ POP-UP EKRANI -->
-<div id="welcomeModal">
+<div id="welcomeModal" class="modal">
     <div class="modal-content">
         <h2 style="color:var(--accent-color); margin-top:0;">🎉 İZMİR 35 KORTENİS LİGİ'NE HOŞ GELDİNİZ!</h2>
         <p style="font-size:14px; line-height:1.6;">Klasik turnuvalardan çok daha fazlası olan bu esnek ve dinamik ekosisteme adım attınız.</p>
         <p style="font-size:13px; color:#cbd5e1; margin-bottom:0;">Sistemimizin sürprizlerle dolu esnek yapısını, maç kurallarını ve Puanlama Matematiğini (K-KOR) tam olarak kavrayabilmek için lütfen öncelikle <strong>Sistem Rehberi</strong> sekmesini dikkatlice okuyunuz.</p>
         <button class="modal-btn" onclick="closeWelcomeModal()">Okudum, Anladım ve Başlıyorum 🚀</button>
+    </div>
+</div>
+
+<!-- OYUNCU PROFİLİ POP-UP (PUBLIC) -->
+<div id="publicProfileModal" class="modal">
+    <div class="modal-content" style="max-width:350px;">
+        <button style="position:absolute; top:10px; right:15px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer;" onclick="closePublicProfile()">✖</button>
+        <div style="font-size:35px; margin-bottom:10px;">👤</div>
+        <h2 id="pubName" style="margin:0; color:white; text-transform:uppercase;">İSİM</h2>
+        <div style="margin-top:5px; display:flex; justify-content:center; gap:5px;">
+            <span id="pubTier" style="background:var(--accent-color); color:black; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px;">SEVİYE</span>
+            <span id="pubGender" style="background:#1e293b; color:white; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px; border:1px solid var(--border-color);">CİNSİYET</span>
+        </div>
+        <div style="display:flex; justify-content:space-around; margin-top:20px;">
+            <div><div id="pubKKor" style="font-size:20px; font-weight:bold; color:var(--accent-color);">0</div><div style="font-size:9px; color:var(--sub-text);">K-KOR</div></div>
+            <div><div id="pubFame" style="font-size:20px; font-weight:bold; color:var(--success);">0</div><div style="font-size:9px; color:var(--sub-text);">Şöhret</div></div>
+            <div><div id="pubWinLoss" style="font-size:20px; font-weight:bold; color:white;">0G - 0M</div><div style="font-size:9px; color:var(--sub-text);">Maçlar</div></div>
+        </div>
+        <div style="background:#1e293b; padding:10px; border-radius:8px; margin-top:15px; font-size:11px; border-left:3px solid var(--success); text-align:left;">
+            <h4 style="margin:0 0 5px 0; color:var(--success);">📅 Oyun Saatleri</h4>
+            <div id="pubAvail" style="color:var(--text-color);">Yükleniyor...</div>
+        </div>
     </div>
 </div>
 
@@ -309,6 +334,15 @@
                 <input type="date" id="startDate" class="auth-input" style="width:100%; margin:0;">
             </div>
             
+            <div class="guide-box" style="margin-bottom:15px; margin-top:0;">
+                <h4 style="margin:0 0 5px 0; color:var(--warning);">🛠️ Kura Öncesi Ölçeklendirme Kılavuzu</h4>
+                <ul style="color:#cbd5e1; margin:0; font-size:11px; padding-left:15px;">
+                    <li><strong>12 - 23 Oyuncu:</strong> İlk 2 Seribaşı, İkinci 2 Play-Off, En iyi 4 KOR Play-In.</li>
+                    <li><strong>24 - 47 Oyuncu:</strong> İlk 4 Seribaşı, İkinci 4 Play-Off, En iyi 8 KOR Play-In.</li>
+                    <li><strong>48+ Oyuncu:</strong> İlk 8 Seribaşı, İkinci 8 Play-Off, En iyi 16 KOR Play-In.</li>
+                </ul>
+            </div>
+
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
                 <span style="font-size:12px; color:var(--sub-text);">Oyuncu Seçimi & Yönetimi:</span>
                 <div style="display:flex; align-items:center; gap:10px;">
@@ -319,8 +353,11 @@
             
             <div style="display:flex; gap:5px; margin-bottom:10px;">
                 <input type="text" id="adminSearchName" class="auth-input force-upper" style="margin:0; flex:1;" placeholder="🔍 İSİMLE ARA..." oninput="adminFilterPlayers()">
+                <select id="adminFilterGender" class="auth-select force-upper" style="margin:0; flex:1;" onchange="adminFilterPlayers()">
+                    <option value="all">CİNSİYET (TÜMÜ)</option><option value="ERKEK">ERKEK</option><option value="KADIN">KADIN</option>
+                </select>
                 <select id="adminFilterTier" class="auth-select force-upper" style="margin:0; flex:1;" onchange="adminFilterPlayers()">
-                    <option value="all">TÜM SEVİYELER</option><option value="SILVER">SILVER</option><option value="GOLD">GOLD</option><option value="PLATIN">PLATIN</option>
+                    <option value="all">SEVİYE (TÜMÜ)</option><option value="SILVER">SILVER</option><option value="GOLD">GOLD</option><option value="PLATIN">PLATIN</option>
                 </select>
                 <select id="adminSortList" class="auth-select force-upper" style="margin:0; flex:1;" onchange="adminFilterPlayers()">
                     <option value="az">A-Z SIRALA</option>
@@ -333,15 +370,6 @@
             <button class="action-btn" style="background:#1e293b; color:white; border:1px dashed var(--accent-color); margin-bottom:15px;" onclick="previewPots()">📦 TORBALARI ÖNİZLE (SİSTEM DİZİLİMİ)</button>
             <div id="potPreviewContainer" style="display:none; margin-bottom:15px;"></div>
             <button class="action-btn" id="startKuraBtn" onclick="startTournament()">🔮 DİNAMİK KURAYI ÇEK VE BAŞLAT</button>
-            
-            <div class="guide-box">
-                <h4 style="margin:0 0 5px 0; color:var(--warning);">🛠️ Kura Öncesi Ölçeklendirme Kılavuzu</h4>
-                <ul style="color:#cbd5e1; margin:0; font-size:11px; padding-left:15px;">
-                    <li><strong>12 - 23 Oyuncu:</strong> İlk 2 Seribaşı, İkinci 2 Play-Off, En iyi 4 KOR Play-In.</li>
-                    <li><strong>24 - 47 Oyuncu:</strong> İlk 4 Seribaşı, İkinci 4 Play-Off, En iyi 8 KOR Play-In.</li>
-                    <li><strong>48+ Oyuncu:</strong> İlk 8 Seribaşı, İkinci 8 Play-Off, En iyi 16 KOR Play-In.</li>
-                </ul>
-            </div>
         </div>
 
         <!-- 4. KURALLAR -->
@@ -466,6 +494,24 @@
         switchTab('rules');
     }
 
+    // YENİ: GENEL PROFİL MODALI AÇICI (PUBLIC)
+    function openPublicProfile(uid) {
+        let u = globalUsers[uid];
+        if (!u) return alert("Oyuncu verisi bulunamadı.");
+        let dStats = derivedGlobalStats[uid] || { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0, fame: 0 };
+        
+        document.getElementById('pubName').innerText = u.name;
+        document.getElementById('pubTier').innerText = `${u.tier || 'BELİRSİZ'} (${u.sysScore || 'N/A'})`;
+        document.getElementById('pubGender').innerText = u.gender || '-';
+        document.getElementById('pubKKor').innerText = (dStats.k_kor || 0).toFixed(1);
+        document.getElementById('pubFame').innerText = (u.fame || 0);
+        document.getElementById('pubWinLoss').innerText = `${dStats.gWins || 0}G - ${dStats.gLoss || 0}M`;
+        document.getElementById('pubAvail').innerText = (u.availability && u.availability.length) ? u.availability.map(a=>a.toLocaleUpperCase('tr-TR')).join(", ") : "BELİRTİLMEDİ";
+        
+        document.getElementById('publicProfileModal').style.display = 'flex';
+    }
+    function closePublicProfile() { document.getElementById('publicProfileModal').style.display = 'none'; }
+
     function loginAdmin() { if(document.getElementById('adminPassword').value === systemAdminPassword) { isAdmin = true; loggedInUser = {id:'ADMIN',name:'YÖNETİCİ'}; enterApp(); } else { alert("❌ Hatalı şifre!"); } }
     function changeOwnPassword() { let oldP = prompt("Mevcut şifrenizi girin:"); if(oldP !== loggedInUser.password) return alert("Hatalı şifre girdiniz!"); let newP = prompt("Yeni şifrenizi belirleyin:"); if(!newP) return; database.ref('the_35_gold_league/users/' + loggedInUser.id + '/password').set(newP).then(() => { loggedInUser.password = newP; alert("Şifreniz başarıyla değiştirildi!"); }); }
     function changeAdminPassword() { let oldP = prompt("Mevcut yönetici şifresini girin:"); if(oldP !== systemAdminPassword) return alert("Hatalı şifre!"); let newP = prompt("Yeni Yönetici Şifresini Belirleyin:"); if(!newP) return; database.ref('the_35_gold_league/admin/password').set(newP).then(() => { systemAdminPassword = newP; alert("Yönetici şifresi güncellendi!"); }); }
@@ -484,10 +530,26 @@
 
     /* YÖNETİCİ MENÜSÜ FONKSİYONLARI */
     function adminFilterPlayers() {
-        let nameQ = document.getElementById('adminSearchName').value.toLocaleUpperCase('tr-TR'); let tierQ = document.getElementById('adminFilterTier').value; let sortQ = document.getElementById('adminSortList').value;
+        let nameQ = document.getElementById('adminSearchName').value.toLocaleUpperCase('tr-TR'); 
+        let genQ = document.getElementById('adminFilterGender').value;
+        let tierQ = document.getElementById('adminFilterTier').value; 
+        let sortQ = document.getElementById('adminSortList').value;
         let list = document.getElementById('adminChecklist'); let items = Array.from(list.children);
-        items.forEach(el => { let name = el.getAttribute('data-name'); let tier = el.getAttribute('data-tier'); el.style.display = (name.includes(nameQ) && (tierQ === 'all' || tier === tierQ)) ? 'flex' : 'none'; });
-        items.sort((a,b) => { if (sortQ === 'az') return a.getAttribute('data-name').localeCompare(b.getAttribute('data-name')); let sa = parseFloat(a.getAttribute('data-score')) || 0; let sb = parseFloat(b.getAttribute('data-score')) || 0; if (sortQ === 'score_desc') return sb - sa; if (sortQ === 'score_asc') return sa - sb; });
+        
+        items.forEach(el => { 
+            let name = el.getAttribute('data-name'); 
+            let tier = el.getAttribute('data-tier'); 
+            let gen = el.getAttribute('data-gender');
+            let isMatch = name.includes(nameQ) && (tierQ === 'all' || tier === tierQ) && (genQ === 'all' || gen === genQ);
+            el.style.display = isMatch ? 'flex' : 'none'; 
+        });
+        
+        items.sort((a,b) => { 
+            if (sortQ === 'az') return a.getAttribute('data-name').localeCompare(b.getAttribute('data-name')); 
+            let sa = parseFloat(a.getAttribute('data-score')) || 0; let sb = parseFloat(b.getAttribute('data-score')) || 0; 
+            if (sortQ === 'score_desc') return sb - sa; 
+            if (sortQ === 'score_asc') return sa - sb; 
+        });
         items.forEach(el => list.appendChild(el));
     }
     function toggleSelectAll() { let isChecked = document.getElementById('selectAllChk').checked; document.querySelectorAll('.admin-player-item').forEach(el => { if (el.style.display !== 'none') { let chk = el.querySelector('.admin-chk'); if (chk) chk.checked = isChecked; } }); updateSelectedCount(); }
@@ -496,7 +558,7 @@
         let list = document.getElementById('adminChecklist'); list.innerHTML = "";
         Object.values(globalUsers).sort((a,b)=>a.name.localeCompare(b.name)).forEach(u => {
             let gIcon = u.gender === 'KADIN' ? '👩' : '👨';
-            list.innerHTML += `<div class="admin-player-item" data-name="${u.name}" data-tier="${u.tier}" data-score="${u.sysScore || 0}"><label style="cursor:pointer; flex:1;"><input type="checkbox" class="admin-chk" value="${u.id}" onchange="updateSelectedCount()"> <strong style="color:white;">${gIcon} ${u.name}</strong> <span style="font-size:10px; color:var(--accent-color);">(${u.tier} - Puan: ${u.sysScore || '-'})</span></label><div><button class="action-sm" onclick="resetUserPass('${u.id}')">🔑 Şifre</button><button class="action-sm" style="background:var(--danger);" onclick="deleteUser('${u.id}')">🗑️ Sil</button></div></div>`;
+            list.innerHTML += `<div class="admin-player-item" data-name="${u.name}" data-tier="${u.tier}" data-score="${u.sysScore || 0}" data-gender="${u.gender || 'ERKEK'}"><label style="cursor:pointer; flex:1;"><input type="checkbox" class="admin-chk" value="${u.id}" onchange="updateSelectedCount()"> <strong style="color:white;">${gIcon} ${u.name}</strong> <span style="font-size:10px; color:var(--accent-color);">(${u.tier} ${u.sysScore || '-'})</span></label><div><button class="action-sm" onclick="resetUserPass('${u.id}')">🔑 Şifre</button><button class="action-sm" style="background:var(--danger);" onclick="deleteUser('${u.id}')">🗑️ Sil</button></div></div>`;
         });
         adminFilterPlayers();
     }
@@ -851,7 +913,7 @@
         let globalArray = Object.keys(globalUsers).map(uid => {
             let user = globalUsers[uid];
             let dStats = derivedGlobalStats[uid] || { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0 };
-            return { name: user.name, tier: user.tier || 'BELİRSİZ', k_kor: dStats.k_kor, gMatch: dStats.gMatch, gWins: dStats.gWins, gLoss: dStats.gLoss };
+            return { id: uid, name: user.name, tier: user.tier || 'BELİRSİZ', k_kor: dStats.k_kor, gMatch: dStats.gMatch, gWins: dStats.gWins, gLoss: dStats.gLoss };
         });
 
         let sortedUsers = globalArray.sort((a,b) => b.k_kor - a.k_kor);
@@ -862,7 +924,7 @@
             tbody.innerHTML += `
                 <tr class="zone-global">
                     <td><strong>${i+1}</strong></td>
-                    <td style="text-align:left; font-weight:bold;">${u.name} <br> <span style="background:#1e293b; color:var(--accent-color); padding:2px 5px; border-radius:4px; font-size:10px;">${u.tier}</span></td>
+                    <td style="text-align:left; font-weight:bold;"><span class="player-link" onclick="openPublicProfile('${u.id}')">${u.name}</span> <br> <span style="background:#1e293b; color:var(--accent-color); padding:2px 5px; border-radius:4px; font-size:10px;">${u.tier}</span></td>
                     <td style="color:var(--warning); font-weight:bold;">${u.gMatch || 0}</td>
                     <td style="color:var(--success);font-weight:bold;">${u.gWins || 0}</td>
                     <td>${u.gLoss || 0}</td>
@@ -895,7 +957,7 @@
         players.forEach((p, i) => {
             let bdg = p.korRank === 1 ? '👑' : `[#${p.korRank}]`;
             let badgeHtml = p.badgeText ? `<span style="background:#1e293b; color:${p.badgeColor}; padding:2px 5px; border-radius:4px; font-size:10px; margin-left:5px; white-space:nowrap;"><strong>${p.badgeLabel}</strong> | ${p.badgeText}</span>` : '';
-            tbody.innerHTML += `<tr class="${p.rowClass}"><td><strong>${i+1}</strong></td><td style="text-align:left; font-weight:bold;">${p.name} <br> ${badgeHtml}</td><td style="color:var(--warning); font-weight:bold;">${p.totalMatches}</td><td style="color:var(--success);font-weight:bold;">${p.wins}</td><td>${p.losses}</td><td>${p.setAv>0?'+'+p.setAv:p.setAv}</td><td style="color:var(--accent-color); font-weight:bold;">${p.kor.toFixed(1)} <span style="font-size:10px;color:#94a3b8">${bdg}</span></td></tr>`;
+            tbody.innerHTML += `<tr class="${p.rowClass}"><td><strong>${i+1}</strong></td><td style="text-align:left; font-weight:bold;"><span class="player-link" onclick="openPublicProfile('${p.id}')">${p.name}</span> <br> ${badgeHtml}</td><td style="color:var(--warning); font-weight:bold;">${p.totalMatches}</td><td style="color:var(--success);font-weight:bold;">${p.wins}</td><td>${p.losses}</td><td>${p.setAv>0?'+'+p.setAv:p.setAv}</td><td style="color:var(--accent-color); font-weight:bold;">${p.kor.toFixed(1)} <span style="font-size:10px;color:#94a3b8">${bdg}</span></td></tr>`;
         });
 
         let miniContainer = document.getElementById('miniStandingsWrapper');
@@ -905,7 +967,7 @@
             piPool.forEach((p, idx) => {
                 let isPi = idx < piCount; let cls = isPi ? "zone-direct" : "zone-eliminated";
                 let status = isPi ? `<span style="color:var(--success);font-weight:bold;">Bilet Cebinde</span>` : `<span style="color:var(--danger);">Elendi</span>`;
-                miniHtml += `<tr class="${cls}"><td><strong>${idx+1}</strong></td><td style="text-align:left; font-weight:bold;">${p.name}</td><td>${p.totalMatches}</td><td style="color:var(--accent-color); font-weight:bold;">${p.kor.toFixed(1)}</td><td>${status}</td></tr>`;
+                miniHtml += `<tr class="${cls}"><td><strong>${idx+1}</strong></td><td style="text-align:left; font-weight:bold;"><span class="player-link" onclick="openPublicProfile('${p.id}')">${p.name}</span></td><td>${p.totalMatches}</td><td style="color:var(--accent-color); font-weight:bold;">${p.kor.toFixed(1)}</td><td>${status}</td></tr>`;
             });
             miniHtml += `</tbody></table></div>`;
             miniContainer.innerHTML = miniHtml;
@@ -945,88 +1007,13 @@
         mainWrapper.innerHTML = `
             <p style="font-size:11px; color:#64748b; text-align:center; margin-bottom:15px;">🏆 Onaylanan Maç: ${played} / ${matches.length}</p>
             <div class="bracket-scroll-container">${bracketHtml}</div>
-            <div style="margin-top:20px; padding-top:20px; border-top:1px dashed #334155;"><h3 style="font-size:13px; color:var(--success); text-align:left;">🎯 PLAY-IN EŞLEŞMELERİ</h3><div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">${piHtml}</div></div>
             <div style="margin-top:20px; padding-top:20px; border-top:1px dashed #334155;"><h3 style="font-size:13px; color:var(--warning); text-align:left;">⚔️ PLAY-OFF EŞLEŞMELERİ</h3><div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">${poHtml}</div></div>
+            <div style="margin-top:20px; padding-top:20px; border-top:1px dashed #334155;"><h3 style="font-size:13px; color:var(--success); text-align:left;">🎯 PLAY-IN EŞLEŞMELERİ</h3><div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">${piHtml}</div></div>
         `;
     }
 
     // ==========================================
-    // PROFİL VE BİLDİRİMLER
-    // ==========================================
-    function renderProfile() {
-        if(isAdmin || !loggedInUser) return;
-        let u = globalUsers[loggedInUser.id] || loggedInUser;
-        let dStats = derivedGlobalStats[u.id] || { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0, fame: 0 };
-        
-        document.getElementById('profName').innerText = u.name;
-        document.getElementById('profTier').innerText = `${u.tier || 'SEVİYE BELİRSİZ'} LİGİ OYUNCUSU (${u.sysScore || 'N/A'})`;
-        document.getElementById('profKKor').innerText = (dStats.k_kor || 0).toFixed(1);
-        document.getElementById('profFame').innerText = (globalUsers[u.id].fame || 0);
-        document.getElementById('profWinLoss').innerText = `${dStats.gWins || 0}G - ${(dStats.gLoss || 0)}M`;
-        document.getElementById('profAvail').innerText = (u.availability && u.availability.length) ? u.availability.map(a=>a.toLocaleUpperCase('tr-TR')).join(", ") : "BELİRTİLMEDİ";
-        
-        let tCount = 0; let notifHtml = '';
-        Object.keys(allTourneys).forEach(tid => {
-            let t = allTourneys[tid]; let tName = t.settings.customName || `İZMİR 35 LİGİ`;
-            if (t.players && t.players.some(p => p.id === u.id)) {
-                tCount++;
-                t.matches.filter(m => m.p1 === u.id || m.p2 === u.id).forEach(m => {
-                    let oppName = (m.p1 === u.id) ? m.p2Name : m.p1Name;
-                    if (!m.played && m.proposedDates && m.proposedDates.length > 0 && m.proposedBy !== u.id && m.proposedBy !== 'ADMIN') {
-                        notifHtml += `<div class="notification-card"><strong>${tName}</strong><br>📅 <strong>${oppName}</strong> maç için tarih önerilerinde bulundu.<br><em>(Lütfen Skor Gir sekmesinden seçiminizi yapınız)</em></div>`;
-                    }
-                    if (m.played && m.pending && m.enteredBy !== u.id && m.enteredBy !== 'ADMIN') {
-                        notifHtml += `<div class="notification-card"><strong>${tName}</strong><br>⏳ <strong>${oppName}</strong> maç skorunu girdi.<br><em>(Lütfen KOR tablosuna yansıması için Skor Gir sekmesinden onaylayın)</em></div>`;
-                    }
-                });
-            }
-        });
-        document.getElementById('profTournaments').innerText = `Kariyer Turnuva Katılımı: ${tCount}`;
-        document.getElementById('profNotificationsContainer').innerHTML = notifHtml;
-    }
-
-    function resolvePasswordReset(key, name) {
-        let newPass = prompt(`${name} için YENİ ŞİFRE belirleyin:`);
-        if (!newPass) return;
-        let foundUid = Object.keys(globalUsers).find(uid => globalUsers[uid].name === name);
-        if (foundUid) {
-            database.ref(`the_35_gold_league/users/${foundUid}/password`).set(newPass).then(() => {
-                database.ref(`the_35_gold_league/password_resets/${key}`).remove();
-                alert(`${name} adlı oyuncunun şifresi değiştirildi!`);
-            });
-        } else {
-            alert("Bu isimde bir kullanıcı bulunamadı! İsmi listeden kontrol edin.");
-            database.ref(`the_35_gold_league/password_resets/${key}`).remove();
-        }
-    }
-
-    function renderAdminNotifs() {
-        let passList = "", pList = "", dList = "";
-        
-        Object.keys(passwordResets).forEach(key => {
-            let r = passwordResets[key];
-            let date = new Date(r.timestamp).toLocaleString('tr-TR');
-            passList += `<div class="admin-notif-row"><div><strong>${r.name}</strong> <br><span style="color:var(--sub-text); font-size:10px;">Talep: ${date}</span></div> <button class="action-sm" style="background:var(--danger);" onclick="resolvePasswordReset('${key}', '${r.name}')">Sıfırla</button></div>`;
-        });
-
-        Object.keys(allTourneys).forEach(tid => {
-            let t = allTourneys[tid]; let tName = t.settings.customName || `LİG`;
-            if(!t.matches) return;
-            t.matches.forEach(m => {
-                let mTitle = `<strong>${m.p1Name}</strong> vs <strong>${m.p2Name}</strong>`;
-                if(m.played && m.pending) pList += `<div class="admin-notif-row"><div>${tName} | ${mTitle}</div> <button class="action-sm" style="background:var(--success);" onclick="document.getElementById('adminLeagueSelect').value='${tid}'; adminSwitchLeague(); switchTab('matches');">İncele</button></div>`;
-                if(!m.played && m.proposedDates && m.proposedDates.length > 0) pList += `<div class="admin-notif-row"><div>${tName} | ${mTitle} <br><span style="color:#64748b;">(Tarih Önerisi Bekliyor)</span></div> <button class="action-sm" onclick="document.getElementById('adminLeagueSelect').value='${tid}'; adminSwitchLeague(); switchTab('matches');">Git</button></div>`;
-                if(!m.played && m.matchDate) dList += `<div class="admin-notif-row"><div>${tName} | ${mTitle} <br><span style="color:var(--success);">Tarih: ${m.matchDate}</span></div> </div>`;
-            });
-        });
-        
-        document.getElementById('adminPasswordResets').innerHTML = passList || "Şifre sıfırlama talebi yok.";
-        document.getElementById('adminPendingList').innerHTML = pList || "Onay bekleyen işlem yok.";
-        document.getElementById('adminConfirmedDatesList').innerHTML = dList || "Kesinleşen tarih yok.";
-    }
-
-    // ==========================================
-    // SKOR VE FİKSTÜR YÖNETİMİ
+    // FİKSTÜR, SKOR VE ONAY İŞLEMLERİ
     // ==========================================
     function populateFilterSelects() {
         let sf = document.getElementById('playerFilterSelect'); let sm = document.getElementById('matchFilterSelect');
@@ -1057,7 +1044,7 @@
                 
                 let ds = m.matchDate ? ` <span style="color:var(--success)">(${m.matchDate})</span>` : '';
                 let sIcon = m.played ? (m.pending ? "⏳" : "✅") : "🎾";
-                card.innerHTML += `<div class="rival-line"><div style="width:100%; display:flex; justify-content:space-between;"><span>M${idx+1}: <strong>${oppName}</strong>${ds}</span><span>${sIcon}</span></div>${smartCal}</div>`;
+                card.innerHTML += `<div class="rival-line"><div style="width:100%; display:flex; justify-content:space-between;"><span>M${idx+1}: <strong class="player-link" onclick="openPublicProfile('${oppId}')">${oppName}</strong>${ds}</span><span>${sIcon}</span></div>${smartCal}</div>`;
             });
             c.appendChild(card);
         });
@@ -1065,7 +1052,7 @@
     }
 
     function checkStatus(id, isRev) {
-        let m = matches.find(x => x.id === id); let fmt = (currentSettings && currentSettings.format) ? currentSettings.format : '6_GAME';
+        let m = matches.find(x => String(x.id) === String(id)); let fmt = (currentSettings && currentSettings.format) ? currentSettings.format : '6_GAME';
         let getVal = (elId) => document.getElementById(elId) ? document.getElementById(elId).value : '';
         let nS1T = parseInt(getVal(`m_${id}_t_s1`)), nS1B = parseInt(getVal(`m_${id}_b_s1`));
         let nS2T = parseInt(getVal(`m_${id}_t_s2`)), nS2B = parseInt(getVal(`m_${id}_b_s2`));
@@ -1109,12 +1096,8 @@
             return;
         }
 
-        // TAM SAATLER İÇİN OPTİON LİSTESİ (SADECE AÇILIR MENÜ)
         let tOpts = `<option value="">Saat Seç</option>`;
-        for(let i=6; i<=23; i++) {
-            let h = i < 10 ? '0'+i+':00' : i+':00';
-            tOpts += `<option value="${h}">${h}</option>`;
-        }
+        for(let i=6; i<=23; i++) { let h = i < 10 ? '0'+i+':00' : i+':00'; tOpts += `<option value="${h}">${h}</option>`; }
 
         dMatches.forEach(m => {
             let isRev = !isAdmin && loggedInUser && (m.p2 === loggedInUser.id);
@@ -1130,7 +1113,7 @@
 
             let isMyMatch = !isAdmin && loggedInUser && (m.p1 === loggedInUser.id || m.p2 === loggedInUser.id);
             
-            // YÖNETİCİ KİLİDİ AÇILDI: Yöneticiyse hiçbir zaman "Read-Only (Sadece Okunur)" olmaz.
+            // YÖNETİCİ KİLİDİ AÇIK! Yönetici ise form her zaman aktiftir.
             let ro = m.played || (!isAdmin && !isMyMatch);
 
             let amIScoreApprover = (isMyMatch || isAdmin) && m.played && m.pending && m.enteredBy !== (isAdmin ? 'ADMIN' : loggedInUser.id);
@@ -1204,12 +1187,12 @@
                     </div>
                     ${dateBox}
                     <div id="score_area_${m.id}" style="display:${m.isWO?'none':'block'}">
-                        <div class="match-row"><div class="match-player">${topN}</div><div class="score-inputs"><input type="number" id="m_${m.id}_t_s1" class="score-input" value="${ts1||''}" placeholder="S1" ${ro?'disabled':''} oninput="checkStatus(${m.id}, ${isRev})"><input type="number" id="m_${m.id}_t_s2" class="score-input" value="${ts2||''}" placeholder="S2" ${ro?'disabled':''} oninput="checkStatus(${m.id}, ${isRev})"></div></div>
+                        <div class="match-row"><div class="match-player player-link" onclick="openPublicProfile('${topId}')">${topN}</div><div class="score-inputs"><input type="number" id="m_${m.id}_t_s1" class="score-input" value="${ts1||''}" placeholder="S1" ${ro?'disabled':''} oninput="checkStatus(${m.id}, ${isRev})"><input type="number" id="m_${m.id}_t_s2" class="score-input" value="${ts2||''}" placeholder="S2" ${ro?'disabled':''} oninput="checkStatus(${m.id}, ${isRev})"></div></div>
                         
                         <div id="tb1_row_${m.id}" class="tb-input-row" style="display:none;"><div class="tb-title">⚡ S1 Tie-Break</div><div class="score-inputs"><input type="number" id="m_${m.id}_t_s1tb" class="score-input" value="${ts1tb}" ${ro?'disabled':''} oninput="checkStatus(${m.id}, ${isRev})">:<input type="number" id="m_${m.id}_b_s1tb" class="score-input" value="${bs1tb}" ${ro?'disabled':''} oninput="checkStatus(${m.id}, ${isRev})"></div></div>
                         <div id="tb2_row_${m.id}" class="tb-input-row" style="display:none;"><div class="tb-title">⚡ S2 Tie-Break</div><div class="score-inputs"><input type="number" id="m_${m.id}_t_s2tb" class="score-input" value="${ts2tb}" ${ro?'disabled':''} oninput="checkStatus(${m.id}, ${isRev})">:<input type="number" id="m_${m.id}_b_s2tb" class="score-input" value="${bs2tb}" ${ro?'disabled':''} oninput="checkStatus(${m.id}, ${isRev})"></div></div>
                         
-                        <div class="match-row"><div class="match-player">${botN}</div><div class="score-inputs"><input type="number" id="m_${m.id}_b_s1" class="score-input" value="${bs1||''}" placeholder="S1" ${ro?'disabled':''} oninput="checkStatus(${m.id}, ${isRev})"><input type="number" id="m_${m.id}_b_s2" class="score-input" value="${bs2||''}" placeholder="S2" ${ro?'disabled':''} oninput="checkStatus(${m.id}, ${isRev})"></div></div>
+                        <div class="match-row"><div class="match-player player-link" onclick="openPublicProfile('${botId}')">${botN}</div><div class="score-inputs"><input type="number" id="m_${m.id}_b_s1" class="score-input" value="${bs1||''}" placeholder="S1" ${ro?'disabled':''} oninput="checkStatus(${m.id}, ${isRev})"><input type="number" id="m_${m.id}_b_s2" class="score-input" value="${bs2||''}" placeholder="S2" ${ro?'disabled':''} oninput="checkStatus(${m.id}, ${isRev})"></div></div>
                         
                         <div id="mt_area_${m.id}" class="tb-input-row" style="display:none; background:#241c00; border-color:var(--warning);"><div class="tb-title" style="color:var(--warning);">🔥 10'luk Maç TB</div><div class="score-inputs"><input type="number" id="m_${m.id}_t_mt" class="score-input" value="${tmt}" oninput="checkStatus(${m.id}, ${isRev})" ${ro?'disabled':''}>:<input type="number" id="m_${m.id}_b_mt" class="score-input" value="${bmt}" oninput="checkStatus(${m.id}, ${isRev})" ${ro?'disabled':''}></div></div>
                     </div>
@@ -1229,7 +1212,7 @@
     }
 
     function proposeDates(mId) {
-        let m = matches.find(x => x.id === mId);
+        let m = matches.find(x => String(x.id) === String(mId));
         let d1 = document.getElementById(`p_d1_${mId}`).value; let t1s = document.getElementById(`p_t1s_${mId}`).value; let t1e = document.getElementById(`p_t1e_${mId}`).value;
         let d2 = document.getElementById(`p_d2_${mId}`).value; let t2s = document.getElementById(`p_t2s_${mId}`).value; let t2e = document.getElementById(`p_t2e_${mId}`).value;
         
@@ -1258,17 +1241,17 @@
         }
     }
 
-    function acceptDate(mId, dateVal) { let m = matches.find(x => x.id === mId); m.matchDate = dateVal; m.proposedDates = []; saveToDb("Tarih karşılıklı onaylandı!"); }
-    function clearDateProposal(mId) { let m = matches.find(x => x.id === mId); m.proposedDates = []; m.proposedBy = ''; saveToDb("Tarih reddedildi."); }
+    function acceptDate(mId, dateVal) { let m = matches.find(x => String(x.id) === String(mId)); m.matchDate = dateVal; m.proposedDates = []; saveToDb("Tarih karşılıklı onaylandı!"); }
+    function clearDateProposal(mId) { let m = matches.find(x => String(x.id) === String(mId)); m.proposedDates = []; m.proposedBy = ''; saveToDb("Tarih reddedildi."); }
     function resetMatchDate(mId) {
         if(!confirm("Mevcut kesinleşen maç tarihini iptal edip yeni bir tarih önermek istiyor musunuz?")) return;
-        let m = matches.find(x => x.id === mId); m.matchDate = ''; m.proposedDates = []; m.proposedBy = '';
+        let m = matches.find(x => String(x.id) === String(mId)); m.matchDate = ''; m.proposedDates = []; m.proposedBy = '';
         saveToDb("Mevcut tarih iptal edildi. Lütfen yeni bir tarih önerin.");
     }
 
     // YENİ: HATASIZ TIE-BREAK VALİDASYONU VE YÖNETİCİ KONTROLÜ
     function submitScore(mId, isP2) {
-        let m = matches.find(x => x.id === mId);
+        let m = matches.find(x => String(x.id) === String(mId));
         let type = document.getElementById(`type_${mId}`).value;
         
         // Yönetici Onay Kuralından Etkilenmez
@@ -1342,13 +1325,13 @@
     }
 
     function approveScore(mId) {
-        let m = matches.find(x => x.id === mId); 
+        let m = matches.find(x => String(x.id) === String(mId)); 
         m.pending = false;
         saveToDb("Skor Onaylandı ve Tablolara İşlendi!");
     }
     
     function giveFairPlay(mId, opponentId) {
-        let m = matches.find(x => x.id === mId);
+        let m = matches.find(x => String(x.id) === String(mId));
         if(!m) return;
         if (m.p1 === loggedInUser.id) m.p1Fair = true; else if (m.p2 === loggedInUser.id) m.p2Fair = true;
         let uRef = database.ref(`the_35_gold_league/users/${opponentId}/fame`);
@@ -1357,7 +1340,7 @@
 
     function clearScoreCloud(id) {
         if(!confirm("Bu maçın skorunu iptal etmek/sıfırlamak istiyor musunuz?")) return;
-        let m = matches.find(x => x.id === id);
+        let m = matches.find(x => String(x.id) === String(id));
         m.played = false; m.pending = false; m.isWO = false; m.woWinner = ''; m.enteredBy = '';
         m.p1S1 = ''; m.p2S1 = ''; m.p1S2 = ''; m.p2S2 = ''; m.p1S1TB = ''; m.p2S1TB = ''; m.p1S2TB = ''; m.p2S2TB = ''; m.p1MT = ''; m.p2MT = '';
         m.p1Fair = false; m.p2Fair = false;
