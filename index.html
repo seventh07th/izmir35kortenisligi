@@ -50,6 +50,7 @@
         .zone-eliminated { background-color: rgba(239, 68, 68, 0.05); border-left: 3px solid var(--danger); }
         .zone-global { background-color: rgba(0, 229, 255, 0.05); border-left: 3px solid #00e5ff; }
         
+        /* KARTLAR VE SKORBOARD */
         .rivals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
         .player-rivals-card { background: #020617; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; }
         .player-main-title { background: #1e293b; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; color: var(--accent-color); font-size: 14px; }
@@ -59,6 +60,7 @@
         .match-card { background: #020617; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.5); overflow: hidden; }
         .match-card-header { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 8px 12px; border-bottom: 1px solid var(--divider); }
         
+        /* TV FORMATI SKORBOARD CSS */
         .scoreboard { display: flex; flex-direction: column; background: #0f172a; border-radius: 8px; border: 1px solid var(--divider); overflow: hidden; margin-bottom: 10px; }
         .sb-row { display: flex; border-bottom: 1px solid var(--divider); }
         .sb-row:last-child { border-bottom: none; }
@@ -75,6 +77,7 @@
         .fair-btn { background: #00e5ff; border: none; padding: 8px; color: black; font-weight: bold; cursor: pointer; border-radius: 6px; width:100%; margin-top:5px; font-size: 11px; transition: 0.3s; }
         .date-box { background: #1e293b; padding: 10px; border-radius: 6px; margin: 10px 15px; font-size: 11px; border-left: 3px solid var(--accent-color); }
         
+        /* AĞAÇ VE KURALLAR */
         .bracket-scroll-container { width: 100%; overflow-x: auto; padding-bottom: 15px; margin-top:20px; }
         .cl-bracket { display: flex; justify-content: space-between; align-items: center; margin: 0 auto; padding: 20px 0; }
         .bracket-col { display: flex; flex-direction: column; justify-content: space-around; gap: 15px; height: 100%; }
@@ -92,6 +95,7 @@
         
         .global-alert { text-align:center; padding:30px; border: 1px dashed var(--warning); border-radius:8px; color:var(--warning); background:#1e293b; margin-top:20px; font-weight:bold;}
 
+        /* MODALS */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box;}
         .modal-content { background: #0f172a; padding: 30px; border-radius: 12px; border: 2px solid var(--accent-color); text-align: center; width: 100%; max-width: 450px; color: white; box-shadow: 0 0 30px rgba(255, 215, 0, 0.2); position:relative; }
         .modal-btn { background: var(--success); color: black; font-weight: bold; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-top: 20px; width: 100%; }
@@ -363,23 +367,16 @@
     let players = []; let matches = []; let currentSettings = null;
     let passwordResets = {};
     let systemAdminPassword = "admin35";
-    
-    // K-KOR Canlı İstatistikler için Cache
     let derivedGlobalStats = {}; 
 
-    // GÜVENLİK: Firebase dizilerini koruma altına al (Çökmeyi Engeller)
-    function _arr(obj) {
-        if(!obj) return [];
-        return Array.isArray(obj) ? obj : Object.values(obj);
-    }
+    function _arr(obj) { if(!obj) return []; return Array.isArray(obj) ? obj : Object.values(obj); }
 
     window.onload = function() { listenToCloud(); };
 
     function listenToCloud() {
-        // Hata yakalayıcı eklendi
         const errHandler = (error) => {
             console.error("Firebase Bağlantı Hatası:", error);
-            document.getElementById('loginGlobalUserSelect').innerHTML = '<option value="">BAĞLANTI HATASI! (KURALLARI KONTROL EDİN)</option>';
+            document.getElementById('loginGlobalUserSelect').innerHTML = '<option value="">BAĞLANTI HATASI!</option>';
         };
 
         database.ref('the_35_gold_league/admin/password').on('value', (s) => {
@@ -418,10 +415,8 @@
     
     function updateLoginDropdown() { 
         let sel = document.getElementById('loginGlobalUserSelect'); 
-        if(!sel) return;
-        let p = sel.value; 
+        if(!sel) return; let p = sel.value; 
         sel.innerHTML = '<option value="">İSMİNİZİ SEÇİN...</option>'; 
-        // Güvenli Sıralama: İsim yoksa çökmez
         Object.values(globalUsers).filter(u => u && u.name).sort((a,b)=>String(a.name).localeCompare(String(b.name))).forEach(u => sel.innerHTML += `<option value="${u.id}">${u.name}</option>`); 
         if(p) sel.value = p; 
     }
@@ -454,7 +449,6 @@
         if(u && u.password === pass) { 
             isAdmin = false; loggedInUser = u; 
             enterApp(); 
-            // İlk Giriş Pop-Up Kontrolü
             if(u.welcomed === false || u.welcomed === undefined) {
                 document.getElementById('welcomeModal').style.display = 'flex';
             }
@@ -501,7 +495,6 @@
         }
     }
 
-    /* YÖNETİCİ MENÜSÜ FONKSİYONLARI */
     function adminFilterPlayers() {
         let nameQ = document.getElementById('adminSearchName').value.toLocaleUpperCase('tr-TR'); 
         let genQ = document.getElementById('adminFilterGender').value;
@@ -544,7 +537,7 @@
         let aOpt = '<option value="new">➕ YENİ TURNUVA KUR</option>'; let uOpt = '<option value="none">GENEL MOD (TÜM ZAMANLAR)</option>';
         Object.keys(allTourneys).forEach(tid => {
             let t = allTourneys[tid];
-            if(!t || !t.settings) return; // Güvenlik Koruması
+            if(!t || !t.settings) return; 
             let n = t.settings.customName || `İZMİR 35 KORTENİS LİGİ`;
             aOpt += `<option value="${tid}">YÖNET: ${n}</option>`;
             if(!isAdmin && loggedInUser && _arr(t.players).some(p => p.id === loggedInUser.id)) uOpt += `<option value="${tid}">${n}</option>`;
@@ -652,9 +645,6 @@
         .then(() => { btn.innerHTML = originalText; btn.disabled = false; alert("Tüm torbalardan eşit ve adil şekilde kura çekildi!"); document.getElementById('adminLeagueSelect').value = newTid; adminSwitchLeague(); });
     }
 
-    // ==========================================
-    // DUAL-STATE TAB SWITCHING
-    // ==========================================
     function switchTab(t) {
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); 
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -706,10 +696,7 @@
 
     function loadTournamentData(tid) {
         let t = allTourneys[tid]; if (!t) return;
-        // GÜVENLİK: Her zaman Dizi (Array) olduğundan emin ol
-        players = _arr(t.players); 
-        matches = _arr(t.matches); 
-        currentSettings = t.settings || {};
+        players = _arr(t.players); matches = _arr(t.matches); currentSettings = t.settings || {};
         
         let formatText = currentSettings.format === '6_GAME' ? '6 OYUNLUK' : '4 OYUNLUK';
         let subText = `${formatText} | ${currentSettings.gender || 'ERKEK'} | ${currentSettings.tier || 'GOLD'} | ${currentSettings.region || 'İZMİR'}`;
@@ -745,9 +732,6 @@
         });
     }
 
-    // ==========================================
-    // KURALLAR VE MANİFESTO
-    // ==========================================
     function renderGlobalRules() {
         document.getElementById('rulesHeaderTitle').innerText = "📜 İZMİR 35 KORTENİS LİGİ - SİSTEM REHBERİ (BETA)";
         let html = `
@@ -878,9 +862,6 @@
         document.getElementById('dynamicRulesContainer').innerHTML = html;
     }
 
-    // ==========================================
-    // SIRALAMALAR VE AĞAÇ
-    // ==========================================
     function renderGlobalStandings() {
         document.getElementById('standingsTitle').innerText = "🏆 GENEL SIRALAMA (TÜM ZAMANLAR)";
         document.getElementById('standingsHead').innerHTML = "<tr><th>#</th><th style='text-align:left;'>OYUNCU</th><th>O</th><th>G</th><th>M</th><th>K-KOR 🌟</th></tr>";
@@ -995,9 +976,6 @@
         if(!isAdmin && loggedInUser) { if(document.querySelector('.panel.active').id==='rivals') sf.value = loggedInUser.id; if(document.querySelector('.panel.active').id==='matches') sm.value = loggedInUser.id; }
     }
 
-    // ==========================================
-    // FİKSTÜR, SKOR VE ONAY İŞLEMLERİ (GÜVENLİ)
-    // ==========================================
     function filterPlayerFikstur() {
         let val = document.getElementById('playerFilterSelect').value;
         document.querySelectorAll('.player-rivals-card').forEach(c => c.style.display = (val === 'all' || c.getAttribute('data-player-id') === val) ? 'block' : 'none');
@@ -1345,10 +1323,8 @@
         saveToDb("Skor sıfırlandı!");
     }
 
-    // YENİ: OPTIMISTIC UI GÜNCELLEMESİ VE ARRAY GÜVENLİĞİ (SIFIR LAG)
     function saveToDb(msg) {
-        calculateStats(); // Değerleri bellekte hesapla
-        
+        calculateStats(); 
         let activePanel = document.querySelector('.panel.active');
         if(activePanel) {
             if (activePanel.id === 'matches') renderMatchesView();
@@ -1356,8 +1332,7 @@
             if (activePanel.id === 'profile') renderProfile();
             if (activePanel.id === 'rivals') renderRivalsGrid();
         }
-
-        database.ref('the_35_gold_league/multi_v1/' + currentTid).set({ players: _arr(players), matches: _arr(matches), settings: currentSettings })
+        database.ref('the_35_gold_league/multi_v1/' + currentTid).set({ players: players, matches: matches, settings: currentSettings })
         .then(() => { if(msg) alert(msg); })
         .catch(err => alert("Bağlantı hatası: Kayıt başarısız oldu. Lütfen internet bağlantınızı kontrol edin."));
     }
