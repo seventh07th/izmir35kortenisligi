@@ -52,7 +52,7 @@
         .zone-eliminated { background-color: rgba(239, 68, 68, 0.05); border-left: 3px solid var(--danger); }
         .zone-global { background-color: rgba(0, 229, 255, 0.05); border-left: 3px solid #00e5ff; }
         
-        /* KARTLAR VE YENİ SKORBOARD */
+        /* KARTLAR VE SKORBOARD */
         .rivals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
         .player-rivals-card { background: #020617; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; }
         .player-main-title { background: #1e293b; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; color: var(--accent-color); font-size: 14px; }
@@ -62,7 +62,7 @@
         .match-card { background: #020617; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.5); overflow: hidden; }
         .match-card-header { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 8px 12px; border-bottom: 1px solid var(--divider); }
         
-        /* YENİ TV FORMATI SKORBOARD CSS */
+        /* TV FORMATI SKORBOARD CSS */
         .scoreboard { display: flex; flex-direction: column; background: #0f172a; border-radius: 8px; border: 1px solid var(--divider); overflow: hidden; margin-bottom: 10px; }
         .sb-row { display: flex; border-bottom: 1px solid var(--divider); }
         .sb-row:last-child { border-bottom: none; }
@@ -393,10 +393,6 @@
         </div>
 
         <div id="matches" class="panel">
-            <div style="background:rgba(255, 189, 0, 0.1); border:1px solid var(--warning); padding:10px; border-radius:6px; margin-bottom:15px; font-size:12px;">
-                <strong>🚨 ÇİFT TARAFLI ONAY:</strong> Tarih planlaması veya Skor girişi yaptığınızda rakibinizin onayı gerekir. Yöneticiler direkt onay yetkisine sahiptir.<br>
-                <strong>⚠️ ÖNEMLİ:</strong> Sadece anlaştığınız ve kesinleşen maç tarihinde skor girişi yapabilirsiniz!
-            </div>
             <select id="matchFilterSelect" class="auth-input force-upper" style="width:100%; margin-bottom:15px; display:none;" onchange="renderMatchesView()"><option value="last10">🕒 LİGDEKİ SON 10 MAÇI İZLE</option></select>
             <div id="matchListContainer"></div>
         </div>
@@ -419,6 +415,7 @@
     let passwordResets = {};
     let systemAdminPassword = "admin35";
     
+    // K-KOR Canlı İstatistikler için Cache
     let derivedGlobalStats = {}; 
 
     window.onload = function() { listenToCloud(); };
@@ -523,6 +520,7 @@
         }
     }
 
+    /* YÖNETİCİ MENÜSÜ FONKSİYONLARI */
     function adminFilterPlayers() {
         let nameQ = document.getElementById('adminSearchName').value.toLocaleUpperCase('tr-TR'); 
         let genQ = document.getElementById('adminFilterGender').value;
@@ -671,6 +669,9 @@
         .then(() => { btn.innerHTML = originalText; btn.disabled = false; alert("Tüm torbalardan eşit ve adil şekilde kura çekildi!"); document.getElementById('adminLeagueSelect').value = newTid; adminSwitchLeague(); });
     }
 
+    // ==========================================
+    // DUAL-STATE TAB SWITCHING VE GÜVENLİ ARAYÜZ
+    // ==========================================
     function switchTab(t) {
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); 
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -994,14 +995,6 @@
         `;
     }
 
-    function populateFilterSelects() {
-        let sf = document.getElementById('playerFilterSelect'); let sm = document.getElementById('matchFilterSelect');
-        if(!sf || !sm) return;
-        sf.innerHTML = '<option value="all">TÜM FİKSTÜRLERİ GÖSTER</option>'; sm.innerHTML = '<option value="last10">🕒 LİGDEKİ SON 10 MAÇ</option>';
-        [...players].sort((a,b)=>a.name.localeCompare(b.name)).forEach(p => { sf.innerHTML += `<option value="${p.id}">${p.name}</option>`; sm.innerHTML += `<option value="${p.id}">👤 ${p.name} MAÇLARI</option>`; });
-        if(!isAdmin && loggedInUser) { if(document.querySelector('.panel.active').id==='rivals') sf.value = loggedInUser.id; if(document.querySelector('.panel.active').id==='matches') sm.value = loggedInUser.id; }
-    }
-
     function filterPlayerFikstur() {
         let val = document.getElementById('playerFilterSelect').value;
         document.querySelectorAll('.player-rivals-card').forEach(c => c.style.display = (val === 'all' || c.getAttribute('data-player-id') === val) ? 'block' : 'none');
@@ -1117,12 +1110,12 @@
                 if(m.matchDate) {
                     dateBox = `<div class="date-box" style="display:flex; justify-content:space-between; align-items:center;">
                         <span>✅ Randevu: <strong style="color:var(--success)">${m.matchDate}</strong></span>
-                        ${(isMyMatch || isAdmin) ? `<button class="action-sm" style="background:var(--warning); color:black;" onclick="resetMatchDate(${m.id}, this)">İptal/Değiştir</button>` : ''}
+                        ${(isMyMatch || isAdmin) ? `<button class="action-sm" style="background:var(--warning); color:black;" onclick="resetMatchDate('${m.id}', this)">İptal/Değiştir</button>` : ''}
                     </div>`;
                 } else if (m.proposedDates && m.proposedDates.length > 0) {
                     if(amIDateApprover) {
-                        let btnHtml = m.proposedDates.map(d => `<button class="action-sm" style="background:var(--success); margin:2px;" onclick="acceptDate(${m.id}, '${d}', this)">${d}</button>`).join('');
-                        dateBox = `<div class="date-box" style="border-color:var(--warning);">⏳ Rakibin Önerileri:<br><div style="margin-top:5px;">${btnHtml} <button class="action-sm" style="background:var(--danger);" onclick="clearDateProposal(${m.id}, this)">Reddet</button></div></div>`;
+                        let btnHtml = m.proposedDates.map(d => `<button class="action-sm" style="background:var(--success); margin:2px;" onclick="acceptDate('${m.id}', '${d}', this)">${d}</button>`).join('');
+                        dateBox = `<div class="date-box" style="border-color:var(--warning);">⏳ Rakibin Önerileri:<br><div style="margin-top:5px;">${btnHtml} <button class="action-sm" style="background:var(--danger);" onclick="clearDateProposal('${m.id}', this)">Reddet</button></div></div>`;
                     } else {
                         dateBox = `<div class="date-box" style="border-color:var(--warning);">⏳ Önerilen Tarihler rakip onayı bekliyor.</div>`;
                     }
@@ -1141,7 +1134,7 @@
                                 <select id="p_t2s_${m.id}" class="score-input" style="width:auto;font-size:10px;padding:4px;">${tOpts}</select> - 
                                 <select id="p_t2e_${m.id}" class="score-input" style="width:auto;font-size:10px;padding:4px;">${tOpts}</select>
                             </div>
-                            <button class="action-sm" style="background:var(--accent-color); color:black; margin-top:5px;" onclick="proposeDates(${m.id}, this)">${isAdmin ? 'Tarihi Direkt Kaydet' : 'Önerileri Gönder'}</button>
+                            <button class="action-sm" style="background:var(--accent-color); color:black; margin-top:5px;" onclick="proposeDates('${m.id}', this)">${isAdmin ? 'Tarihi Direkt Kaydet' : 'Önerileri Gönder'}</button>
                         </div>
                     </div>`;
                 }
@@ -1152,7 +1145,7 @@
                 let opponentId = (m.p1 === loggedInUser.id) ? m.p2 : m.p1;
                 let iHaveRewarded = (m.p1 === loggedInUser.id) ? m.p1Fair : m.p2Fair;
                 if(!iHaveRewarded) {
-                    fairPlayBtn = `<button class="fair-btn" onclick="giveFairPlay(${m.id}, '${opponentId}', this)">👍 Rakibimi Kutla (+5 Şöhret)</button>`;
+                    fairPlayBtn = `<button class="fair-btn" onclick="giveFairPlay('${m.id}', '${opponentId}', this)">👍 Rakibimi Kutla (Centilmenlik +5 Puan)</button>`;
                 } else {
                     fairPlayBtn = `<div style="text-align:center; font-size:10px; color:var(--success); margin-top:5px;">✅ Rakibinizi Kutladınız!</div>`;
                 }
@@ -1163,7 +1156,7 @@
                 ${sBanner}
                 <div style="padding:15px;">
                     <div class="match-card-header">
-                        <select id="type_${m.id}" class="match-opt" onchange="toggleWO(${m.id}, ${isRev})" ${ro?'disabled':''}><option value="normal" ${!m.isWO?'selected':''}>🎾 Normal Maç</option><option value="wo" ${m.isWO?'selected':''}>🛡️ Hükmen</option></select>
+                        <select id="type_${m.id}" class="match-opt" onchange="toggleWO('${m.id}', ${isRev})" ${ro?'disabled':''}><option value="normal" ${!m.isWO?'selected':''}>🎾 Normal Maç</option><option value="wo" ${m.isWO?'selected':''}>🛡️ Hükmen</option></select>
                         <span style="font-size:11px; color:#94a3b8;">#M${m.id}</span>
                     </div>
                     ${dateBox}
@@ -1210,9 +1203,9 @@
                     </div>
 
                     <div style="display:flex; justify-content:space-between; gap:5px; margin-top:10px;">
-                        ${(!ro && (isMyMatch || isAdmin)) ? `<button class="save-btn" onclick="submitScore(${m.id}, ${isRev}, this)">${isAdmin?'Skoru Anında İşle':'Skoru Gönder (Onay)'}</button>` : ''}
-                        ${amIScoreApprover ? `<button class="pending-btn" onclick="approveScore(${m.id}, this)">✅ SKORU ONAYLA</button>` : ''}
-                        ${(isAdmin && m.played) || (isMyMatch && m.pending) ? `<button class="action-sm" style="background:var(--danger); padding:10px;" onclick="clearScoreCloud(${m.id}, this)">İptal/Sil</button>` : ''}
+                        ${(!ro && (isMyMatch || isAdmin)) ? `<button class="save-btn" onclick="submitScore('${m.id}', ${isRev}, this)">${isAdmin?'Skoru Anında İşle':'Skoru Gönder (Onay)'}</button>` : ''}
+                        ${amIScoreApprover ? `<button class="pending-btn" onclick="approveScore('${m.id}', this)">✅ SKORU ONAYLA</button>` : ''}
+                        ${(isAdmin && m.played) || (isMyMatch && m.pending) ? `<button class="action-sm" style="background:var(--danger); padding:10px;" onclick="clearScoreCloud('${m.id}', this)">İptal/Sil</button>` : ''}
                     </div>
                     ${fairPlayBtn}
                 </div>`;
