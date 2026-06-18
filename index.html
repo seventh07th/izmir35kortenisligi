@@ -82,7 +82,6 @@
         .rules-content h3 { color: var(--accent-color); border-bottom: 1px solid var(--divider); padding-bottom: 5px; margin-top: 25px; text-align: left; }
         .rules-content p, .rules-content ul { text-align: left; margin: 10px 0; }
         .example-box { background: rgba(255, 215, 0, 0.05); border-left: 3px solid var(--accent-color); padding: 15px; margin-top: 15px; border-radius: 0 6px 6px 0; text-align: left;}
-        .guide-box { background: #1e293b; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 12px; border-left: 4px solid var(--warning); text-align: left;}
         
         .notification-card { background:rgba(245, 158, 11, 0.1); border-left:4px solid var(--warning); padding:12px; margin-top:10px; font-size:12px; text-align:left; border-radius:4px; }
         .admin-notif-row { padding: 10px; border-bottom: 1px solid var(--divider); font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
@@ -252,7 +251,7 @@
                 <div style="font-size:40px; margin-bottom:10px;">👤</div>
                 <h2 id="profName" style="margin:0; color:white; text-transform:uppercase;">YÜKLENİYOR...</h2>
                 <div style="margin-top:5px; display:flex; justify-content:center; align-items:center; gap:10px;">
-                    <span id="profTier" style="background:var(--accent-color); color:black; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px; text-transform:uppercase;">SEVİYE</span>
+                    <span id="profTier" style="background:var(--accent-color); color:black; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px; text-transform:uppercase;">SEVİYE BELİRSİZ</span>
                     <button class="action-sm" style="background:var(--danger); font-size:10px;" onclick="changeOwnPassword()">🔑 Şifre Değiştir</button>
                 </div>
                 
@@ -363,7 +362,7 @@
 
         <!-- 6. FİKSTÜR -->
         <div id="rivals" class="panel">
-            <!-- Uyarı divi buraya JS ile eklenir (Eğer turnuva seçili değilse) -->
+            <!-- Uyarı divi buraya JS ile eklenir -->
             <select id="playerFilterSelect" class="auth-input force-upper" style="width:100%; margin-bottom:15px; display:none;" onchange="filterPlayerFikstur()"></select>
             <div id="rivalsGridContainer"></div>
         </div>
@@ -425,6 +424,7 @@
     function updateLoginDropdown() { let sel = document.getElementById('loginGlobalUserSelect'); let p = sel.value; sel.innerHTML = '<option value="">İSMİNİZİ SEÇİN...</option>'; Object.values(globalUsers).sort((a,b)=>a.name.localeCompare(b.name)).forEach(u => sel.innerHTML += `<option value="${u.id}">${u.name}</option>`); if(p) sel.value = p; }
 
     function registerNewUser() {
+        // Güvenlik: XSS (Cross-Site Scripting) Engellemesi
         let nameRaw = document.getElementById('regName').value.trim();
         let name = nameRaw.replace(/[<>]/g, '').toLocaleUpperCase('tr-TR'); 
         let pass = document.getElementById('regPassword').value; let gender = document.getElementById('regGender').value;
@@ -452,7 +452,10 @@
         if(u && u.password === pass) { 
             isAdmin = false; loggedInUser = u; 
             enterApp(); 
-            if(u.welcomed === false) { document.getElementById('welcomeModal').style.display = 'flex'; }
+            // İlk Giriş Pop-Up Kontrolü
+            if(u.welcomed === false || u.welcomed === undefined) {
+                document.getElementById('welcomeModal').style.display = 'flex';
+            }
         } else { alert("❌ Hatalı Şifre!"); } 
     }
     
@@ -479,6 +482,7 @@
         }
     }
 
+    /* YÖNETİCİ MENÜSÜ FONKSİYONLARI */
     function adminFilterPlayers() {
         let nameQ = document.getElementById('adminSearchName').value.toLocaleUpperCase('tr-TR'); let tierQ = document.getElementById('adminFilterTier').value; let sortQ = document.getElementById('adminSortList').value;
         let list = document.getElementById('adminChecklist'); let items = Array.from(list.children);
@@ -647,7 +651,7 @@
             if(t === 'rules') renderGlobalRules();
             if(t === 'standings') renderGlobalStandings();
             
-            // PANEL İSKELETİNİ SİLMEDEN GÜVENLİ UYARI GÖSTERİMİ
+            // PANEL İSKELETİNİ SİLMEDEN GÜVENLİ UYARI GÖSTERİMİ (ÇÖKMEYİ ENGELLER)
             if(t === 'rivals') { 
                 if(rf) rf.style.display = 'none'; 
                 document.getElementById('rivalsGridContainer').innerHTML = `<div class="global-alert">⚠️ Bu sekmeyi görüntülemek için lütfen üst menüden oynadığınız bir turnuvayı seçin.</div>`; 
@@ -847,7 +851,7 @@
         let globalArray = Object.keys(globalUsers).map(uid => {
             let user = globalUsers[uid];
             let dStats = derivedGlobalStats[uid] || { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0 };
-            return { name: user.name, tier: user.tier, k_kor: dStats.k_kor, gMatch: dStats.gMatch, gWins: dStats.gWins, gLoss: dStats.gLoss };
+            return { name: user.name, tier: user.tier || 'BELİRSİZ', k_kor: dStats.k_kor, gMatch: dStats.gMatch, gWins: dStats.gWins, gLoss: dStats.gLoss };
         });
 
         let sortedUsers = globalArray.sort((a,b) => b.k_kor - a.k_kor);
@@ -947,7 +951,82 @@
     }
 
     // ==========================================
-    // FİKSTÜR, SKOR VE ONAY İŞLEMLERİ
+    // PROFİL VE BİLDİRİMLER
+    // ==========================================
+    function renderProfile() {
+        if(isAdmin || !loggedInUser) return;
+        let u = globalUsers[loggedInUser.id] || loggedInUser;
+        let dStats = derivedGlobalStats[u.id] || { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0, fame: 0 };
+        
+        document.getElementById('profName').innerText = u.name;
+        document.getElementById('profTier').innerText = `${u.tier || 'SEVİYE BELİRSİZ'} LİGİ OYUNCUSU (${u.sysScore || 'N/A'})`;
+        document.getElementById('profKKor').innerText = (dStats.k_kor || 0).toFixed(1);
+        document.getElementById('profFame').innerText = (globalUsers[u.id].fame || 0);
+        document.getElementById('profWinLoss').innerText = `${dStats.gWins || 0}G - ${(dStats.gLoss || 0)}M`;
+        document.getElementById('profAvail').innerText = (u.availability && u.availability.length) ? u.availability.map(a=>a.toLocaleUpperCase('tr-TR')).join(", ") : "BELİRTİLMEDİ";
+        
+        let tCount = 0; let notifHtml = '';
+        Object.keys(allTourneys).forEach(tid => {
+            let t = allTourneys[tid]; let tName = t.settings.customName || `İZMİR 35 LİGİ`;
+            if (t.players && t.players.some(p => p.id === u.id)) {
+                tCount++;
+                t.matches.filter(m => m.p1 === u.id || m.p2 === u.id).forEach(m => {
+                    let oppName = (m.p1 === u.id) ? m.p2Name : m.p1Name;
+                    if (!m.played && m.proposedDates && m.proposedDates.length > 0 && m.proposedBy !== u.id && m.proposedBy !== 'ADMIN') {
+                        notifHtml += `<div class="notification-card"><strong>${tName}</strong><br>📅 <strong>${oppName}</strong> maç için tarih önerilerinde bulundu.<br><em>(Lütfen Skor Gir sekmesinden seçiminizi yapınız)</em></div>`;
+                    }
+                    if (m.played && m.pending && m.enteredBy !== u.id && m.enteredBy !== 'ADMIN') {
+                        notifHtml += `<div class="notification-card"><strong>${tName}</strong><br>⏳ <strong>${oppName}</strong> maç skorunu girdi.<br><em>(Lütfen KOR tablosuna yansıması için Skor Gir sekmesinden onaylayın)</em></div>`;
+                    }
+                });
+            }
+        });
+        document.getElementById('profTournaments').innerText = `Kariyer Turnuva Katılımı: ${tCount}`;
+        document.getElementById('profNotificationsContainer').innerHTML = notifHtml;
+    }
+
+    function resolvePasswordReset(key, name) {
+        let newPass = prompt(`${name} için YENİ ŞİFRE belirleyin:`);
+        if (!newPass) return;
+        let foundUid = Object.keys(globalUsers).find(uid => globalUsers[uid].name === name);
+        if (foundUid) {
+            database.ref(`the_35_gold_league/users/${foundUid}/password`).set(newPass).then(() => {
+                database.ref(`the_35_gold_league/password_resets/${key}`).remove();
+                alert(`${name} adlı oyuncunun şifresi değiştirildi!`);
+            });
+        } else {
+            alert("Bu isimde bir kullanıcı bulunamadı! İsmi listeden kontrol edin.");
+            database.ref(`the_35_gold_league/password_resets/${key}`).remove();
+        }
+    }
+
+    function renderAdminNotifs() {
+        let passList = "", pList = "", dList = "";
+        
+        Object.keys(passwordResets).forEach(key => {
+            let r = passwordResets[key];
+            let date = new Date(r.timestamp).toLocaleString('tr-TR');
+            passList += `<div class="admin-notif-row"><div><strong>${r.name}</strong> <br><span style="color:var(--sub-text); font-size:10px;">Talep: ${date}</span></div> <button class="action-sm" style="background:var(--danger);" onclick="resolvePasswordReset('${key}', '${r.name}')">Sıfırla</button></div>`;
+        });
+
+        Object.keys(allTourneys).forEach(tid => {
+            let t = allTourneys[tid]; let tName = t.settings.customName || `LİG`;
+            if(!t.matches) return;
+            t.matches.forEach(m => {
+                let mTitle = `<strong>${m.p1Name}</strong> vs <strong>${m.p2Name}</strong>`;
+                if(m.played && m.pending) pList += `<div class="admin-notif-row"><div>${tName} | ${mTitle}</div> <button class="action-sm" style="background:var(--success);" onclick="document.getElementById('adminLeagueSelect').value='${tid}'; adminSwitchLeague(); switchTab('matches');">İncele</button></div>`;
+                if(!m.played && m.proposedDates && m.proposedDates.length > 0) pList += `<div class="admin-notif-row"><div>${tName} | ${mTitle} <br><span style="color:#64748b;">(Tarih Önerisi Bekliyor)</span></div> <button class="action-sm" onclick="document.getElementById('adminLeagueSelect').value='${tid}'; adminSwitchLeague(); switchTab('matches');">Git</button></div>`;
+                if(!m.played && m.matchDate) dList += `<div class="admin-notif-row"><div>${tName} | ${mTitle} <br><span style="color:var(--success);">Tarih: ${m.matchDate}</span></div> </div>`;
+            });
+        });
+        
+        document.getElementById('adminPasswordResets').innerHTML = passList || "Şifre sıfırlama talebi yok.";
+        document.getElementById('adminPendingList').innerHTML = pList || "Onay bekleyen işlem yok.";
+        document.getElementById('adminConfirmedDatesList').innerHTML = dList || "Kesinleşen tarih yok.";
+    }
+
+    // ==========================================
+    // SKOR VE FİKSTÜR YÖNETİMİ
     // ==========================================
     function populateFilterSelects() {
         let sf = document.getElementById('playerFilterSelect'); let sm = document.getElementById('matchFilterSelect');
@@ -1030,6 +1109,13 @@
             return;
         }
 
+        // TAM SAATLER İÇİN OPTİON LİSTESİ (SADECE AÇILIR MENÜ)
+        let tOpts = `<option value="">Saat Seç</option>`;
+        for(let i=6; i<=23; i++) {
+            let h = i < 10 ? '0'+i+':00' : i+':00';
+            tOpts += `<option value="${h}">${h}</option>`;
+        }
+
         dMatches.forEach(m => {
             let isRev = !isAdmin && loggedInUser && (m.p2 === loggedInUser.id);
             let topN = isRev ? m.p2Name : m.p1Name, botN = isRev ? m.p1Name : m.p2Name;
@@ -1043,8 +1129,9 @@
             let ts2tb=getV(isRev?m.p2S2TB:m.p1S2TB), bs2tb=getV(isRev?m.p1S2TB:m.p2S2TB);
 
             let isMyMatch = !isAdmin && loggedInUser && (m.p1 === loggedInUser.id || m.p2 === loggedInUser.id);
-            let ro = isAdmin || (!isMyMatch && val !== 'last10') || (m.played && !m.pending); 
-            if(m.played && m.pending) ro = true; 
+            
+            // YÖNETİCİ KİLİDİ AÇILDI: Yöneticiyse hiçbir zaman "Read-Only (Sadece Okunur)" olmaz.
+            let ro = m.played || (!isAdmin && !isMyMatch);
 
             let amIScoreApprover = (isMyMatch || isAdmin) && m.played && m.pending && m.enteredBy !== (isAdmin ? 'ADMIN' : loggedInUser.id);
             if(isAdmin && m.pending) amIScoreApprover = true; 
@@ -1066,7 +1153,7 @@
                 if(m.matchDate) {
                     dateBox = `<div class="date-box" style="display:flex; justify-content:space-between; align-items:center;">
                         <span>✅ Kesinleşen Randevu: <strong style="color:var(--success)">${m.matchDate}</strong></span>
-                        ${(isMyMatch || isAdmin) ? `<button class="action-sm" style="background:var(--warning); color:black;" onclick="resetMatchDate(${m.id})">Değiştir</button>` : ''}
+                        ${(isMyMatch || isAdmin) ? `<button class="action-sm" style="background:var(--warning); color:black;" onclick="resetMatchDate(${m.id})">Tarihi İptal Et / Değiştir</button>` : ''}
                     </div>`;
                 } else if (m.proposedDates && m.proposedDates.length > 0) {
                     if(amIDateApprover) {
@@ -1076,11 +1163,21 @@
                         dateBox = `<div class="date-box" style="border-color:var(--warning);">⏳ Gönderilen Tarih Önerileri rakip onayını bekliyor.</div>`;
                     }
                 } else if (isMyMatch || isAdmin) {
-                    dateBox = `<div class="date-box"><span>📅 Tarih ve Esnek Saat Öner (En fazla 2):</span> 
+                    dateBox = `<div class="date-box"><span>📅 Tarih ve Tam Saat Öner ${isAdmin ? '(Yöneticiler 1 Tarih Girebilir)' : '(2 Seçenek Zorunlu)'}:</span> 
                         <div style="display:flex; flex-direction:column; gap:5px; margin-top:5px;">
-                            <div style="display:flex; gap:5px; align-items:center;"><input type="date" id="p_d1_${m.id}" class="score-input" style="width:auto;font-size:10px;padding:4px;"><input type="time" id="p_t1s_${m.id}" class="score-input" style="width:auto;font-size:10px;padding:4px;">-<input type="time" id="p_t1e_${m.id}" class="score-input" style="width:auto;font-size:10px;padding:4px;"></div>
-                            <div style="display:flex; gap:5px; align-items:center;"><input type="date" id="p_d2_${m.id}" class="score-input" style="width:auto;font-size:10px;padding:4px;"><input type="time" id="p_t2s_${m.id}" class="score-input" style="width:auto;font-size:10px;padding:4px;">-<input type="time" id="p_t2e_${m.id}" class="score-input" style="width:auto;font-size:10px;padding:4px;"></div>
-                            <button class="action-sm" style="background:var(--accent-color); color:black; margin-top:5px;" onclick="proposeDates(${m.id})">Önerileri Gönder</button>
+                            <div style="display:flex; gap:5px; align-items:center;">
+                                <span style="font-weight:bold; color:var(--accent-color);">1.</span>
+                                <input type="date" id="p_d1_${m.id}" class="score-input" style="width:auto;font-size:10px;padding:4px;">
+                                <select id="p_t1s_${m.id}" class="score-input" style="width:auto;font-size:10px;padding:4px;">${tOpts}</select> - 
+                                <select id="p_t1e_${m.id}" class="score-input" style="width:auto;font-size:10px;padding:4px;">${tOpts}</select>
+                            </div>
+                            <div style="display:flex; gap:5px; align-items:center;">
+                                <span style="font-weight:bold; color:var(--accent-color);">2.</span>
+                                <input type="date" id="p_d2_${m.id}" class="score-input" style="width:auto;font-size:10px;padding:4px;">
+                                <select id="p_t2s_${m.id}" class="score-input" style="width:auto;font-size:10px;padding:4px;">${tOpts}</select> - 
+                                <select id="p_t2e_${m.id}" class="score-input" style="width:auto;font-size:10px;padding:4px;">${tOpts}</select>
+                            </div>
+                            <button class="action-sm" style="background:var(--accent-color); color:black; margin-top:5px;" onclick="proposeDates(${m.id})">${isAdmin ? 'Tarihi Direkt Kaydet' : 'Önerileri Gönder'}</button>
                         </div>
                     </div>`;
                 }
@@ -1121,7 +1218,7 @@
                     </div>
 
                     <div style="display:flex; justify-content:space-between; gap:5px; margin-top:10px;">
-                        ${(!ro && (isMyMatch || isAdmin)) ? `<button class="save-btn" onclick="submitScore(${m.id}, ${isRev})">${isAdmin?'Skoru İşle':'Skoru Gönder (Onay)'}</button>` : ''}
+                        ${(!ro && (isMyMatch || isAdmin)) ? `<button class="save-btn" onclick="submitScore(${m.id}, ${isRev})">${isAdmin?'Skoru Anında İşle':'Skoru Gönder (Onay)'}</button>` : ''}
                         ${amIScoreApprover ? `<button class="pending-btn" onclick="approveScore(${m.id})">✅ SKORU ONAYLA</button>` : ''}
                         ${(isAdmin && m.played) || (isMyMatch && m.pending) ? `<button class="action-sm" style="background:var(--danger); padding:10px;" onclick="clearScoreCloud(${m.id})">İptal/Sil</button>` : ''}
                     </div>
@@ -1135,14 +1232,30 @@
         let m = matches.find(x => x.id === mId);
         let d1 = document.getElementById(`p_d1_${mId}`).value; let t1s = document.getElementById(`p_t1s_${mId}`).value; let t1e = document.getElementById(`p_t1e_${mId}`).value;
         let d2 = document.getElementById(`p_d2_${mId}`).value; let t2s = document.getElementById(`p_t2s_${mId}`).value; let t2e = document.getElementById(`p_t2e_${mId}`).value;
+        
+        if (!isAdmin) {
+            if (!d1 || !t1s || !t1e || !d2 || !t2s || !t2e) {
+                return alert("Lütfen rakibinize sunmak için her 2 Tarih ve Tam Saat aralığı seçeneğini de eksiksiz doldurunuz!");
+            }
+        } else {
+            if (!d1 || !t1s || !t1e) {
+                return alert("Yönetici olarak en az 1. Tarih ve Saat aralığını girmelisiniz.");
+            }
+        }
+
         let arr = []; 
         if (d1 && t1s && t1e) arr.push(`${d1} (${t1s} - ${t1e})`); 
         if (d2 && t2s && t2e) arr.push(`${d2} (${t2s} - ${t2e})`);
 
-        if(arr.length === 0) return alert("Lütfen en az 1 Tarih ve tam Saat Aralığı seçiniz.");
-        if(isAdmin) { m.matchDate = arr[0]; m.proposedDates = []; } 
-        else { m.proposedDates = arr; m.proposedBy = loggedInUser.id; }
-        saveToDb("Tarih ve saat önerileri rakibe gönderildi!");
+        if(isAdmin) { 
+            m.matchDate = arr[0]; 
+            m.proposedDates = []; 
+            saveToDb("Tarih yönetici tarafından kesinleştirildi!");
+        } else { 
+            m.proposedDates = arr; 
+            m.proposedBy = loggedInUser.id; 
+            saveToDb("Tarih ve saat önerileri rakibe gönderildi!");
+        }
     }
 
     function acceptDate(mId, dateVal) { let m = matches.find(x => x.id === mId); m.matchDate = dateVal; m.proposedDates = []; saveToDb("Tarih karşılıklı onaylandı!"); }
@@ -1153,11 +1266,12 @@
         saveToDb("Mevcut tarih iptal edildi. Lütfen yeni bir tarih önerin.");
     }
 
-    // YENİ: HATASIZ TIE-BREAK VALİDASYONU (KURALA TAM UYUM)
+    // YENİ: HATASIZ TIE-BREAK VALİDASYONU VE YÖNETİCİ KONTROLÜ
     function submitScore(mId, isP2) {
         let m = matches.find(x => x.id === mId);
         let type = document.getElementById(`type_${mId}`).value;
         
+        // Yönetici Onay Kuralından Etkilenmez
         if (!isAdmin) {
             if (!m.matchDate) return alert("HATA: Önce rakibinizle maç tarihini belirleyip onaylamanız gerekmektedir!");
             let plannedDate = m.matchDate.split(' ')[0];
@@ -1228,7 +1342,8 @@
     }
 
     function approveScore(mId) {
-        let m = matches.find(x => x.id === mId); m.pending = false;
+        let m = matches.find(x => x.id === mId); 
+        m.pending = false;
         saveToDb("Skor Onaylandı ve Tablolara İşlendi!");
     }
     
