@@ -348,9 +348,9 @@
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px;">
                 <input type="text" id="leagueCustomName" class="auth-input force-upper" style="width:100%; margin:0;" placeholder="🏆 TURNUVA ADI (ÖRN: BAHAR KUPASI)" oninput="this.value = this.value.toLocaleUpperCase('tr-TR')">
                 <select id="leagueCapacity" class="auth-input force-upper" style="width:100%; margin:0; border-color: var(--accent-color); font-weight:bold;">
-                    <option value="23" selected>🧍 BUTİK KOTA (Maks 23 Kişi)</option>
-                    <option value="47">🧍‍♂️ STANDART KOTA (Maks 47 Kişi)</option>
-                    <option value="96">🏟️ BÜYÜK LİG (Maks 96 Kişi)</option>
+                    <option value="23" selected>🧍 BUTİK LİG (12-23 Kişi)</option>
+                    <option value="47">🧍‍♂️ STANDART LİG (24-47 Kişi)</option>
+                    <option value="96">🏟️ BÜYÜK LİG (48-96 Kişi)</option>
                 </select>
                 <select id="leagueGender" class="auth-input force-upper" style="width:100%; margin:0;"><option value="ERKEK" selected>👨 ERKEK LİGİ</option><option value="KADIN">👩 KADIN LİGİ</option><option value="KARMA">🤝 KARMA LİG</option></select>
                 <select id="leagueFormat" class="auth-input force-upper" style="width:100%; margin:0;"><option value="6_GAME" selected>🎾 6 OYUNLUK FORMAT</option><option value="4_GAME">⚡ 4 OYUNLUK FORMAT</option></select>
@@ -503,15 +503,9 @@
                     loggedInUser = globalUsers[loggedInUser.id];
                 }
 
-                if(!currentTid && document.getElementById('standings').classList.contains('active')) renderGlobalStandings();
-                if(!isAdmin && loggedInUser && document.getElementById('profile').classList.contains('active')) renderProfile();
-                
-                if (isAdmin && document.getElementById('admin_pending').classList.contains('active')) {
-                    renderAdminPendingPanel();
-                }
-                if (isAdmin && document.getElementById('setup_manual').classList.contains('active')) {
-                    renderAdminChecklist();
-                }
+                // Tetikleme - Aktif sekmeyi günceller
+                let activePanelId = document.querySelector('.panel.active') ? document.querySelector('.panel.active').id : null;
+                if(activePanelId) switchTab(activePanelId);
 
             } catch(e) { console.error("Kullanıcı okuma hatası:", e); }
         }, errHandler);
@@ -522,30 +516,34 @@
                 buildGlobalStats(); 
                 populateLeagueDropdowns();
                 
-                if (currentTid && allTourneys[currentTid]) { 
-                    let status = allTourneys[currentTid].settings.status || 'active';
-                    if(status === 'pending') {
-                        if(isAdmin) renderAdminPendingPanel();
+                let activePanelId = document.querySelector('.panel.active') ? document.querySelector('.panel.active').id : null;
+
+                if (currentTid) {
+                    if(!allTourneys[currentTid]) {
+                        currentTid = null;
+                        alert("Bulunduğunuz lig yöneticiler tarafından silindi veya kapatıldı.");
+                        goHome();
+                        return;
                     } else {
-                        loadTournamentData(currentTid); 
+                        let status = allTourneys[currentTid].settings.status || 'active';
+                        if(status === 'pending') {
+                            if(isAdmin && activePanelId === 'admin_pending') renderAdminPendingPanel();
+                        } else {
+                            loadTournamentData(currentTid); 
+                        }
                     }
                 }
                 
-                if(!currentTid && document.getElementById('standings').classList.contains('active')) renderGlobalStandings();
-                
-                if (isAdmin && document.getElementById('admin_notifs').classList.contains('active')) {
-                    renderAdminNotifs();
-                }
-                if (document.getElementById('tournaments').classList.contains('active')) {
-                    renderTournamentsList();
-                }
+                if(activePanelId) switchTab(activePanelId); // Her değişikliği anında UI'a yansıtır (Silinenler vs)
+
             } catch(e) { console.error("Turnuva okuma hatası:", e); }
         }, errHandler);
 
         database.ref('the_35_gold_league/password_resets').on('value', (s) => {
             try {
                 passwordResets = s.val() || {};
-                if(isAdmin && document.getElementById('admin_notifs').classList.contains('active')) renderAdminNotifs();
+                let activePanelId = document.querySelector('.panel.active') ? document.querySelector('.panel.active').id : null;
+                if(isAdmin && activePanelId === 'admin_notifs') renderAdminNotifs();
             } catch(e){}
         }, errHandler);
     }
@@ -792,9 +790,12 @@
             let s = t.settings || {};
             let status = s.status || 'active';
             let tName = s.customName || "İZMİR 35 LİGİ";
-            let formatText = s.format === '6_GAME' ? '6 OYUNLUK' : '4 OYUNLUK';
+            let formatText = s.format === '6_GAME' ? '6 Oyunluk 2 Normal Set' : '4 Oyunluk 2 Kısa Set';
             let cap = s.maxCapacity || (s.playerCount || 23);
             let mLimit = cap >= 48 ? 10 : (cap >= 24 ? 8 : 6);
+            
+            let ligType = cap >= 48 ? "BÜYÜK LİG (48-96 Kişi)" : (cap >= 24 ? "STANDART LİG (24-47 Kişi)" : "BUTİK LİG (12-23 Kişi)");
+            let poText = cap >= 48 ? "İlk 8 Seribaşı, İkinci 8 Play-Off, Sonraki 16 Play-In" : (cap >= 24 ? "İlk 4 Seribaşı, İkinci 4 Play-Off, Sonraki 8 Play-In" : "İlk 2 Seribaşı, İkinci 2 Play-Off, Sonraki 4 Play-In");
             
             let sDateObj = s.startDate ? new Date(s.startDate) : null;
             let eDateObj = sDateObj ? new Date(sDateObj.getTime() + (mLimit * 7 * 24*60*60*1000)) : null;
@@ -808,10 +809,16 @@
             }
 
             let pInfo = s.startDate ? 
-                `<strong style="color:var(--accent-color);">Takvim ve İşleyiş:</strong><br>
-                • <strong>Lig Aşaması (${mLimit} Maç):</strong> ${sDateObj.toLocaleDateString('tr-TR')} ile ${eDateObj.toLocaleDateString('tr-TR')} tarihleri arasında esnek fikstür ile oynanır.<br>
-                • <strong>Play-Off Turları:</strong> ${poS.toLocaleDateString('tr-TR')} - ${poE.toLocaleDateString('tr-TR')} arasında tamamlanır.<br>
-                • <strong>Büyük Final Şöleni:</strong> ~${fSat.toLocaleDateString('tr-TR')} (Hafta Sonu)` : 'Tarih Belirlenmedi';
+                `<div style="display:flex; flex-direction:column; gap:4px;">
+                    <strong style="color:var(--accent-color);">📋 FORMAT: ${ligType} | Şehir: İZMİR | İlçe: ${s.region || 'Belirtilmedi'}</strong>
+                    <span>🎾 <strong>Maç Sistemi:</strong> ${formatText}</span>
+                    <span>⚔️ <strong>Kural:</strong> ${poText} kalır.</span>
+                    <hr style="border:0; border-top:1px dashed var(--divider); margin:4px 0;">
+                    <strong style="color:var(--success);">🗓️ TAKVİM VE İŞLEYİŞ:</strong>
+                    <span>• <strong>Lig Aşaması (${mLimit} Maç):</strong> ${sDateObj.toLocaleDateString('tr-TR')} - ${eDateObj.toLocaleDateString('tr-TR')}</span>
+                    <span>• <strong>Play-Off Turları:</strong> ${poS.toLocaleDateString('tr-TR')} - ${poE.toLocaleDateString('tr-TR')}</span>
+                    <span>• <strong>Büyük Final:</strong> ~${fSat.toLocaleDateString('tr-TR')} (Hafta Sonu)</span>
+                </div>` : '<div style="color:var(--sub-text);">Tarih ve Format Belirlenmedi</div>';
             
             let regs = _arr(t.registeredPlayers || []);
             let N = status === 'pending' ? regs.length : (t.players ? _arr(t.players).length : 0);
@@ -845,7 +852,7 @@
                         <strong style="color:var(--accent-color); font-size:14px;">🏆 ${tName}</strong>
                         ${statusHtml}
                     </div>
-                    <div style="font-size:11px; color:#cbd5e1; margin-top:5px; background:#0f172a; padding:8px; border-radius:6px; border-left:3px solid var(--accent-color);">
+                    <div style="font-size:11px; color:#cbd5e1; margin-top:5px; background:#0f172a; padding:10px; border-radius:6px; border-left:3px solid var(--accent-color); line-height:1.4;">
                         ${pInfo}
                     </div>
                     <div style="font-size:11px; color:#94a3b8; display:flex; gap:10px; margin-top:10px;">
@@ -874,11 +881,11 @@
                         <strong style="color:var(--accent-color); font-size:14px;">🏆 ${tName}</strong>
                         ${badge}
                     </div>
-                    <div style="font-size:11px; color:#cbd5e1; margin-top:5px; background:#0f172a; padding:8px; border-radius:6px; border-left:3px solid var(--warning);">
+                    <div style="font-size:11px; color:#cbd5e1; margin-top:5px; background:#0f172a; padding:10px; border-radius:6px; border-left:3px solid var(--warning); line-height:1.4;">
                         ${pInfo}
                     </div>
                     <div style="font-size:11px; color:#94a3b8; display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
-                        <span>Kategori: ${s.gender} | ${s.tier} | Kapasite: ${N} | Format: ${formatText}</span>
+                        <span>Kategori: ${s.gender} | ${s.tier} | Kapasite: ${N}</span>
                         ${btnHtml}
                     </div>
                 </div>`;
@@ -1426,7 +1433,7 @@
             }
         });
 
-        const tbody = document.querySelector("#standingsTable tbody"); tbody.innerHTML = "";
+        const tbody = document.getElementById("standingsBody"); if(!tbody) return; tbody.innerHTML = "";
         players.forEach((p, i) => {
             let bdg = p.korRank === 1 ? '👑' : `[#${p.korRank}]`;
             let badgeHtml = p.badgeText ? `<span style="background:#1e293b; color:${p.badgeColor}; padding:2px 5px; border-radius:4px; font-size:10px; margin-left:5px; white-space:nowrap;"><strong>${p.badgeLabel}</strong> | ${p.badgeText}</span>` : '';
@@ -1946,26 +1953,14 @@
             let cleanPlayers = JSON.parse(JSON.stringify(_arr(players)));
             let cleanMatches = JSON.parse(JSON.stringify(_arr(matches)));
             
-            let activePanel = document.querySelector('.panel.active');
-            if(activePanel) {
-                if (activePanel.id === 'matches') renderMatchesView();
-                if (activePanel.id === 'standings') renderLocalStandings();
-                if (activePanel.id === 'profile') renderProfile();
-                if (activePanel.id === 'rivals') renderRivalsGrid();
-            }
-
             database.ref('the_35_gold_league/multi_v1/' + currentTid).set({ 
                 players: cleanPlayers, matches: cleanMatches, settings: currentSettings,
                 registeredPlayers: _arr(allTourneys[currentTid].registeredPlayers || [])
             })
-            .then(() => { 
-                if(msg) alert(msg); 
-                if(activePanel && activePanel.id === 'matches') renderMatchesView();
-            })
+            .then(() => { if(msg) alert(msg); })
             .catch(err => {
                 console.error("Kayıt Hatası:", err);
                 alert("Bağlantı hatası: Kayıt başarısız oldu. Lütfen internet bağlantınızı kontrol edin.");
-                if(activePanel && activePanel.id === 'matches') renderMatchesView();
             });
             
         } catch(e) {
