@@ -172,6 +172,7 @@
         <button class="nav-btn" style="background: var(--danger); border-color: var(--danger);" onclick="logoutSession()">🚪 Çıkış</button>
     </div>
 
+    <!-- AUTH WRAPPER (Sadece giriş ekranında gösterilir) -->
     <div id="authWrapper">
         <h1 id="mainTitle">✨ İZMİR 35 KORTENİS LİGİ ✨</h1>
         <p style="text-align:center; margin:0 0 15px 0; font-size:12px; color:var(--sub-text);" id="subTitleText">Kariyer ve Lig Yönetim Sistemi</p>
@@ -237,6 +238,7 @@
         </div>
     </div>
 
+    <!-- ANA UYGULAMA (APP) - SADECE BİR KERE YAZILDI! DOM ÇATIŞMASI YOK -->
     <div id="mainApp">
         <div id="adminTopBar">
             <span style="color:var(--warning); font-size:13px; font-weight:bold; margin-right:5px;">⚙️ KONTROL MERKEZİ:</span>
@@ -256,6 +258,7 @@
             <button class="tab-btn" onclick="switchTab('tree')">Turnuva Ağacı</button>
         </div>
 
+        <!-- PANEL ALANLARI -->
         <div id="tournaments" class="panel">
             <h2 style="color:var(--accent-color); margin-top:0;">🎾 LİG VE TURNUVA MERKEZİ</h2>
             
@@ -311,6 +314,7 @@
             </div>
         </div>
 
+        <!-- ADMİN KAYIT BEKLEYEN TURNUVA YÖNETİM PANELİ -->
         <div id="admin_pending" class="panel">
             <h2 style="color:var(--accent-color); margin-top:0;" id="pendingAdminTitle">KAYIT YÖNETİMİ</h2>
             <p style="font-size:12px; color:var(--sub-text); margin-bottom:15px;">Bu turnuva henüz başlatılmadı. Oyuncular kayıt olabilir veya siz manuel ekleyebilirsiniz. Asıl liste dolarsa gelenler yedek listeye geçer.</p>
@@ -338,6 +342,7 @@
             <button class="action-btn" id="startPendingBtn" onclick="startPendingTournament(this)" disabled style="background:#334155; color:#94a3b8;">⏳ KURAYI ÇEK VE TURNUVAYI BAŞLAT (Min 12 Kişi)</button>
         </div>
 
+        <!-- ADMİN YENİ TURNUVA KURMA EKRANI (KAYDA AÇMA) -->
         <div id="setup_pending" class="panel">
             <h2 style="color:var(--accent-color); margin-top:0;">➕ YENİ TURNUVA OLUŞTUR (KAYDA AÇ)</h2>
             <p style="font-size:12px; color:var(--sub-text);">Turnuva ayarlarını yapıp kayda açtığınızda oyuncular "Turnuvalar" sekmesinden kayıt olabilirler.</p>
@@ -367,6 +372,7 @@
             <button class="action-btn" onclick="createPendingTournament()">🚀 TURNUVAYI KAYDA AÇ</button>
         </div>
 
+        <!-- ADMİN ESKİ MANUEL TURNUVA KURMA VE OYUNCU YÖNETİM EKRANI -->
         <div id="setup_manual" class="panel">
             <h2 style="color:var(--success); margin-top:0;">⚙️ GELİŞMİŞ KURA MOTORU VE OYUNCU YÖNETİMİ</h2>
             <p style="font-size:12px; color:var(--sub-text);">Tüm sistem oyuncularını yönetebilir (Şifre sıfırlama, silme) ve listeden seçtiğiniz oyuncularla anında kura çekip aktif bir turnuva başlatabilirsiniz.</p>
@@ -499,8 +505,9 @@
                     loggedInUser = globalUsers[loggedInUser.id];
                 }
 
-                let activePanelId = document.querySelector('.panel.active') ? document.querySelector('.panel.active').id : null;
-                if(activePanelId) switchTab(activePanelId);
+                // SADECE aktif sekmeyi günceller (Çökmeyi Engeller)
+                let activePanel = document.querySelector('.panel.active');
+                if(activePanel && activePanel.id) switchTab(activePanel.id);
 
             } catch(e) { console.error("Kullanıcı okuma hatası:", e); }
         }, errHandler);
@@ -511,7 +518,8 @@
                 buildGlobalStats(); 
                 populateLeagueDropdowns();
                 
-                let activePanelId = document.querySelector('.panel.active') ? document.querySelector('.panel.active').id : null;
+                let activePanel = document.querySelector('.panel.active');
+                let activePanelId = activePanel ? activePanel.id : null;
 
                 if (currentTid) {
                     if(!allTourneys[currentTid]) {
@@ -529,7 +537,7 @@
                     }
                 }
                 
-                if(activePanelId) switchTab(activePanelId);
+                if(activePanelId) switchTab(activePanelId); // Her değişikliği anında UI'a yansıtır
 
             } catch(e) { console.error("Turnuva okuma hatası:", e); }
         }, errHandler);
@@ -537,102 +545,11 @@
         database.ref('the_35_gold_league/password_resets').on('value', (s) => {
             try {
                 passwordResets = s.val() || {};
-                let activePanelId = document.querySelector('.panel.active') ? document.querySelector('.panel.active').id : null;
-                if(isAdmin && activePanelId === 'admin_notifs') renderAdminNotifs();
+                let activePanel = document.querySelector('.panel.active');
+                if(isAdmin && activePanel && activePanel.id === 'admin_notifs') renderAdminNotifs();
             } catch(e){}
         }, errHandler);
     }
-
-    // YENİ VE DÜZELTİLMİŞ FONKSİYONLAR BURADA BAŞLIYOR:
-    
-    function buildGlobalStats() {
-        derivedGlobalStats = {};
-        
-        // Önce tüm kullanıcılar için sıfırdan istatistik objesi oluştur
-        Object.keys(globalUsers).forEach(uid => {
-            derivedGlobalStats[uid] = { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0, fame: globalUsers[uid].fame || 0 };
-        });
-
-        // Tüm aktif ve bitmiş turnuvalardaki oyuncu verilerini topla
-        Object.keys(allTourneys).forEach(tid => {
-            let t = allTourneys[tid];
-            if (t.settings && t.settings.status === 'active' && t.players) {
-                _arr(t.players).forEach(tp => {
-                    if (derivedGlobalStats[tp.id]) {
-                        derivedGlobalStats[tp.id].k_kor += (tp.kor || 0);
-                        derivedGlobalStats[tp.id].gWins += (tp.wins || 0);
-                        derivedGlobalStats[tp.id].gLoss += (tp.losses || 0);
-                        derivedGlobalStats[tp.id].gMatch += (tp.totalMatches || 0);
-                    }
-                });
-            }
-        });
-    }
-
-    function renderGlobalStandings() {
-        document.getElementById('standingsTitle').innerText = "🏆 GENEL SIRALAMA (TÜM ZAMANLAR)";
-        document.getElementById('standingsHead').innerHTML = "<tr><th>#</th><th style='text-align:left;'>OYUNCU</th><th>O</th><th>G</th><th>M</th><th>K-KOR 🌟</th></tr>";
-        const tbody = document.getElementById("standingsBody");
-        if(!tbody) return;
-        tbody.innerHTML = "";
-
-        // Global listeyi oluştur ve puanına göre sırala
-        let globalList = Object.values(globalUsers).map(u => {
-            let stats = derivedGlobalStats[u.id] || { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0 };
-            return { id: u.id, name: u.name, ...stats };
-        }).sort((a, b) => b.k_kor - a.k_kor);
-
-        globalList.forEach((p, i) => {
-            tbody.innerHTML += `<tr>
-                <td><strong>${i+1}</strong></td>
-                <td style="text-align:left; font-weight:bold;"><span class="player-link" onclick="openPublicProfile('${p.id}')">${p.name}</span></td>
-                <td style="color:var(--warning); font-weight:bold;">${p.gMatch}</td>
-                <td style="color:var(--success);font-weight:bold;">${p.gWins}</td>
-                <td>${p.gLoss}</td>
-                <td style="color:var(--accent-color); font-weight:bold;">${p.k_kor.toFixed(1)}</td>
-            </tr>`;
-        });
-        
-        // Mini tablo alanını temizle
-        let mini = document.getElementById('miniStandingsWrapper');
-        if(mini) mini.innerHTML = "";
-    }
-
-    function renderGlobalRules() {
-        document.getElementById('rulesHeaderTitle').innerText = "📜 SİSTEM REHBERİ VE K-KOR MATEMATİĞİ";
-        document.getElementById('dynamicRulesContainer').innerHTML = `
-            <h3>Hoş Geldiniz!</h3>
-            <p>İzmir 35 KorTenis Ligi sistemi, kortlardaki rekabetçi tempoyu dijitale taşımak için özel olarak kurgulanmıştır.</p>
-            <h3>K-KOR (Kort Kort Puanı) Nedir?</h3>
-            <p>Sistemimiz klasik galibiyet/mağlubiyet sisteminden ziyade, <strong>Maç İçi Performans (MİP)</strong> ve <strong>Rakip Güç Çarpanı (RGÇ)</strong> bazlı gelişmiş bir algoritma kullanır.</p>
-            <ul>
-                <li>Oynadığınız her oyun (game) değerlidir. Skor 6-0 da olsa, 7-6 da olsa kazandığınız her oyun puanınızı etkiler.</li>
-                <li>Sizden üst seviye birinden (ya da kazanma oranı yüksek birinden) aldığınız oyun, size ekstra K-KOR kazandırır.</li>
-                <li>Turnuva formatlarına sadık kalarak, belirlenen tarihlerde maçlarınızı tamamlamanız beklenir.</li>
-            </ul>
-            <div class="guide-box">Menüdeki <strong>Turnuvalar</strong> sekmesinden seviyenize uygun liglere katılabilir, rakiplerinizle sistem üzerinden ortak bir gün belirleyip skorunuzu girebilirsiniz.</div>
-        `;
-    }
-
-    function generateDynamicRules(settings) {
-        let formatText = settings.format === '6_GAME' ? '6 Oyunluk (Klasik 2 Set)' : '4 Oyunluk (Kısa Format)';
-        document.getElementById('rulesHeaderTitle').innerText = `📜 ${settings.customName || 'TURNUVA'} KURALLARI`;
-        document.getElementById('dynamicRulesContainer').innerHTML = `
-            <h3>Dinamik Turnuva Kuralları</h3>
-            <p>Bu turnuva, kayıtlar tamamlandığında kura çekimi ile başlamış aktif bir ligdir.</p>
-            <ul>
-                <li><strong>Maç Formatı:</strong> ${formatText}</li>
-                <li><strong>Seviye Sınırı:</strong> ${settings.tier || 'Belirtilmedi'}</li>
-                <li><strong>Kategori:</strong> ${settings.gender || 'Belirtilmedi'}</li>
-                <li><strong>Bölge/İlçe:</strong> ${settings.region || 'İzmir'}</li>
-            </ul>
-            <div class="example-box">
-                Skor girişlerini maç tamamlandıktan hemen sonra, rakibinizle teyitleşerek sisteme girmeniz gerekmektedir. Hükmen (WO - Maça Çıkmama) durumlarında kaybeden taraftan genel şöhret puanı silinecektir.
-            </div>
-        `;
-    }
-    
-    // (DİĞER MEVCUT FONKSİYONLARIN KORUNARAK AŞAĞIYA EKLENMESİ)
 
     function toggleAuth(id) { document.querySelectorAll('.auth-card').forEach(c=>c.style.display='none'); document.getElementById(id).style.display='block'; }
     function forgotPassword() { let n = prompt("Sisteme kayıtlı Adınızı ve Soyadınızı girin:"); if (!n) return; database.ref('the_35_gold_league/password_resets').push({ name: n.toLocaleUpperCase('tr-TR'), timestamp: Date.now() }).then(() => alert("Şifre sıfırlama talebiniz yöneticiye iletildi.")); }
@@ -1007,6 +924,9 @@
         let regs = _arr(t.registeredPlayers || []);
         if(!regs.includes(loggedInUser.id)) {
             regs.push(loggedInUser.id);
+            // İyimser UI
+            allTourneys[tid].registeredPlayers = regs;
+            renderTournamentsList();
             database.ref(`the_35_gold_league/multi_v1/${tid}/registeredPlayers`).set(regs).then(() => {
                 alert("Turnuvaya kaydınız başarıyla alındı!");
             });
@@ -1020,12 +940,16 @@
         let index = regs.indexOf(loggedInUser.id);
         if(index > -1) {
             regs.splice(index, 1);
+            // İyimser UI
+            allTourneys[tid].registeredPlayers = regs;
+            renderTournamentsList();
             database.ref(`the_35_gold_league/multi_v1/${tid}/registeredPlayers`).set(regs).then(() => {
                 alert("Turnuvadan ayrıldınız.");
             });
         }
     }
 
+    /* YÖNETİCİ MENÜSÜ FONKSİYONLARI */
     function adminFilterPlayers() {
         let nameQ = document.getElementById('adminSearchName').value.toLocaleUpperCase('tr-TR'); 
         let genQ = document.getElementById('adminFilterGender').value;
@@ -1121,6 +1045,8 @@
         let regs = _arr(t.registeredPlayers || []);
         if(!regs.includes(uid)) {
             regs.push(uid);
+            allTourneys[currentTid].registeredPlayers = regs; // Optimistic UI
+            renderAdminPendingPanel();
             database.ref(`the_35_gold_league/multi_v1/${currentTid}/registeredPlayers`).set(regs);
         }
     }
@@ -1131,6 +1057,8 @@
         let index = regs.indexOf(uid);
         if(index > -1) {
             regs.splice(index, 1);
+            allTourneys[currentTid].registeredPlayers = regs; // Optimistic UI
+            renderAdminPendingPanel();
             database.ref(`the_35_gold_league/multi_v1/${currentTid}/registeredPlayers`).set(regs);
         }
     }
@@ -1149,6 +1077,7 @@
         let newSettings = { status: 'pending', maxCapacity: cap, format: format, tier: tier, gender: gender, region: region, startDate: sDate, customName: cName };
         
         allTourneys[newTid] = { settings: newSettings, registeredPlayers: [] };
+        populateLeagueDropdowns(); // Optimistic UI
         
         database.ref('the_35_gold_league/multi_v1/' + newTid).set({ 
             settings: newSettings,
@@ -1213,17 +1142,19 @@
             }
         }
 
+        // Optimistic UI updates
+        t.players = tempPlayers;
+        t.matches = tempMatches;
+        t.settings.status = 'active';
+        t.settings.playerCount = N;
+        t.settings.matchLimit = mLimit;
+        
         database.ref(`the_35_gold_league/multi_v1/${currentTid}/players`).set(tempPlayers);
         database.ref(`the_35_gold_league/multi_v1/${currentTid}/matches`).set(tempMatches);
-        
-        let s = t.settings;
-        s.status = 'active';
-        s.playerCount = N;
-        s.matchLimit = mLimit;
-        
-        database.ref(`the_35_gold_league/multi_v1/${currentTid}/settings`).set(s).then(() => {
+        database.ref(`the_35_gold_league/multi_v1/${currentTid}/settings`).set(t.settings).then(() => {
             btn.innerHTML = originalText; btn.disabled = false; 
             alert("Turnuva kuraları çekildi ve lig başlatıldı!"); 
+            populateLeagueDropdowns();
             adminSwitchLeague(); 
         });
     }
@@ -1297,21 +1228,22 @@
 
         let newTid = "LIG_" + Date.now();
         let newSettings = { status: 'active', matchLimit: mLimit, format: format, tier: tier, gender: gender, region: region, startDate: sDate, playerCount: N, customName: cName };
+        let regsArr = Array.from(checked).map(cb => cb.value);
         
-        allTourneys[newTid] = { players: tempPlayers, matches: tempMatches, settings: newSettings, registeredPlayers: Array.from(checked).map(cb => cb.value) };
+        allTourneys[newTid] = { players: tempPlayers, matches: tempMatches, settings: newSettings, registeredPlayers: regsArr };
+        populateLeagueDropdowns(); // Optimistic UI
         
         database.ref('the_35_gold_league/multi_v1/' + newTid).set({ 
             players: tempPlayers, 
             matches: tempMatches, 
             settings: newSettings,
-            registeredPlayers: Array.from(checked).map(cb => cb.value)
+            registeredPlayers: regsArr
+        }).then(() => { 
+            btn.innerHTML = originalText; btn.disabled = false; 
+            if(document.getElementById('potPreviewContainer')) document.getElementById('potPreviewContainer').style.display = 'none';
+            alert("Turnuva manuel olarak kuraları çekildi ve lig başlatıldı!"); 
+            document.getElementById('adminLeagueSelect').value = newTid; adminSwitchLeague(); 
         });
-        
-        btn.innerHTML = originalText; btn.disabled = false; 
-        if(document.getElementById('potPreviewContainer')) document.getElementById('potPreviewContainer').style.display = 'none';
-        alert("Turnuva manuel olarak kuraları çekildi ve lig başlatıldı!"); 
-        document.getElementById('adminLeagueSelect').value = newTid; 
-        adminSwitchLeague(); 
     }
 
     function populateLeagueDropdowns() {
@@ -1402,7 +1334,7 @@
         if(!currentTid || !confirm("Bu ligi kalıcı olarak silmek istiyor musunuz?")) return; 
         let tid = currentTid; 
         currentTid = null; 
-        delete allTourneys[tid]; // Hızlı UI Güncellemesi için
+        delete allTourneys[tid]; // Optimistic UI
         goHome();
         database.ref('the_35_gold_league/multi_v1/' + tid).remove().then(() => alert("Lig silindi.")); 
     }
@@ -1532,6 +1464,171 @@
 
         players.sort((a,b) => b.kor - a.kor);
         players.forEach((p, i) => p.korRank = i + 1);
+    }
+
+    function renderGlobalRules() {
+        document.getElementById('rulesHeaderTitle').innerText = "📜 İZMİR 35 KORTENİS LİGİ - SİSTEM REHBERİ (BETA)";
+        let html = `
+            <div style="background:#1e293b; padding:15px; border-radius:8px; margin-bottom:15px; border-left:4px solid var(--accent-color);">
+                <h3 style="color:var(--accent-color); margin-top:0;">🌟 VİZYONUMUZ VE AMACIMIZ</h3>
+                <p style="text-align:justify; font-size:12px;">İzmir 35 KorTenis Ligi; tenise gönül vermiş oyuncuları klasik, tek maçta elenilen stresli turnuva formatlarından kurtarmak için tasarlanmış, <strong>ezber bozan yenilikçi bir tenis ekosistemidir.</strong><br><br>
+                Amacımız; sıralamanın en altındaki oyuncuların bile rekabetten kopmadan son maça kadar şansını sürdürebildiği, puanlamanın sürekli değişkenlik gösterdiği heyecan dolu bir platform yaratmaktır. Her oyuncunun kendi yetenek seviyesinde bolca maç yapmasını, <strong>esnek fikstür</strong> yapımız sayesinde kendi takvimine ve müsaitliğine göre oynamasını ve yeni tenis partnerleri edinmesini sağlıyoruz. Bu sistem şu an bir başlangıç ve test aşamasındadır. Biz burada sadece bir turnuva yapmayı değil, sizlerden gelecek geri bildirimlerle sürekli gelişecek sağlam bir <strong>"Lig Kültürü"</strong> hedefliyoruz.</p>
+            </div>
+            
+            <h3>👤 1. SİSTEME GİRİŞ: KAYIT VE SEVİYE BELİRLEME</h3>
+            <p style="font-size:12px;">Sisteme ilk adım attığınızda, uluslararası geçerliliği olan <strong>NTRP</strong> standartlarındaki 6 aşamalı seviye anketimizi doldurursunuz. Sistem, verdiğiniz cevaplara göre sizi 1.5 ile 7.0 arasında puanlayarak uygun lig kategorinize (SILVER, GOLD veya PLATIN) atar. Ayrıca seçtiğiniz saat dilimleri sayesinde, rakiplerinizle fikstür üzerinde "Ortak Müsaitlik" eşleşmelerinizi anında görebilirsiniz.</p>
+
+            <h3>🎾 2. LİG ÇEŞİTLİLİĞİ VE MAÇ FORMATLARI</h3>
+            <ul style="font-size:12px;">
+                <li><strong>Lig ve Maç Formatları:</strong> Kort rezervasyonlarının genellikle 1 saatle kısıtlı olması ve oyuncularımızın farklı tenis beklentilerini karşılamak adına liglerimiz <strong>"6 Oyunluk Standart Lig"</strong> veya <strong>"4 Oyunluk Kısa Set Ligi (Fast4)"</strong> olarak iki ayrı konseptte başlatılabilir.</li>
+                <li><strong>Karar Puanı (Altın Puan) İnisiyatifi:</strong> Kort sürelerini verimli kullanmak ve maç süresi avantajı sağlamak adına, oyunlarda "Avantaj" yerine "Karar Puanı (Altın Puan)" uygulaması ile oynanıp oynanmayacağı tamamen oyuncuların maç öncesi karşılıklı anlaşmasına bırakılmıştır. Bu seçimin alınacak puanlara hiçbir etkisi yoktur.</li>
+                <li><strong>Farklı Formatlar K-KOR Puanını Etkiler mi?:</strong> Kesinlikle hayır! Sistemimiz oyun "sayısına" değil, oyun <strong>"yüzdesine" (MİP)</strong> odaklanır. 6 oyunluk formatta maçı 6-0, 6-0 kazanan birisi ile 4 oyunluk formatta 4-0, 4-0 kazanan birisi oyunların %100'ünü almış olur ve aynı maksimum puanı kazanır.</li>
+                <li><strong>Aynı Turnuvada Neden İki Format Karışık Oynanmaz?:</strong> Puanlama adaleti sağlansa bile, aynı kupa için yarışan oyuncuların fiziksel efor standartlarının eşit olması sportif bütünlük için zorunludur. Turnuva tek bir formatla başlar ve herkes o formata uyar.</li>
+                <li><strong>Kategori Çeşitliliği:</strong> Liglerimiz cinsiyete göre; Erkek, Kadın veya Karma Lig olarak düzenlenebilir. Seviyeye göre ise SILVER (1.5-3.5), GOLD (3.6-5.9), PLATIN (6.0-7.0) veya tüm seviyelerin karıştığı OPEN LİG olarak kurulabilir.</li>
+            </ul>
+
+            <h3>🏆 3. KATILIMCI SAYISINA GÖRE 3 FARKLI LİG İMKANI</h3>
+            <ul style="font-size:12px;">
+                <li><strong>🧍 Butik Lig (12 - 23 Oyuncu):</strong> Herkes 6 maç yapar. İlk 2 Seribaşı olur, Sonraki 2 Play-Off oynar. Kalan oyunculardan en iyi 4 (En iyi KOR) puanlı oyuncu Play-In oynar.</li>
+                <li><strong>🧍‍♂️ Standart Lig (24 - 47 Oyuncu):</strong> Herkes 8 maç yapar. İlk 4 Seribaşı olur, Sonraki 4 Play-Off oynar. Kalan oyunculardan en iyi 8 (En iyi KOR) puanlı oyuncu Play-In oynar.</li>
+                <li><strong>🏟️ Büyük Lig (48 - 96 Oyuncu):</strong> Herkes 10 maç yapar. İlk 8 Seribaşı olur, Sonraki 8 Play-Off oynar. Kalan oyunculardan en iyi 16 (En iyi KOR) puanlı oyuncu Play-In oynar.</li>
+            </ul>
+
+            <h3>🔮 4. KUSURSUZ KURA VE TORBA (SEEDING) SİSTEMİ</h3>
+            <p style="font-size:12px;">Kayıt olurken elde ettiğiniz "Sistem Puanı"na göre oyuncular büyükten küçüğe doğru sıralanarak <strong>Torbalara (Pots)</strong> ayrılır. Kura motorumuz, her oyuncuya <strong>her torbadan eşit sayıda rakip</strong> atayarak kusursuz bir Çapraz Eşleşme oluşturur.</p>
+
+            <h3>🤝 5. ESNEK FİKSTÜR, ÇİFT TARAFLI ONAY VE HÜKMEN (WO)</h3>
+            <ul style="font-size:12px;">
+                <li><strong>Esnek Fikstür:</strong> Maç oynamak için bir sıra zorunluluğu yoktur. Dilediğiniz rakiple, anlaştığınız zaman korta çıkabilirsiniz.</li>
+                <li><strong>Çift Taraflı Onay:</strong> Maç tarihi için sistemden öneri yaparsınız; rakip onayladığında randevu kesinleşir. Skor da yine rakibin onayı ile tablolara işlenir.</li>
+                <li><strong>Hükmen (WO) Kuralı:</strong> Anlaşılan maça çıkmayan oyuncu hükmen mağlup sayılır. WO durumunda kazanan sadece 1 Galibiyet, kaybeden sadece 1 Mağlubiyet alır. Her iki tarafa da <strong>Set Averajı veya KOR Puanı hesaplanmaz/verilmez!</strong> Puan, kortta ter dökerek kazanılır.</li>
+            </ul>
+
+            <h3>📊 6. KOR MUCİZESİ VE DİNAMİK SIRALAMA</h3>
+            <ul style="font-size:12px;">
+                <li><strong>MİP (Maç İçi Performans):</strong> Maçta kazandığınız oyun yüzdesidir. Yenilseniz dahi aldığınız her oyun size MİP kazandırır. Formülü: <code>(Kazanılan Oyun / Toplam Oynanan Oyun) × 100</code></li>
+                <li><strong>RGÇ (Rakip Güç Çarpanı):</strong> Rakibinizin ligdeki güncel galibiyet oranıdır. Formülü: <code>1 + (Rakibin Galibiyet Sayısı / Rakibin Toplam Maç Sayısı)</code></li>
+                <li><strong>Nasıl Hesaplanır?:</strong> 
+                    <br>🏆 <strong>KAZANAN:</strong> <code>(MİP × RGÇ) + 30 Puan (Galibiyet Primi)</code>
+                    <br>🛡️ <strong>KAYBEDEN:</strong> <code>(MİP × RGÇ) × 0.50 (Mağlup Çarpanı)</code>
+                </li>
+                <li><strong>Dinamik Sıralama (Canlı Puan Uyarısı):</strong> Lig aşamasında oynadığınız bir rakip, haftalar sonra maç kazanmaya devam ederse, RGÇ'si artacağı için <strong>sizin geçmişte aldığınız KOR puanınız da anında yükselir.</strong> Bu yüzden Puan Tablosu son maça kadar sürekli değişkendir!</li>
+            </ul>
+
+            <h3>⚔️ 7. AKAN AĞAÇ PLAY-OFF SİSTEMİ</h3>
+            <p style="font-size:12px;">Turnuva ağacında (Ağaç 🏆 sekmesi) rakibinizin kim olduğu netleştiği an, diğer eşleşmeleri beklemeden maçınızı oynayabilirsiniz.</p>
+
+            <h3>🌟 8. GENEL KLASMAN: K-KOR VE ŞÖHRET PUANI SİSTEMİ</h3>
+            <ul style="font-size:12px;">
+                <li><strong>1) K-KOR (Kariyer KOR Puanı):</strong> Tıpkı ATP dünya sıralamasında olduğu gibi, oynadığınız tüm turnuvalardaki kazandığınız KOR puanlarının ve başarı bonuslarının <strong>toplanarak biriktiği</strong> "Ömür Boyu Başarı" puanınızdır. Sistemde ne kadar aktif olur ve maç yaparsanız puanınız o kadar artar. Formül: <code>[Mevcut Biriken K-KOR] + [Yeni Turnuvanın KOR Puanı] + [Başarı Bonusu]</code>.
+                    <br>Ligi zirvede bitirenler K-KOR tablolarına devasa "Kariyer Bonusları" yazdırır:
+                    <ul>
+                        <li><strong>💎 PLATIN LİG:</strong> Şampiyon (+1500 Puan), Finalist (+1000 Puan), Yarı Finalist (+500 Puan)</li>
+                        <li><strong>🌍 OPEN LİG (Karma):</strong> Şampiyon (+1200 Puan), Finalist (+700 Puan), Yarı Finalist (+350 Puan)</li>
+                        <li><strong>🥇 GOLD LİG:</strong> Şampiyon (+1000 Puan), Finalist (+600 Puan), Yarı Finalist (+300 Puan)</li>
+                        <li><strong>🥈 SILVER LİG:</strong> Şampiyon (+500 Puan), Finalist (+300 Puan), Yarı Finalist (+150 Puan)</li>
+                    </ul>
+                </li>
+                <li><strong>2) Şöhret Puanı (Fame):</strong> Sistemdeki sadakatinizi, disiplininizi ve centilmenliğinizi ölçen prestij puanıdır:
+                    <ul>
+                        <li>Oynanan her maç için <strong>+1 Puan</strong>, ligi eksiksiz bitirene <strong>+20 Puan</strong>.</li>
+                        <li>Rakibin profilindeki <em>"👍 Rakibim çok centilmendi"</em> butonuna basıldığında o kişiye <strong>+5 Puan</strong>.</li>
+                        <li>Hükmen (WO) ile maça çıkmayan oyuncuya <strong>-10 Puan</strong> ceza.</li>
+                    </ul>
+                </li>
+            </ul>
+        `;
+        document.getElementById('dynamicRulesContainer').innerHTML = html;
+    }
+
+    function generateDynamicRules(s) {
+        document.getElementById('rulesHeaderTitle').innerText = "📜 TURNUVA KURALLARI VE LİG FORMATI";
+        let n = s.playerCount || 12; let mLimit = s.matchLimit || 6; let is4Game = s.format === '4_GAME';
+        let sDateStr = "Belirlenmedi", eDateStr = "Belirlenmedi", poDateStr = "Belirlenmedi", finalStr = "Belirlenmedi";
+        if(s.startDate) {
+            let st = new Date(s.startDate); let en = new Date(st); en.setDate(en.getDate() + (mLimit * 7));
+            let poS = new Date(en); poS.setDate(poS.getDate() + 1); let poE = new Date(poS); poE.setDate(poS.getDate() + 14);
+            let fSat = new Date(poE); let ds = (6 - fSat.getDay() + 7) % 7; if (ds === 0) ds = 7; fSat.setDate(fSat.getDate() + ds); let fSun = new Date(fSat); fSun.setDate(fSat.getDate() + 1);
+
+            const opt = { day: 'numeric', month: 'long', year: 'numeric' };
+            sDateStr = st.toLocaleDateString('tr-TR', opt); eDateStr = en.toLocaleDateString('tr-TR', opt);
+            poDateStr = `${poS.toLocaleDateString('tr-TR', opt)} - ${poE.toLocaleDateString('tr-TR', opt)}`;
+            finalStr = `${fSat.toLocaleDateString('tr-TR', opt)} - ${fSun.toLocaleDateString('tr-TR', opt)} (İlk Hafta Sonu)`;
+        }
+
+        let fmtText = is4Game ? "Tüm maçlar 4 oyunluk 2 kısa set üzerinden oynanır." : "Tüm maçlar standart 6 oyunluk 2 set üzerinden oynanır.";
+        let exTitle = is4Game ? "🎾 CANLI BİR ÖRNEK (4 OYUNLUK FORMAT):" : "🎾 CANLI BİR ÖRNEK (6 OYUNLUK FORMAT):";
+        let exWin = is4Game ? "Lider (Çarpan: 2.0) maçı 4-2, 4-2 kazanırsa; oyun yüzdesi %66 olur ve (66*2.0) + 30 formülüyle 162 Puan alır. Ancak lider, rakibine hiç oyun vermeden 4-0, 4-0 kazanırsa; oyun yüzdesi %100 olur ve (100*2.0) + 30 ile 230 Puan alır." : "Lider (Çarpan: 2.0) maçı 6-4, 6-4 kazanırsa; oyun yüzdesi %60 olur ve (60*2.0) + 30 formülüyle 150 Puan alır. Ancak lider, rakibine hiç oyun vermeden 6-0, 6-0 kazanırsa; oyun yüzdesi %100 olur ve (100*2.0) + 30 ile 230 Puan alır.";
+        let exLoss = is4Game ? "Rakip (Kaybeden taraf) maçı 4-2, 4-2 kaybetmesine rağmen, liderden 4 oyun kopardığı için %33 MİP oranına ulaşır. Rakibinin de çarpanı (örneğin 1.5) olsun. (33*1.5) × 0.50 formülüyle ~25 Puan elde eder." : "Rakip (Kaybeden taraf) maçı 6-4, 6-4 kaybetmesine rağmen, liderden 8 oyun kopardığı için %40 MİP oranına ulaşır. Rakibinin de çarpanı (örneğin 1.5) olsun. (40*1.5) × 0.50 formülüyle 30 Puan elde eder.";
+
+        let poText = n >= 48 ? "Lig sonunda ilk 8 oyuncu 'Seri Başı', sonraki 8 oyuncu 'Play-Off' turuna kalır. Kalan oyunculardan en iyi 16 KOR (En iyi KOR sıralaması) puanlı oyuncu 'Play-In' eşleşmesi yapar ve kazananlar Play-Off turuna yükselir." : (n >= 24 ? "Lig sonunda ilk 4 oyuncu 'Seri Başı', sonraki 4 oyuncu 'Play-Off' turuna kalır. Kalan oyunculardan en iyi 8 KOR (En iyi KOR sıralaması) puanlı oyuncu 'Play-In' eşleşmesi yapar ve kazananlar Play-Off turuna yükselir." : "Lig sonunda ilk 2 oyuncu 'Seri Başı', sonraki 2 oyuncu 'Play-Off' turuna kalır. Kalan oyunculardan en iyi 4 KOR (En iyi KOR sıralaması) puanlı oyuncu 'Play-In' eşleşmesi yapar ve kazananlar Play-Off turuna yükselir.");
+
+        let html = `<ul style="list-style-type:none; padding-left:0;">
+            <li><strong style="color:var(--accent-color); font-size:14px;">🗓️ 1. TURNUVA TAKVİMİ VE İŞLEYİŞ</strong></li>
+            <li>• <strong>Kayıt ve Başlangıç:</strong> Lig aşaması başlamadan önce kayıtların tamamlanması gerekmektedir. Son kayıt tarihi ve lig başlangıç günü: <strong style="color:var(--danger);">${sDateStr}</strong></li>
+            <li>• <strong>Lig Aşaması (<strong style="color:var(--danger);">${sDateStr} - ${eDateStr}</strong>):</strong> ${n} oyuncu arasında, her bir oyuncunun ${mLimit} farklı rakiple eşleşeceği (her torbadan adil dağılım) ve ${mLimit} haftalık bir süreçte tamamlanan rastgele atamalı lig fikstürü.</li>
+            <li>• <strong>Esnek Fikstür:</strong> Belirtilen haftalık süreç boyunca dilediğiniz rakiple, dilediğiniz sırayla korta çıkabilirsiniz. Bu esnek yapı, tüm oyuncularımıza kendi programlarına uygun bir rekabet alanı sunmak ve maçların (WO) kaçırılma ihtimalini en aza indirerek ligin dinamizmini kesintisiz kılmak amacıyla tasarlanmıştır.</li>
+            <li>• <strong>Play-Off ve Final Takvimi:</strong> Lig aşaması tamamlandıktan sonra Play-Off süreci başlar. Büyük Final hariç tüm Play-Off turlarının <strong style="color:var(--danger);">${poDateStr}</strong> içerisinde tamamlanması hedeflenmektedir. Büyük Final Şöleni ise bu sürenin bitimindeki ilk hafta sonu olan <strong style="color:var(--danger);">${finalStr}</strong> tarihinde oynanacaktır.</li>
+            <br>
+            <li><strong style="color:var(--accent-color); font-size:14px;">🎾 2. LİG FORMATI VE ZAMAN YÖNETİMİ</strong></li>
+            <li>• <strong>Maç Formatı:</strong> ${fmtText} Setlerde 1-1'lik eşitlik olması durumunda 10 puanlık maç tie-break'i oynanır.</li>
+            <li>• <strong>Zaman Yönetimi (Karar Puanı):</strong> Kort rezervasyonunun kısıtlı (1 saat) olması durumunda, tarafların anlaşması koşuluyla süreyi verimli kullanmak adına "Avantaj" yerine "Karar Puanı (Altın Puan)" oynanabilir. Bu seçimi katılımcılarımıza bırakıyoruz. Puan durumu ve lig sıralamasına bir etkisi yoktur.</li>
+            <br>
+            <li><strong style="color:var(--accent-color); font-size:14px;">📊 3. KOR (KORT OYUN REYTİNGİ) VE YENİLİKÇİ PUANLAMA</strong></li>
+            <li>• Klasik "oyun averajı" sisteminin ötesine geçen KOR; maçın sonucuna, oyunun bütününe ve gösterilen performansa değer veren, tenisin rekabetçi ruhunu ödüllendiren yenilikçi bir performans analizidir. Sıralama önceliği: 1) Galibiyet Sayısı, 2) Set Averajı, 3) KOR Puanı şeklindedir.</li>
+            <li>• <strong style="color:var(--warning);">Dinamik KOR ve Sıralama Uyarısı:</strong> Lig aşamasında maç oynama sırası zorunluluğu yoktur. Oynadığınız bir rakip, siz onunla oynadıktan haftalar sonra bile maç kazanmaya devam ederse, <strong>RGÇ (Rakip Güç Çarpanı) artacağı için sizin KOR puanınız da otomatik ve canlı olarak yükselir.</strong> Bu yüzden Puan Tablosu ve Sıralamalar <u style="color:var(--warning);">ligin son gününe, hatta oynanacak son maça kadar her an değişebilir!</u> Rekabet son ana kadar canlıdır.</li>
+            <li>• <strong>MİP (Maç İçi Performans):</strong> [Kazandığınız Oyun / Toplam Oynanan Oyun] × 100</li>
+            <li>• <strong>RGÇ (Rakip Güç Çarpanı):</strong> 1 + (Rakibin Galibiyet Sayısı / Rakibin Toplam Maç Sayısı)</li>
+            <li>• <strong>Hükmen (WO) Maçlar:</strong> Hükmen biten maçlarda kazanan oyuncu sadece 1 Galibiyet, kaybeden oyuncu ise sadece 1 Mağlubiyet alır. Her iki tarafa da Set Averajı veya KOR Puanı <strong>verilmez/hesaplanmaz.</strong> Bu kural, oyuncuların KOR veya Set Averajı manipülasyonu yapmak amacıyla kortta oynamadan skor girmelerini kesin olarak engellemek için geliştirilmiştir. Gerçek puan kortta ter dökerek kazanılır!</li>
+            <div style="background:#1e293b; padding:10px; border-radius:6px; border-left:4px solid var(--accent-color); margin:10px 0;">
+                <strong>📌 KOR PUANI NASIL HESAPLANIR?</strong><br>
+                🏆 KAZANAN: (MİP × RGÇ) + 30 Puan (Galibiyet Primi)<br>
+                🛡️ KAYBEDEN: (MİP × RGÇ) × 0.50 (Mağlup Çarpanı)
+            </div>
+            <div class="example-box">
+                <strong style="color:var(--accent-color)">${exTitle}</strong> Lider ve rakibi bir maçta karşılaştı.<br><br>
+                <strong style="color:var(--success)">Kazanan Senaryosu:</strong> ${exWin}<br><br>
+                <strong style="color:var(--danger)">Kaybeden Senaryosu:</strong> ${exLoss}
+            </div>
+            <br>
+            <li><strong style="color:var(--accent-color); font-size:14px;">⚔️ 4. KATMANLI PLAY-OFF SİSTEMİ</strong></li>
+            <li>• <strong>Play-Off Yapısı:</strong> ${poText} <br><br><strong>Akan Sistem:</strong> Final maçı hariç tüm eşleşmeler "Akan Play-Off" düzenindedir; rakibiniz belli olduğu an maçınızı oynayabilirsiniz. Turnuva ağacındaki tüm güncel eşleşmeleri, seri başlarını ve ilerleyişi "Turnuva Ağacı" sekmesinden anlık olarak takip edebilirsiniz.</li>
+        </ul>`;
+        document.getElementById('dynamicRulesContainer').innerHTML = html;
+    }
+
+    function renderGlobalStandings() {
+        document.getElementById('standingsTitle').innerText = "🏆 GENEL SIRALAMA (TÜM ZAMANLAR)";
+        document.getElementById('standingsHead').innerHTML = "<tr><th>#</th><th style='text-align:left;'>OYUNCU</th><th>O</th><th>G</th><th>M</th><th>K-KOR 🌟</th></tr>";
+        
+        let globalArray = Object.keys(globalUsers).map(uid => {
+            let user = globalUsers[uid];
+            let dStats = derivedGlobalStats[uid] || { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0 };
+            return { id: uid, name: user.name, tier: user.tier || 'BELİRSİZ', sysScore: user.sysScore, k_kor: dStats.k_kor, gMatch: dStats.gMatch, gWins: dStats.gWins, gLoss: dStats.gLoss };
+        });
+
+        let sortedUsers = globalArray.sort((a,b) => (b.k_kor || 0) - (a.k_kor || 0));
+        
+        // HATA BURADAN ÇÖZÜLDÜ: getElementById kullanıldı
+        const tbody = document.getElementById("standingsBody"); 
+        if(!tbody) return;
+        tbody.innerHTML = "";
+        
+        sortedUsers.forEach((u, i) => {
+            let bdg = i === 0 ? '👑' : '';
+            tbody.innerHTML += `
+                <tr class="zone-global">
+                    <td><strong>${i+1}</strong></td>
+                    <td style="text-align:left; font-weight:bold;"><span class="player-link" onclick="openPublicProfile('${u.id}')">${u.name}</span> <br> <span style="background:#1e293b; color:var(--accent-color); padding:2px 5px; border-radius:4px; font-size:10px;">${u.tier} (${u.sysScore || '-'})</span></td>
+                    <td style="color:var(--warning); font-weight:bold;">${u.gMatch || 0}</td>
+                    <td style="color:var(--success);font-weight:bold;">${u.gWins || 0}</td>
+                    <td>${u.gLoss || 0}</td>
+                    <td style="color:var(--accent-color); font-weight:bold;">${(u.k_kor || 0).toFixed(1)} ${bdg}</td>
+                </tr>`;
+        });
+        
+        let miniContainer = document.getElementById('miniStandingsWrapper');
+        if(miniContainer) miniContainer.innerHTML = ""; 
     }
 
     function renderLocalStandings() {
