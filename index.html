@@ -499,7 +499,6 @@
                     loggedInUser = globalUsers[loggedInUser.id];
                 }
 
-                // SADECE aktif sekmeyi günceller
                 let activePanelId = document.querySelector('.panel.active') ? document.querySelector('.panel.active').id : null;
                 if(activePanelId) switchTab(activePanelId);
 
@@ -543,6 +542,97 @@
             } catch(e){}
         }, errHandler);
     }
+
+    // YENİ VE DÜZELTİLMİŞ FONKSİYONLAR BURADA BAŞLIYOR:
+    
+    function buildGlobalStats() {
+        derivedGlobalStats = {};
+        
+        // Önce tüm kullanıcılar için sıfırdan istatistik objesi oluştur
+        Object.keys(globalUsers).forEach(uid => {
+            derivedGlobalStats[uid] = { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0, fame: globalUsers[uid].fame || 0 };
+        });
+
+        // Tüm aktif ve bitmiş turnuvalardaki oyuncu verilerini topla
+        Object.keys(allTourneys).forEach(tid => {
+            let t = allTourneys[tid];
+            if (t.settings && t.settings.status === 'active' && t.players) {
+                _arr(t.players).forEach(tp => {
+                    if (derivedGlobalStats[tp.id]) {
+                        derivedGlobalStats[tp.id].k_kor += (tp.kor || 0);
+                        derivedGlobalStats[tp.id].gWins += (tp.wins || 0);
+                        derivedGlobalStats[tp.id].gLoss += (tp.losses || 0);
+                        derivedGlobalStats[tp.id].gMatch += (tp.totalMatches || 0);
+                    }
+                });
+            }
+        });
+    }
+
+    function renderGlobalStandings() {
+        document.getElementById('standingsTitle').innerText = "🏆 GENEL SIRALAMA (TÜM ZAMANLAR)";
+        document.getElementById('standingsHead').innerHTML = "<tr><th>#</th><th style='text-align:left;'>OYUNCU</th><th>O</th><th>G</th><th>M</th><th>K-KOR 🌟</th></tr>";
+        const tbody = document.getElementById("standingsBody");
+        if(!tbody) return;
+        tbody.innerHTML = "";
+
+        // Global listeyi oluştur ve puanına göre sırala
+        let globalList = Object.values(globalUsers).map(u => {
+            let stats = derivedGlobalStats[u.id] || { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0 };
+            return { id: u.id, name: u.name, ...stats };
+        }).sort((a, b) => b.k_kor - a.k_kor);
+
+        globalList.forEach((p, i) => {
+            tbody.innerHTML += `<tr>
+                <td><strong>${i+1}</strong></td>
+                <td style="text-align:left; font-weight:bold;"><span class="player-link" onclick="openPublicProfile('${p.id}')">${p.name}</span></td>
+                <td style="color:var(--warning); font-weight:bold;">${p.gMatch}</td>
+                <td style="color:var(--success);font-weight:bold;">${p.gWins}</td>
+                <td>${p.gLoss}</td>
+                <td style="color:var(--accent-color); font-weight:bold;">${p.k_kor.toFixed(1)}</td>
+            </tr>`;
+        });
+        
+        // Mini tablo alanını temizle
+        let mini = document.getElementById('miniStandingsWrapper');
+        if(mini) mini.innerHTML = "";
+    }
+
+    function renderGlobalRules() {
+        document.getElementById('rulesHeaderTitle').innerText = "📜 SİSTEM REHBERİ VE K-KOR MATEMATİĞİ";
+        document.getElementById('dynamicRulesContainer').innerHTML = `
+            <h3>Hoş Geldiniz!</h3>
+            <p>İzmir 35 KorTenis Ligi sistemi, kortlardaki rekabetçi tempoyu dijitale taşımak için özel olarak kurgulanmıştır.</p>
+            <h3>K-KOR (Kort Kort Puanı) Nedir?</h3>
+            <p>Sistemimiz klasik galibiyet/mağlubiyet sisteminden ziyade, <strong>Maç İçi Performans (MİP)</strong> ve <strong>Rakip Güç Çarpanı (RGÇ)</strong> bazlı gelişmiş bir algoritma kullanır.</p>
+            <ul>
+                <li>Oynadığınız her oyun (game) değerlidir. Skor 6-0 da olsa, 7-6 da olsa kazandığınız her oyun puanınızı etkiler.</li>
+                <li>Sizden üst seviye birinden (ya da kazanma oranı yüksek birinden) aldığınız oyun, size ekstra K-KOR kazandırır.</li>
+                <li>Turnuva formatlarına sadık kalarak, belirlenen tarihlerde maçlarınızı tamamlamanız beklenir.</li>
+            </ul>
+            <div class="guide-box">Menüdeki <strong>Turnuvalar</strong> sekmesinden seviyenize uygun liglere katılabilir, rakiplerinizle sistem üzerinden ortak bir gün belirleyip skorunuzu girebilirsiniz.</div>
+        `;
+    }
+
+    function generateDynamicRules(settings) {
+        let formatText = settings.format === '6_GAME' ? '6 Oyunluk (Klasik 2 Set)' : '4 Oyunluk (Kısa Format)';
+        document.getElementById('rulesHeaderTitle').innerText = `📜 ${settings.customName || 'TURNUVA'} KURALLARI`;
+        document.getElementById('dynamicRulesContainer').innerHTML = `
+            <h3>Dinamik Turnuva Kuralları</h3>
+            <p>Bu turnuva, kayıtlar tamamlandığında kura çekimi ile başlamış aktif bir ligdir.</p>
+            <ul>
+                <li><strong>Maç Formatı:</strong> ${formatText}</li>
+                <li><strong>Seviye Sınırı:</strong> ${settings.tier || 'Belirtilmedi'}</li>
+                <li><strong>Kategori:</strong> ${settings.gender || 'Belirtilmedi'}</li>
+                <li><strong>Bölge/İlçe:</strong> ${settings.region || 'İzmir'}</li>
+            </ul>
+            <div class="example-box">
+                Skor girişlerini maç tamamlandıktan hemen sonra, rakibinizle teyitleşerek sisteme girmeniz gerekmektedir. Hükmen (WO - Maça Çıkmama) durumlarında kaybeden taraftan genel şöhret puanı silinecektir.
+            </div>
+        `;
+    }
+    
+    // (DİĞER MEVCUT FONKSİYONLARIN KORUNARAK AŞAĞIYA EKLENMESİ)
 
     function toggleAuth(id) { document.querySelectorAll('.auth-card').forEach(c=>c.style.display='none'); document.getElementById(id).style.display='block'; }
     function forgotPassword() { let n = prompt("Sisteme kayıtlı Adınızı ve Soyadınızı girin:"); if (!n) return; database.ref('the_35_gold_league/password_resets').push({ name: n.toLocaleUpperCase('tr-TR'), timestamp: Date.now() }).then(() => alert("Şifre sıfırlama talebiniz yöneticiye iletildi.")); }
@@ -642,7 +732,6 @@
         }
     };
     
-    // YENİ: Yönetici Şifre Sıfırlama Talebini Siler
     window.deletePwReset = function(key) {
         database.ref('the_35_gold_league/password_resets/' + key).remove();
     };
@@ -937,7 +1026,6 @@
         }
     }
 
-    /* YÖNETİCİ MENÜSÜ FONKSİYONLARI */
     function adminFilterPlayers() {
         let nameQ = document.getElementById('adminSearchName').value.toLocaleUpperCase('tr-TR'); 
         let genQ = document.getElementById('adminFilterGender').value;
