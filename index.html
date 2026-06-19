@@ -16,7 +16,7 @@
         .container { max-width: 1200px; margin: 0 auto; }
         h1, h2, h3 { text-align: center; color: var(--accent-color); margin: 10px 0; letter-spacing: 1px; }
         
-        .nav-bar { display: none; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px; }
+        .nav-bar { display: none; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px; flex-wrap:wrap; gap:10px;}
         .nav-btn { background: #1e293b; color: white; border: 1px solid var(--border-color); padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.3s; }
         .nav-btn:hover { background: #334155; }
         
@@ -134,9 +134,10 @@
 
 <div class="container">
     <div class="nav-bar" id="appNavBar">
-        <div>
+        <div style="display:flex; gap:10px; align-items:center;">
             <button class="nav-btn" onclick="goHome()" id="homeBtn" style="display:none;">🏠 Ana Sayfa</button>
-            <select id="userActiveLeagueSelect" class="auth-input force-upper" style="width:auto; margin:0 0 0 5px; padding:6px; font-size:12px; display:none;" onchange="userSwitchLeague()">
+            <button class="nav-btn" id="navAdminNotifBtn" onclick="openAdminGlobalNotifs()" style="display:none; background:var(--warning); color:black; border-color:var(--warning);">🔔 BİLDİRİMLER</button>
+            <select id="userActiveLeagueSelect" class="auth-input force-upper" style="width:auto; margin:0; padding:6px; font-size:12px; display:none;" onchange="userSwitchLeague()">
                 <option value="none">GENEL MOD (TÜM ZAMANLAR)</option>
             </select>
         </div>
@@ -168,7 +169,7 @@
             <input type="text" id="regName" class="auth-input force-upper" placeholder="AD SOYAD (ÖRN: OĞUZ UZUN)">
             
             <div style="display:flex; gap:10px; margin-bottom:12px;">
-                <select id="regGender" class="auth-select force-upper" style="margin:bottom:0;">
+                <select id="regGender" class="auth-select force-upper" style="margin-bottom:0;">
                     <option value="">CİNSİYET</option><option value="ERKEK">👨 ERKEK</option><option value="KADIN">👩 KADIN</option>
                 </select>
                 <select id="regHand" class="auth-select force-upper" style="margin-bottom:0;">
@@ -223,7 +224,6 @@
 
         <div class="tabs" id="tabsContainer" style="display:none;">
             <button class="tab-btn" onclick="switchTab('profile')">👤 Profil</button>
-            <button class="tab-btn" id="tabAdminBtn" onclick="switchTab('admin_notifs')" style="display:none;">🔔 Bildirimler</button>
             <button class="tab-btn" id="tabRulesBtn" onclick="switchTab('rules')">📜 Sistem Rehberi</button>
             <button class="tab-btn active" id="tabStandingsBtn" onclick="switchTab('standings')">🏆 Genel Sıralama</button>
             <button class="tab-btn" onclick="switchTab('rivals')">Fikstür</button>
@@ -258,7 +258,7 @@
         </div>
 
         <div id="admin_notifs" class="panel">
-            <h2>🔔 LİG YÖNETİM BİLDİRİMLERİ</h2>
+            <h2 style="color:var(--warning);">🔔 TÜM LİG BİLDİRİMLERİ (MERKEZ)</h2>
             <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
                 <button class="action-sm" style="background:var(--accent-color); color:black; font-weight:bold; padding:8px 12px;" onclick="changeAdminPassword()">🔑 YÖNETİCİ ŞİFRESİNİ DEĞİŞTİR</button>
             </div>
@@ -266,13 +266,13 @@
                 <h4 style="color:var(--danger); margin-top:0; border-bottom:1px solid var(--divider); padding-bottom:5px;">🔑 ŞİFRE SIFIRLAMA TALEPLERİ</h4>
                 <div id="adminPasswordResets">Bulunmuyor.</div>
             </div>
-            <div style="background:#020617; padding:15px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:15px;">
-                <h4 style="color:var(--warning); margin-top:0; border-bottom:1px solid var(--divider); padding-bottom:5px;">⏳ ONAY BEKLEYEN SKORLAR VEYA TARİHLER</h4>
-                <div id="adminPendingList">Bulunmuyor.</div>
+            <div style="background:#020617; padding:15px; border-radius:8px; border:1px solid var(--warning); margin-bottom:15px;">
+                <h4 style="color:var(--warning); margin-top:0; border-bottom:1px solid var(--divider); padding-bottom:5px;">⏳ ONAY BEKLEYEN SKORLAR VE TARİHLER (TÜM LİGLER)</h4>
+                <div id="adminPendingList">Yükleniyor...</div>
             </div>
-            <div style="background:#020617; padding:15px; border-radius:8px; border:1px solid var(--border-color);">
-                <h4 style="color:var(--success); margin-top:0; border-bottom:1px solid var(--divider); padding-bottom:5px;">✅ SON KESİNLEŞEN MAÇ TARİHLERİ</h4>
-                <div id="adminConfirmedDatesList">Bulunmuyor.</div>
+            <div style="background:#020617; padding:15px; border-radius:8px; border:1px solid var(--success);">
+                <h4 style="color:var(--success); margin-top:0; border-bottom:1px solid var(--divider); padding-bottom:5px;">✅ SON KESİNLEŞEN MAÇ TARİHLERİ (TÜM LİGLER)</h4>
+                <div id="adminConfirmedDatesList">Yükleniyor...</div>
             </div>
         </div>
 
@@ -411,10 +411,14 @@
                         isAdmin = false; loggedInUser = globalUsers[savedUserId];
                         if(document.getElementById('authWrapper').style.display !== 'none') enterApp();
                     }
+                } else if (!isAdmin && loggedInUser && globalUsers[loggedInUser.id]) {
+                    // Update session loggedInUser data if changed remotely (like alerts added)
+                    loggedInUser = globalUsers[loggedInUser.id];
                 }
 
                 if(isAdmin && document.getElementById('setup').classList.contains('active')) renderAdminChecklist();
                 if(!currentTid && document.getElementById('standings').classList.contains('active')) renderGlobalStandings();
+                if(!isAdmin && loggedInUser && document.getElementById('profile').classList.contains('active')) renderProfile();
             } catch(e) { console.error("Kullanıcı okuma hatası:", e); }
         }, errHandler);
 
@@ -425,6 +429,11 @@
                 populateLeagueDropdowns();
                 if (currentTid && allTourneys[currentTid]) { loadTournamentData(currentTid); }
                 if(!currentTid && document.getElementById('standings').classList.contains('active')) renderGlobalStandings();
+                
+                // Keep admin global notifs updated if open
+                if (isAdmin && document.getElementById('admin_notifs').classList.contains('active')) {
+                    renderAdminNotifs();
+                }
             } catch(e) { console.error("Turnuva okuma hatası:", e); }
         }, errHandler);
 
@@ -451,6 +460,13 @@
     function registerNewUser() {
         let nameRaw = document.getElementById('regName').value.trim();
         let name = nameRaw.replace(/[<>]/g, '').toLocaleUpperCase('tr-TR'); 
+        
+        // Benzersiz İsim Kontrolü
+        let nameExists = Object.values(globalUsers).some(u => u.name === name);
+        if(nameExists) {
+            return alert("HATA: Bu isimde bir oyuncu zaten kayıtlı! Lütfen adınızı veya soyadınızı farklılaştırarak (Örn: İkinci isim ekleyerek) tekrar deneyin.");
+        }
+
         let pass = document.getElementById('regPassword').value; 
         let gender = document.getElementById('regGender').value;
         let dHand = document.getElementById('regHand').value;
@@ -529,15 +545,42 @@
     function changeAdminPassword() { let oldP = prompt("Mevcut yönetici şifresini girin:"); if(oldP !== systemAdminPassword) return alert("Hatalı şifre!"); let newP = prompt("Yeni Yönetici Şifresini Belirleyin:"); if(!newP) return; database.ref('the_35_gold_league/admin/password').set(newP).then(() => { systemAdminPassword = newP; alert("Yönetici şifresi güncellendi!"); }); }
     function logoutSession() { localStorage.removeItem('korTennisUserId'); location.reload(); }
 
+    function addAlertToUser(uid, msg) {
+        if(!uid) return;
+        database.ref(`the_35_gold_league/users/${uid}/alerts`).push({ text: msg, time: Date.now() });
+    }
+
+    window.dismissAlert = function(key) {
+        if(loggedInUser && loggedInUser.id) {
+            database.ref(`the_35_gold_league/users/${loggedInUser.id}/alerts/${key}`).remove();
+        }
+    };
+
     function enterApp() {
-        document.getElementById('authWrapper').style.display = "none"; document.getElementById('mainApp').style.display = "block"; document.getElementById('appNavBar').style.display = "flex";
+        document.getElementById('authWrapper').style.display = "none"; 
+        document.getElementById('mainApp').style.display = "block"; 
+        document.getElementById('appNavBar').style.display = "flex";
+        
         if(isAdmin) {
-            document.getElementById('adminTopBar').style.display = "block"; document.getElementById('homeBtn').style.display = "inline-block"; document.getElementById('tabAdminBtn').style.display = "inline-block";
-            adminSwitchLeague();
+            document.getElementById('adminTopBar').style.display = "block"; 
+            document.getElementById('homeBtn').style.display = "inline-block"; 
+            document.getElementById('navAdminNotifBtn').style.display = "inline-block";
+            populateLeagueDropdowns(); 
+            openAdminGlobalNotifs(); // ADMİN İLK GİRİŞTE BİLDİRİMLER EKRANINA DÜŞER
         } else {
-            document.getElementById('tabsContainer').style.display = "flex"; document.getElementById('userActiveLeagueSelect').style.display = "inline-block";
+            document.getElementById('tabsContainer').style.display = "flex"; 
+            document.getElementById('userActiveLeagueSelect').style.display = "inline-block";
             populateLeagueDropdowns(); switchTab('profile');
         }
+    }
+
+    function openAdminGlobalNotifs() {
+        document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+        document.getElementById('tabsContainer').style.display = 'none';
+        document.getElementById('deleteLeagueBtn').style.display = 'none';
+        document.getElementById('adminLeagueSelect').value = 'notifs'; // Reset dropdown visually
+        document.getElementById('admin_notifs').classList.add('active');
+        renderAdminNotifs();
     }
 
     function renderProfile() {
@@ -556,29 +599,47 @@
 
         // Bildirimleri Çek
         let notifHtml = '';
+        
+        // 1. Kalıcı (Onaylandı) Bildirimleri (Firebase'den)
+        if(loggedInUser.alerts) {
+            Object.keys(loggedInUser.alerts).forEach(alertKey => {
+                let alertObj = loggedInUser.alerts[alertKey];
+                notifHtml += `<div class="notification-card" style="border-color:var(--success); background:rgba(0,255,170,0.1); margin-bottom:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <span style="flex:1;">${alertObj.text}</span>
+                        <button class="action-sm" style="background:transparent; color:var(--text-color); font-size:16px; margin:0; padding:0 5px;" onclick="dismissAlert('${alertKey}')">✖</button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        // 2. Dinamik Onay Bekleyen İşlemler
         let myPendingScore = []; let myPendingDate = [];
         Object.keys(allTourneys).forEach(tid => {
             let t = allTourneys[tid];
             if (!t.matches) return;
             let tMatches = _arr(t.matches);
+            let tName = t.settings.customName || "Turnuva";
+            
             tMatches.forEach(m => {
                 let isMyMatch = m.p1 === loggedInUser.id || m.p2 === loggedInUser.id;
                 if (!isMyMatch) return;
                 if (m.played && m.pending && m.enteredBy !== loggedInUser.id) {
-                    myPendingScore.push(`${m.p1Name} vs ${m.p2Name}`);
+                    myPendingScore.push(`<strong>[${tName}]</strong> ${m.p1Name} vs ${m.p2Name}`);
                 }
                 if (!m.played && m.proposedDates && m.proposedDates.length > 0 && m.proposedBy !== loggedInUser.id) {
-                    myPendingDate.push(`${m.p1Name} vs ${m.p2Name}`);
+                    myPendingDate.push(`<strong>[${tName}]</strong> ${m.p1Name} vs ${m.p2Name}`);
                 }
             });
         });
 
         if (myPendingScore.length > 0 || myPendingDate.length > 0) {
-            myPendingScore.forEach(n => notifHtml += `<div class="notification-card">🚨 <strong>SKOR ONAYI:</strong> ${n} maçı skor onayınızı bekliyor! Lütfen 'Skor Gir' sekmesinden işlemi tamamlayın.</div>`);
-            myPendingDate.forEach(n => notifHtml += `<div class="notification-card">📅 <strong>TARİH ONAYI:</strong> ${n} maçı için rakibiniz tarih önerdi! Lütfen 'Skor Gir' sekmesinden işlemi tamamlayın.</div>`);
-        } else {
-            notifHtml = `<div style="text-align:center; color:var(--sub-text); font-size:11px; margin-top:20px;">Bekleyen bir eyleminiz bulunmuyor.</div>`;
+            myPendingScore.forEach(n => notifHtml += `<div class="notification-card" style="margin-bottom:10px;">🚨 <strong>SKOR ONAYI BEKLİYOR:</strong> ${n} maçı skor onayınızı bekliyor! Lütfen 'Skor Gir' sekmesinden işlemi tamamlayın.</div>`);
+            myPendingDate.forEach(n => notifHtml += `<div class="notification-card" style="border-color:#3b82f6; background:rgba(59,130,246,0.1); margin-bottom:10px;">📅 <strong>TARİH ONAYI BEKLİYOR:</strong> ${n} maçı için rakibiniz tarih önerdi! Lütfen 'Skor Gir' sekmesinden işlemi tamamlayın.</div>`);
+        } else if (!loggedInUser.alerts) {
+            notifHtml += `<div style="text-align:center; color:var(--sub-text); font-size:11px; margin-top:20px;">Bekleyen bir eyleminiz bulunmuyor.</div>`;
         }
+        
         document.getElementById('profNotificationsContainer').innerHTML = notifHtml;
     }
 
@@ -593,17 +654,25 @@
                 Object.values(passwordResets).map(r => `<div class="admin-notif-row">${r.name} şifre sıfırlama talep etti.</div>`).join('') : 'Bulunmuyor.';
         }
         
-        if(pendingList && matches) {
-            let pending = matches.filter(m => m.pending && m.played);
-            let pDates = matches.filter(m => !m.played && m.proposedDates && m.proposedDates.length > 0);
+        let pHtml = '', cHtml = '';
             
-            let html = pending.length > 0 ? pending.map(m => `<div class="admin-notif-row">${m.p1Name} vs ${m.p2Name} (Skor Onayı Bekliyor)</div>`).join('') : '';
-            html += pDates.length > 0 ? pDates.map(m => `<div class="admin-notif-row">${m.p1Name} vs ${m.p2Name} (Tarih Onayı Bekliyor)</div>`).join('') : '';
-            pendingList.innerHTML = html || 'Bulunmuyor.';
+        Object.keys(allTourneys).forEach(tid => {
+            let t = allTourneys[tid];
+            if (!t.matches) return;
+            let tMatches = _arr(t.matches);
+            let tName = t.settings.customName || "İsimsiz Turnuva";
             
-            let confirmed = matches.filter(m => !m.played && m.matchDate);
-            confirmedList.innerHTML = confirmed.length > 0 ? confirmed.map(m => `<div class="admin-notif-row">${m.p1Name} vs ${m.p2Name} (${m.matchDate})</div>`).join('') : 'Bulunmuyor.';
-        }
+            let pending = tMatches.filter(m => m.pending && m.played);
+            let pDates = tMatches.filter(m => !m.played && m.proposedDates && m.proposedDates.length > 0);
+            let confirmed = tMatches.filter(m => !m.played && m.matchDate);
+            
+            if(pending.length > 0) pHtml += pending.map(m => `<div class="admin-notif-row"><span><strong style="color:var(--accent-color)">[${tName}]</strong> ${m.p1Name} vs ${m.p2Name}</span> <span style="background:var(--warning); color:black; padding:2px 5px; border-radius:4px; font-weight:bold;">Skor Onayı</span></div>`).join('');
+            if(pDates.length > 0) pHtml += pDates.map(m => `<div class="admin-notif-row"><span><strong style="color:var(--accent-color)">[${tName}]</strong> ${m.p1Name} vs ${m.p2Name}</span> <span style="background:#3b82f6; color:white; padding:2px 5px; border-radius:4px; font-weight:bold;">Tarih Onayı</span></div>`).join('');
+            if(confirmed.length > 0) cHtml += confirmed.map(m => `<div class="admin-notif-row"><span><strong style="color:var(--accent-color)">[${tName}]</strong> ${m.p1Name} vs ${m.p2Name}</span> <span style="color:var(--success); font-weight:bold;">${m.matchDate}</span></div>`).join('');
+        });
+        
+        if(pendingList) pendingList.innerHTML = pHtml || 'Bulunmuyor.';
+        if(confirmedList) confirmedList.innerHTML = cHtml || 'Bulunmuyor.';
     }
 
     /* YÖNETİCİ MENÜSÜ FONKSİYONLARI */
@@ -647,6 +716,10 @@
     function populateLeagueDropdowns() {
         let aSel = document.getElementById('adminLeagueSelect'); let uSel = document.getElementById('userActiveLeagueSelect'); if(!aSel || !uSel) return;
         let aOpt = '<option value="new">➕ YENİ TURNUVA KUR</option>'; let uOpt = '<option value="none">GENEL MOD (TÜM ZAMANLAR)</option>';
+        
+        // Add a hidden option for notifs so UI looks clean if selected via button
+        aOpt += '<option value="notifs" style="display:none;">BİLDİRİMLER EKRANI</option>';
+
         Object.keys(allTourneys).forEach(tid => {
             let t = allTourneys[tid];
             if(!t || !t.settings) return; 
@@ -655,7 +728,9 @@
             if(!isAdmin && loggedInUser && _arr(t.players).some(p => p.id === loggedInUser.id)) uOpt += `<option value="${tid}">${n}</option>`;
         });
         let aPrev = aSel.value, uPrev = uSel.value; aSel.innerHTML = aOpt; uSel.innerHTML = uOpt;
-        if(aPrev !== 'new' && allTourneys[aPrev]) aSel.value = aPrev; if(uPrev !== 'none' && allTourneys[uPrev]) uSel.value = uPrev;
+        if(aPrev !== 'new' && aPrev !== 'notifs' && allTourneys[aPrev]) aSel.value = aPrev; 
+        if(aPrev === 'notifs') aSel.value = 'notifs';
+        if(uPrev !== 'none' && allTourneys[uPrev]) uSel.value = uPrev;
     }
 
     function adminSwitchLeague() {
@@ -664,8 +739,11 @@
             currentTid = null; document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
             document.getElementById('tabsContainer').style.display = 'none'; document.getElementById('deleteLeagueBtn').style.display = 'none';
             document.getElementById('setup').classList.add('active'); renderAdminChecklist();
+        } else if (val === 'notifs') {
+            openAdminGlobalNotifs();
         } else {
             currentTid = val; document.getElementById('tabsContainer').style.display = 'flex'; document.getElementById('deleteLeagueBtn').style.display = 'inline-block';
+            document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
             loadTournamentData(val); switchTab('standings');
         }
     }
@@ -682,7 +760,10 @@
         currentTid = val; loadTournamentData(val); switchTab('standings');
     }
 
-    function goHome() { if(isAdmin) { document.getElementById('adminLeagueSelect').value="new"; adminSwitchLeague(); } else { switchTab('profile'); } }
+    function goHome() { 
+        if(isAdmin) { openAdminGlobalNotifs(); document.getElementById('adminLeagueSelect').value="notifs"; } 
+        else { switchTab('profile'); } 
+    }
     function deleteCurrentTournament() { if(!currentTid || !confirm("Bu ligi kalıcı olarak silmek istiyor musunuz?")) return; let tid = currentTid; currentTid = null; delete allTourneys[tid]; database.ref('the_35_gold_league/multi_v1/' + tid).remove().then(() => { alert("Silindi."); goHome(); }); }
 
     function previewPots() {
@@ -766,7 +847,7 @@
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); 
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         if(document.getElementById(t)) document.getElementById(t).classList.add('active');
-        let i = ['profile', 'admin_notifs', 'rules', 'standings', 'rivals', 'matches', 'tree'].indexOf(t);
+        let i = ['profile', 'rules', 'standings', 'rivals', 'matches', 'tree'].indexOf(t);
         if(i !== -1) document.querySelectorAll('.tab-btn')[i].classList.add('active');
 
         let rulesBtn = document.getElementById('tabRulesBtn');
@@ -780,7 +861,6 @@
         }
 
         if(t === 'profile') renderProfile();
-        if(t === 'admin_notifs') renderAdminNotifs();
 
         let rf = document.getElementById('playerFilterSelect');
         let mf = document.getElementById('matchFilterSelect');
@@ -904,7 +984,7 @@
                 gWins: 0, 
                 gLoss: 0, 
                 gMatch: 0, 
-                fame: (globalUsers[uid].fame || 0) // Veritabanındaki taban puan (FairPlay vs buradan gelir)
+                fame: (globalUsers[uid].fame || 0) 
             };
         });
 
@@ -923,13 +1003,13 @@
                     if(derivedGlobalStats[m.p2]) derivedGlobalStats[m.p2].gMatch++;
                     
                     if(m.isWO) {
+                        // Hükmen kaybeden tarafı bulup 10 şöhret puanı silme
                         let loserId = (String(m.woWinner) === String(m.p1)) ? m.p2 : m.p1;
                         if(derivedGlobalStats[loserId]) derivedGlobalStats[loserId].fame -= 10;
                         
                         if(m.winnerId === m.p1) { if(derivedGlobalStats[m.p1]) derivedGlobalStats[m.p1].gWins++; if(derivedGlobalStats[m.p2]) derivedGlobalStats[m.p2].gLoss++; }
                         else if(m.winnerId === m.p2) { if(derivedGlobalStats[m.p2]) derivedGlobalStats[m.p2].gWins++; if(derivedGlobalStats[m.p1]) derivedGlobalStats[m.p1].gLoss++; }
                     } else {
-                        // Normal maç: +1 Şöhret puanı her iki oyuncuya da (Kurallar gereği)
                         if(derivedGlobalStats[m.p1]) derivedGlobalStats[m.p1].fame += 1;
                         if(derivedGlobalStats[m.p2]) derivedGlobalStats[m.p2].fame += 1;
                         
@@ -1443,7 +1523,17 @@
         else { m.proposedDates = arr; m.proposedBy = loggedInUser.id; saveToDb("Tarih ve saat önerileri rakibe gönderildi!"); }
     }
 
-    function acceptDate(mId, dateVal, btn) { btn.innerHTML = "⏳..."; btn.disabled = true; let m = matches.find(x => String(x.id) === String(mId)); m.matchDate = dateVal; m.proposedDates = []; saveToDb("Tarih karşılıklı onaylandı!"); }
+    function acceptDate(mId, dateVal, btn) { 
+        btn.innerHTML = "⏳..."; btn.disabled = true; 
+        let m = matches.find(x => String(x.id) === String(mId)); 
+        m.matchDate = dateVal; m.proposedDates = []; 
+        
+        let tName = currentSettings.customName || "Turnuva";
+        addAlertToUser(m.proposedBy, `📅 <strong>[${tName}]</strong> ${m.p1Name} vs ${m.p2Name} maçı için önerdiğiniz tarih (${dateVal}) rakibiniz tarafından onaylandı!`);
+        
+        saveToDb("Tarih karşılıklı onaylandı!"); 
+    }
+    
     function clearDateProposal(mId, btn) { btn.innerHTML = "⏳..."; btn.disabled = true; let m = matches.find(x => String(x.id) === String(mId)); m.proposedDates = []; m.proposedBy = ''; saveToDb("Tarih reddedildi."); }
     function resetMatchDate(mId, btn) {
         if(!confirm("Mevcut kesinleşen maç tarihini iptal edip yeni bir tarih önermek istiyor musunuz?")) return;
@@ -1499,13 +1589,28 @@
                 return "hata";
             };
 
+            // Set 1 Tie-Break Logic Check
             if((fmt==='6_GAME' && ((t1==='7'&&b1==='6')||(b1==='7'&&t1==='6'))) || (fmt==='4_GAME' && ((t1==='5'&&b1==='4')||(b1==='5'&&t1==='4')))) {
-                let res = tbCheck(document.getElementById(`m_${mId}_t_s1tb`).value, document.getElementById(`m_${mId}_b_s1tb`).value); 
-                if(res==='boş') return alert("HATA: 1. Set Tie-Break skorunu girmediniz!"); if(res==='hata') return alert("HATA: 1. Set Tie-Break skoru kuraldışı (Örn: 7-5, 8-6, 12-10).");
+                let tbT = document.getElementById(`m_${mId}_t_s1tb`).value; let tbB = document.getElementById(`m_${mId}_b_s1tb`).value;
+                let res = tbCheck(tbT, tbB); 
+                if(res==='boş') return alert("HATA: 1. Set Tie-Break skorunu girmediniz!"); 
+                if(res==='hata') return alert("HATA: 1. Set Tie-Break skoru kuraldışı (Örn: 7-5, 8-6, 12-10).");
+                
+                let winSet = parseInt(t1) > parseInt(b1) ? 'T' : 'B';
+                let winTb = parseInt(tbT) > parseInt(tbB) ? 'T' : 'B';
+                if (winSet !== winTb) return alert("HATA: 1. Set skorunda kazanan taraf ile Tie-Break skorunda kazanan taraf eşleşmiyor! Lütfen girişleri kontrol edin.");
             }
+            
+            // Set 2 Tie-Break Logic Check
             if((fmt==='6_GAME' && ((t2==='7'&&b2==='6')||(b2==='7'&&t2==='6'))) || (fmt==='4_GAME' && ((t2==='5'&&b2==='4')||(b2==='5'&&t2==='4')))) {
-                let res = tbCheck(document.getElementById(`m_${mId}_t_s2tb`).value, document.getElementById(`m_${mId}_b_s2tb`).value); 
-                if(res==='boş') return alert("HATA: 2. Set Tie-Break skorunu girmediniz!"); if(res==='hata') return alert("HATA: 2. Set Tie-Break skoru kuraldışı (Örn: 7-5, 8-6, 12-10).");
+                let tbT = document.getElementById(`m_${mId}_t_s2tb`).value; let tbB = document.getElementById(`m_${mId}_b_s2tb`).value;
+                let res = tbCheck(tbT, tbB); 
+                if(res==='boş') return alert("HATA: 2. Set Tie-Break skorunu girmediniz!"); 
+                if(res==='hata') return alert("HATA: 2. Set Tie-Break skoru kuraldışı (Örn: 7-5, 8-6, 12-10).");
+                
+                let winSet = parseInt(t2) > parseInt(b2) ? 'T' : 'B';
+                let winTb = parseInt(tbT) > parseInt(tbB) ? 'T' : 'B';
+                if (winSet !== winTb) return alert("HATA: 2. Set skorunda kazanan taraf ile Tie-Break skorunda kazanan taraf eşleşmiyor! Lütfen girişleri kontrol edin.");
             }
 
             if(w1 !== w2) {
@@ -1537,6 +1642,10 @@
         btn.innerHTML = "⏳ İŞLENİYOR..."; btn.disabled = true;
         let m = matches.find(x => String(x.id) === String(mId)); 
         m.pending = false;
+        
+        let tName = currentSettings.customName || "Turnuva";
+        addAlertToUser(m.enteredBy, `✅ <strong>[${tName}]</strong> ${m.p1Name} vs ${m.p2Name} maçınızın skoru rakibiniz tarafından onaylandı!`);
+        
         saveToDb("Skor Onaylandı ve Tablolara İşlendi!");
     }
     
