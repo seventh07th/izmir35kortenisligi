@@ -441,7 +441,7 @@
         <div id="matches" class="panel">
             <div style="background:rgba(255, 189, 0, 0.1); border:1px solid var(--warning); padding:10px; border-radius:6px; margin-bottom:15px; font-size:12px;">
                 <strong>🚨 ÇİFT TARAFLI ONAY:</strong> Tarih planlaması veya Skor girişi yaptığınızda rakibinizin onayı gerekir. Yöneticiler direkt onay yetkisine sahiptir.<br>
-                <strong>⚠️ ÖNEMLİ:</strong> Sadece anlaştığınız ve kesinleşen maç tarihinde skor girişi yapabilirsiniz!
+                <strong>⚠️ ÖNEMLİ:</strong> Skor girişi <u>sadece maç oynandıktan sonraki ilk 48 saat içerisinde</u> yapılabilir.
             </div>
             <select id="matchFilterSelect" class="auth-input force-upper" style="width:100%; margin-bottom:15px; display:none;" onchange="renderMatchesView()"><option value="last10">🕒 LİGDEKİ SON 10 MAÇI İZLE</option></select>
             <div id="matchListContainer"></div>
@@ -471,6 +471,18 @@
     function _arr(obj) { return (!obj) ? [] : (Array.isArray(obj) ? obj : Object.values(obj)); }
 
     window.onload = function() { listenToCloud(); };
+
+    // Yardımcı Zaman Fonksiyonu
+    function parseMatchDateTime(matchDateStr) {
+        if(!matchDateStr) return null;
+        try {
+            let parts = matchDateStr.split(' (');
+            if(parts.length < 2) return null;
+            let d = parts[0]; 
+            let t = parts[1].split(' - ')[0]; 
+            return new Date(`${d}T${t}:00`).getTime();
+        } catch(e) { return null; }
+    }
 
     // -- CANLI VERİ VE SENKRONİZASYON (REAKTİVİTE) ÇÖZÜMÜ --
     function buildGlobalStats() {
@@ -557,6 +569,23 @@
         database.ref('the_35_gold_league/multi_v1').on('value', (s) => {
             try {
                 allTourneys = s.val() || {}; 
+                
+                // 24 Saat Otomatik Onay Mantığı
+                let isAnyAutoApproved = false;
+                Object.keys(allTourneys).forEach(tid => {
+                    let t = allTourneys[tid];
+                    if(t.matches) {
+                        _arr(t.matches).forEach(m => {
+                            if(m.played && m.pending && m.savedAt) {
+                                if(Date.now() - m.savedAt > 24 * 60 * 60 * 1000) {
+                                    m.pending = false; // Hafızada otomatik onayla
+                                    isAnyAutoApproved = true;
+                                }
+                            }
+                        });
+                    }
+                });
+
                 buildGlobalStats(); 
                 populateLeagueDropdowns();
                 
@@ -879,10 +908,14 @@
             }
 
             let countdownHtml = '';
+            let isRegistrationExpired = false;
+            
             if (sDateObj && status === 'pending') {
                 let now = Date.now();
                 let diffMs = sDateObj.getTime() - now;
-                if (diffMs > 0 && diffMs <= 86400000) { 
+                isRegistrationExpired = diffMs <= 0;
+                
+                if (!isRegistrationExpired && diffMs <= 86400000) { 
                     let hours = Math.floor(diffMs / (1000 * 60 * 60));
                     let minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
                     countdownHtml = `<div style="background:var(--danger); color:white; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold; text-align:center; margin-bottom:8px; animation: blink 1.5s infinite;">⏳ KAYITLAR KAPANMAK ÜZERE: Son ${hours} Saat ${minutes} Dakika</div>`;
@@ -928,7 +961,11 @@
                 } else if (amIIn) {
                     btnHtml = `<button class="action-sm" style="background:var(--danger); padding:8px 12px;" onclick="leaveTournament('${tid}')">Çıkış Yap / Ayrıl</button>`;
                 } else {
-                    btnHtml = `<button class="action-sm" style="background:var(--accent-color); color:black; padding:8px 12px;" onclick="joinTournament('${tid}')">Turnuvaya Katıl</button>`;
+                    if(isRegistrationExpired) {
+                        btnHtml = `<button class="action-sm" style="background:#334155; color:#94a3b8; padding:8px 12px; cursor:not-allowed;" disabled>Katılım Süresi Bitti</button>`;
+                    } else {
+                        btnHtml = `<button class="action-sm" style="background:var(--accent-color); color:black; padding:8px 12px;" onclick="joinTournament('${tid}')">Turnuvaya Katıl</button>`;
+                    }
                 }
                 
                 pList.innerHTML += `<div class="tournament-card">
@@ -952,12 +989,32 @@
                 activeCount++;
                 let badge = '';
                 let btnHtml = '';
+                let subHtml = ''; 
+                
                 if(isAdmin) {
                     btnHtml = `<button class="action-sm" style="background:var(--warning); color:black; padding:8px 12px;" onclick="document.getElementById('adminLeagueSelect').value='${tid}'; adminSwitchLeague();">⚙️ Yönet</button>`;
                 } else {
                     let participants = _arr(t.players || []);
                     let amIPlaying = participants.some(p => p.id === loggedInUser.id);
-                    badge = amIPlaying ? `<span class="tournament-badge" style="background:var(--success); color:black;">BU LİGDE OYNUYORSUNUZ</span>` : `<span class="tournament-badge" style="background:#334155;">MAÇLAR DEVAM EDİYOR</span>`;
+                    
+                    if(amIPlaying) {
+                        badge = `<span class="tournament-badge" style="background:var(--success); color:black;">BU LİGDE OYNUYORSUNUZ</span>`;
+                    } else {
+                        badge = `<span class="tournament-badge" style="background:#334155;">MAÇLAR DEVAM EDİYOR</span>`;
+                        
+                        let subPool = _arr(t.substitutePool || []);
+                        let amISub = subPool.includes(loggedInUser.id);
+                        
+                        subHtml = `
+                        <div style="margin-top:10px; background:rgba(0, 229, 255, 0.05); border:1px dashed #00e5ff; padding:10px; border-radius:6px; font-size:11px;">
+                            <div style="color:#00e5ff; font-weight:bold; margin-bottom:5px;">🔄 Yedek Oyuncu Havuzu</div>
+                            <div style="color:#cbd5e1; margin-bottom:8px;">Sakatlık vb. nedenlerle ayrılan oyuncuların yerine geçmek için yedek listesine girebilirsiniz.</div>
+                            ${amISub 
+                                ? `<button class="action-sm" style="background:var(--danger); padding:6px 10px;" onclick="leaveSubstitutePool('${tid}')">Listeden Çık</button> <span style="color:var(--success); font-weight:bold; margin-left:10px;">✅ Listedesiniz</span>` 
+                                : `<button class="action-sm" style="background:#00e5ff; color:black; padding:6px 10px;" onclick="joinSubstitutePool('${tid}')">Ben Katılabilirim (Yedek Ol)</button>`
+                            }
+                        </div>`;
+                    }
                 }
                 
                 aList.innerHTML += `<div class="tournament-card">
@@ -972,12 +1029,41 @@
                         <span>Kategori: ${s.gender} | ${s.tier} | Kapasite: ${N}</span>
                         ${btnHtml}
                     </div>
+                    ${subHtml}
                 </div>`;
             }
         });
 
         if(pendingCount === 0) pList.innerHTML = `<div style="font-size:12px; color:var(--sub-text);">Şu an kayda açık yeni bir turnuva bulunmuyor.</div>`;
         if(activeCount === 0) aList.innerHTML = `<div style="font-size:12px; color:var(--sub-text);">Şu an oynanan aktif bir turnuva bulunmuyor.</div>`;
+    }
+
+    function joinSubstitutePool(tid) {
+        let t = allTourneys[tid];
+        let pool = _arr(t.substitutePool || []);
+        if(!pool.includes(loggedInUser.id)) {
+            pool.push(loggedInUser.id);
+            allTourneys[tid].substitutePool = pool;
+            renderTournamentsList();
+            database.ref(`the_35_gold_league/multi_v1/${tid}/substitutePool`).set(pool).then(() => {
+                alert("Yedek listesine başarıyla eklendiniz! Yönetici ihtiyaç durumunda sizinle iletişime geçecektir.");
+            });
+        }
+    }
+
+    function leaveSubstitutePool(tid) {
+        if(!confirm("Yedek listesinden çıkmak istediğinize emin misiniz?")) return;
+        let t = allTourneys[tid];
+        let pool = _arr(t.substitutePool || []);
+        let index = pool.indexOf(loggedInUser.id);
+        if(index > -1) {
+            pool.splice(index, 1);
+            allTourneys[tid].substitutePool = pool;
+            renderTournamentsList();
+            database.ref(`the_35_gold_league/multi_v1/${tid}/substitutePool`).set(pool).then(() => {
+                alert("Yedek listesinden ayrıldınız.");
+            });
+        }
     }
 
     function joinTournament(tid) {
@@ -1418,7 +1504,6 @@
             }
         });
 
-        // Mod bazlı sekme gizleme/gösterme (General Mode vs Tournament Mode)
         let isGeneralMode = currentTid === null;
         document.getElementById('tabProfileBtn').style.display = isGeneralMode ? 'block' : 'none';
         document.getElementById('tabTournamentsBtn').style.display = isGeneralMode ? 'block' : 'none';
@@ -1751,11 +1836,13 @@
         
         let t = allTourneys[currentTid];
         let pList = _arr(t.players).map(x => x.id); 
+        let subPool = _arr(t.substitutePool || []);
         
         let sel = document.getElementById('subInSelect');
         sel.innerHTML = '<option value="">SİSTEMDEN YENİ OYUNCU SEÇ...</option>';
         Object.values(globalUsers).filter(u => u && u.name && !pList.includes(u.id)).sort((a,b)=>a.name.localeCompare(b.name)).forEach(u => {
-            sel.innerHTML += `<option value="${u.id}">${u.name} (${u.tier})</option>`;
+            let poolText = subPool.includes(u.id) ? " 🟢 (YEDEK LİSTESİNDE)" : "";
+            sel.innerHTML += `<option value="${u.id}">${u.name} (${u.tier})${poolText}</option>`;
         });
 
         document.getElementById('substituteModal').style.display = 'flex';
@@ -1916,7 +2003,6 @@
         document.getElementById("score_area_" + id).style.display = isWo ? 'none' : 'block';
         document.getElementById("wo_area_" + id).style.display = isWo ? 'block' : 'none';
         
-        // Hükmen uyarı mesajını yönet
         let warnEl = document.getElementById(`wo_warn_${id}`);
         if(warnEl) warnEl.style.display = isWo ? 'none' : 'block';
 
@@ -2012,7 +2098,6 @@
                 }
             }
 
-            // Hükmen uyarıları ve kilit sistemi
             let woDisabled = !m.matchDate ? 'disabled' : '';
             let woWarning = !m.matchDate ? `<div id="wo_warn_${m.id}" style="font-size:10px; color:var(--danger); margin-top:4px; display:${m.isWO ? 'none' : 'block'};">⚠️ Hükmen (WO) seçeneği, maç tarihi kesinleşmeden kullanılamaz.</div>` : '';
 
@@ -2132,9 +2217,18 @@
         
         if (!isAdmin) {
             if (!m.matchDate) return alert("HATA: Önce rakibinizle maç tarihini belirleyip onaylamanız gerekmektedir!");
-            let plannedDate = m.matchDate.split(' ')[0];
-            let todayLocal = new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-            if (plannedDate !== todayLocal) return alert(`HATA: Sadece planlanan maç gününde skor girişi yapabilirsiniz!\n\nBugünün Tarihi: ${todayLocal}\nPlanlanan Tarih: ${plannedDate}`);
+            
+            let matchTime = parseMatchDateTime(m.matchDate);
+            if(!matchTime) return alert("HATA: Maç tarihi formatı geçersiz.");
+            
+            let now = Date.now();
+            
+            if (now < matchTime) {
+                return alert("HATA: Maç günü ve saati henüz gelmedi! Skor girişini ancak maç oynandıktan sonra yapabilirsiniz.");
+            }
+            if (now > matchTime + (48 * 60 * 60 * 1000)) {
+                return alert("HATA: Maç saatinin üzerinden 48 saat geçtiği için artık skor giremezsiniz! Lütfen yönetici ile iletişime geçin.");
+            }
         }
 
         if(type === 'wo') {
@@ -2258,7 +2352,8 @@
             
             database.ref('the_35_gold_league/multi_v1/' + currentTid).set({ 
                 players: cleanPlayers, matches: cleanMatches, settings: currentSettings,
-                registeredPlayers: _arr(allTourneys[currentTid].registeredPlayers || [])
+                registeredPlayers: _arr(allTourneys[currentTid].registeredPlayers || []),
+                substitutePool: _arr(allTourneys[currentTid].substitutePool || [])
             })
             .then(() => { if(msg) alert(msg); })
             .catch(err => {
