@@ -127,7 +127,7 @@
     <div class="modal-content" style="max-width:350px;">
         <button style="position:absolute; top:10px; right:15px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer;" onclick="closePublicProfile()">✖</button>
         <div style="font-size:35px; margin-bottom:10px;">👤</div>
-        <h2 id="pubName" style="margin:0; color:white; text-transform:uppercase;">İSİM</h2>
+        <h2 id="pubName" style="margin:0; color:white; text-transform:uppercase;">İSİM YÜKLENİYOR...</h2>
         <div style="margin-top:5px; display:flex; justify-content:center; flex-wrap:wrap; gap:5px;">
             <span id="pubTier" style="background:var(--accent-color); color:black; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px;">SEVİYE</span>
             <span id="pubGender" style="background:#1e293b; color:white; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px; border:1px solid var(--border-color);">CİNSİYET</span>
@@ -234,56 +234,48 @@
 
             <div style="font-size:13px; color:var(--warning); font-weight:bold; margin-top:20px; margin-bottom:10px; border-bottom:1px solid var(--divider); padding-bottom:5px;">📊 PROFESYONEL SEVİYE ANKETİ (NTRP)</div>
             
-            <!-- SLIDER 1: FOREHAND -->
             <div class="slider-container">
                 <div class="slider-header"><span>1. Forehand Becerisi</span><span class="slider-badge" id="val_fh">5</span></div>
                 <input type="range" id="sl_fh" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('fh')">
                 <div class="slider-desc" id="desc_fh">Standart rallilerde forehand tarafım güvenilir. Çapraz ve ortaya kontrollü oynayabiliyorum.</div>
             </div>
 
-            <!-- SLIDER 2: BACKHAND -->
             <div class="slider-container">
                 <div class="slider-header"><span>2. Backhand Becerisi</span><span class="slider-badge" id="val_bh">5</span></div>
                 <input type="range" id="sl_bh" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('bh')">
                 <div class="slider-desc" id="desc_bh">Standart tempoda backhand tarafım güvenilir. Topu oyunda tutabiliyorum.</div>
             </div>
 
-            <!-- SLIDER 3: SERVIS -->
             <div class="slider-container">
                 <div class="slider-header"><span>3. Servis Etkinliği</span><span class="slider-badge" id="val_sv">5</span></div>
                 <input type="range" id="sl_sv" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('sv')">
                 <div class="slider-desc" id="desc_sv">Servisim güvenilir. Çok etkili olmasa da oyuna düzenli başlayabiliyorum.</div>
             </div>
 
-            <!-- SLIDER 4: RETURN -->
             <div class="slider-container">
                 <div class="slider-header"><span>4. Servis Karşılama (Return)</span><span class="slider-badge" id="val_rt">5</span></div>
                 <input type="range" id="sl_rt" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('rt')">
                 <div class="slider-desc" id="desc_rt">Return ile ralliyi başlatabiliyorum. Genelde güvenli bölgeye dönüyorum.</div>
             </div>
 
-            <!-- SLIDER 5: RALLI / OYUN KURMA -->
             <div class="slider-container">
                 <div class="slider-header"><span>5. Ralli ve Oyun Kurma</span><span class="slider-badge" id="val_ok">5</span></div>
                 <input type="range" id="sl_ok" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('ok')">
                 <div class="slider-desc" id="desc_ok">Ralliyi sürdürebiliyor, topu genelde güvenli bölgelere atabiliyorum.</div>
             </div>
 
-            <!-- SLIDER 6: TAKTIK -->
             <div class="slider-container">
                 <div class="slider-header"><span>6. Maç Planı ve Taktik</span><span class="slider-badge" id="val_tk">5</span></div>
                 <input type="range" id="sl_tk" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('tk')">
                 <div class="slider-desc" id="desc_tk">Maç içinde neyin işe yaradığını anlayıp aynı planı sürdürmeye çalışıyorum.</div>
             </div>
 
-            <!-- SLIDER 7: WINNER -->
             <div class="slider-container">
                 <div class="slider-header"><span>7. Winner (Bitiricilik) Becerisi</span><span class="slider-badge" id="val_wn">5</span></div>
                 <input type="range" id="sl_wn" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('wn')">
                 <div class="slider-desc" id="desc_wn">Açık kort bulduğumda winner alabiliyorum ama risk-hata dengesi ortalama.</div>
             </div>
 
-            <!-- SLIDER 8: VOLE -->
             <div class="slider-container">
                 <div class="slider-header"><span>8. File Önü ve Vole</span><span class="slider-badge" id="val_vl">5</span></div>
                 <input type="range" id="sl_vl" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('vl')">
@@ -334,7 +326,7 @@
         <div id="profile" class="panel">
             <div style="text-align:center; padding:20px; background:#020617; border-radius:12px; border:1px solid var(--border-color);">
                 <div style="font-size:40px; margin-bottom:10px;">👤</div>
-                <h2 id="profName" style="margin:0; color:white; text-transform:uppercase;">İSİM</h2>
+                <h2 id="profName" style="margin:0; color:white; text-transform:uppercase;">YÜKLENİYOR...</h2>
                 <div style="margin-top:5px; display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:10px;">
                     <span id="profTier" style="background:var(--accent-color); color:black; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px; text-transform:uppercase;">SEVİYE YÜKLENİYOR...</span>
                     <span id="profStyle" style="background:#1e293b; color:var(--warning); font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px; border:1px solid var(--border-color);">STİL BELİRTİLMEDİ</span>
@@ -646,7 +638,12 @@
     let derivedGlobalStats = {}; 
     let substituteOldUid = null;
 
-    function _arr(obj) { return (!obj) ? [] : (Array.isArray(obj) ? obj : Object.values(obj)); }
+    // Firebase "null" dizilerini temizleyen ÇELİK YELEK
+    function _arr(obj) { 
+        if(!obj) return []; 
+        let arr = Array.isArray(obj) ? obj : Object.values(obj);
+        return arr.filter(item => item !== null && item !== undefined);
+    }
 
     window.onload = function() { listenToCloud(); };
 
@@ -665,16 +662,18 @@
         derivedGlobalStats = {};
         
         Object.values(globalUsers).forEach(u => {
+            if(!u) return;
             derivedGlobalStats[u.id] = { k_kor: parseFloat(u.k_kor_base || 0), gWins: 0, gLoss: 0, gMatch: 0, fame: u.fame || 0 };
         });
 
         Object.keys(allTourneys).forEach(tid => {
             let t = allTourneys[tid];
-            let status = t.settings ? t.settings.status : 'active';
+            if(!t || !t.settings) return;
+            let status = t.settings.status || 'active';
             
             if (status === 'active' && t.players) {
                 _arr(t.players).forEach(p => {
-                    if (derivedGlobalStats[p.id]) derivedGlobalStats[p.id].k_kor += (p.kor || 0);
+                    if (derivedGlobalStats[p.id]) derivedGlobalStats[p.id].k_kor += (parseFloat(p.kor) || 0);
                 });
             }
 
@@ -814,7 +813,7 @@
         let nameRaw = document.getElementById('regName').value.trim();
         let name = nameRaw.replace(/[<>]/g, '').toLocaleUpperCase('tr-TR'); 
         
-        let nameExists = Object.values(globalUsers).some(u => u.name === name);
+        let nameExists = Object.values(globalUsers).some(u => u && u.name === name);
         if(nameExists) { return alert("HATA: Bu isimde bir oyuncu zaten kayıtlı! Lütfen adınızı veya soyadınızı farklılaştırarak (Örn: İkinci isim ekleyerek) tekrar deneyin."); }
 
         let pass = document.getElementById('regPassword').value; 
@@ -828,7 +827,6 @@
             return alert("Lütfen ad, şifre, cinsiyet, el tercihleri ve maç müsaitliği alanlarını eksiksiz doldurun.");
         }
         
-        // Slider Puanlarını Çek
         let vFh = parseInt(document.getElementById('sl_fh').value);
         let vBh = parseInt(document.getElementById('sl_bh').value);
         let vSv = parseInt(document.getElementById('sl_sv').value);
@@ -838,11 +836,9 @@
         let vWn = parseInt(document.getElementById('sl_wn').value);
         let vVl = parseInt(document.getElementById('sl_vl').value);
 
-        // Ağırlıklı Matematik[cite: 1]
-        let srTotal = (vSv * 0.60) + (vRt * 0.40); // Servis %60, Return %40
+        let srTotal = (vSv * 0.60) + (vRt * 0.40);
         let totalRaw = (vFh * 0.20) + (vBh * 0.18) + (srTotal * 0.25) + (vOk * 0.12) + (vTk * 0.10) + (vWn * 0.08) + (vVl * 0.07);
         
-        // NTRP Dönüşümü[cite: 1]
         let ntrp = 1.0;
         if (totalRaw >= 9.20) ntrp = 7.0;
         else if (totalRaw >= 8.50) ntrp = 6.5;
@@ -857,11 +853,10 @@
         else if (totalRaw >= 2.20) ntrp = 2.0;
         else if (totalRaw >= 1.50) ntrp = 1.5;
 
-        // Yeni Lig Barajları
         let tier = "SILVER";
         if (ntrp >= 6.0) tier = "PLATIN";
         else if (ntrp >= 4.0) tier = "GOLD";
-        else tier = "SILVER"; // 1.0 ile 3.9 arası SILVER
+        else tier = "SILVER"; 
 
         let sysScore = ntrp.toFixed(1); 
         let uid = "USR_" + Date.now();
@@ -1001,6 +996,7 @@
         let myPendingScore = []; let myPendingDate = [];
         Object.keys(allTourneys).forEach(tid => {
             let t = allTourneys[tid];
+            if(!t || !t.settings) return;
             let status = t.settings.status || 'active';
             if (status !== 'active') return; 
             if (!t.matches) return;
@@ -1050,6 +1046,7 @@
             
         Object.keys(allTourneys).forEach(tid => {
             let t = allTourneys[tid];
+            if(!t || !t.settings) return;
             let status = t.settings.status || 'active';
             if (status !== 'active') return; 
             
@@ -1095,7 +1092,8 @@
 
         Object.keys(allTourneys).forEach(tid => {
             let t = allTourneys[tid];
-            let s = t.settings || {};
+            if(!t || !t.settings) return;
+            let s = t.settings;
             let status = s.status || 'active';
             let tName = s.customName || "İZMİR 35 LİGİ";
             let formatText = s.format === '6_GAME' ? '6 Oyunluk 2 Normal Set' : '4 Oyunluk 2 Kısa Set';
@@ -1105,15 +1103,18 @@
             let ligType = cap >= 48 ? "BÜYÜK LİG (48-96 Kişi)" : (cap >= 24 ? "STANDART LİG (24-47 Kişi)" : "BUTİK LİG (12-23 Kişi)");
             let poText = cap >= 48 ? "İlk 8 Seribaşı, İkinci 8 Play-Off, Sonraki 16 (En iyi KOR) Play-In" : (cap >= 24 ? "İlk 4 Seribaşı, İkinci 4 Play-Off, Sonraki 8 (En iyi KOR) Play-In" : "İlk 2 Seribaşı, İkinci 2 Play-Off, Sonraki 4 (En iyi KOR) Play-In");
             
-            let sDateObj = s.startDate ? new Date(s.startDate) : null;
-            let eDateObj = sDateObj ? new Date(sDateObj.getTime() + (mLimit * 7 * 24*60*60*1000)) : null;
-            let poS = eDateObj ? new Date(eDateObj.getTime() + (1 * 24*60*60*1000)) : null;
-            let poE = poS ? new Date(poS.getTime() + (14 * 24*60*60*1000)) : null;
-            
-            let fSat = poE ? new Date(poE.getTime()) : null; 
-            if(fSat) {
-                let ds = (6 - fSat.getDay() + 7) % 7; if (ds === 0) ds = 7; 
-                fSat.setDate(fSat.getDate() + ds); 
+            let sDateObj = null; let eDateObj = null; let poS = null; let poE = null; let fSat = null;
+            if(s.startDate) {
+                let st = new Date(s.startDate);
+                if(!isNaN(st.getTime())) {
+                    sDateObj = st;
+                    eDateObj = new Date(st.getTime() + (mLimit * 7 * 24*60*60*1000));
+                    poS = new Date(eDateObj.getTime() + (1 * 24*60*60*1000));
+                    poE = new Date(poS.getTime() + (14 * 24*60*60*1000));
+                    fSat = new Date(poE.getTime());
+                    let ds = (6 - fSat.getDay() + 7) % 7; if (ds === 0) ds = 7; 
+                    fSat.setDate(fSat.getDate() + ds); 
+                }
             }
 
             let countdownHtml = '';
@@ -1131,7 +1132,7 @@
                 }
             }
 
-            let pInfo = s.startDate ? 
+            let pInfo = sDateObj ? 
                 `<div style="display:flex; flex-direction:column; gap:4px;">
                     ${countdownHtml}
                     <strong style="color:var(--accent-color);">📋 FORMAT: ${ligType} | Şehir: İZMİR | İlçe: ${s.region || 'Belirtilmedi'}</strong>
@@ -1146,8 +1147,8 @@
                     <div style="margin-top:5px; color:var(--warning); font-weight:bold; font-size:10px;">⚠️ NOT: Lig aşaması başlamadan önce kayıtların tamamlanması gerekmektedir. Son kayıt tarihi turnuva başlangıç günüdür.</div>
                 </div>` : '<div style="color:var(--sub-text);">Tarih ve Format Belirlenmedi</div>';
             
-            let regs = _arr(t.registeredPlayers || []);
-            let N = status === 'pending' ? regs.length : (t.players ? _arr(t.players).length : 0);
+            let regs = _arr(t.registeredPlayers);
+            let N = status === 'pending' ? regs.length : _arr(t.players).length;
 
             let amIIn = false;
             let myIndex = -1;
@@ -1203,7 +1204,7 @@
                 if(isAdmin) {
                     btnHtml = `<button class="action-sm" style="background:var(--warning); color:black; padding:8px 12px;" onclick="document.getElementById('adminLeagueSelect').value='${tid}'; adminSwitchLeague();">⚙️ Yönet</button>`;
                 } else {
-                    let participants = _arr(t.players || []);
+                    let participants = _arr(t.players);
                     let amIPlaying = participants.some(p => p.id === loggedInUser.id);
                     
                     if(amIPlaying) {
@@ -1211,7 +1212,7 @@
                     } else {
                         badge = `<span class="tournament-badge" style="background:#334155;">MAÇLAR DEVAM EDİYOR</span>`;
                         
-                        let subPool = _arr(t.substitutePool || []);
+                        let subPool = _arr(t.substitutePool);
                         let amISub = subPool.includes(loggedInUser.id);
                         
                         subHtml = `
@@ -1249,7 +1250,7 @@
 
     function joinSubstitutePool(tid) {
         let t = allTourneys[tid];
-        let pool = _arr(t.substitutePool || []);
+        let pool = _arr(t.substitutePool);
         if(!pool.includes(loggedInUser.id)) {
             pool.push(loggedInUser.id);
             allTourneys[tid].substitutePool = pool;
@@ -1263,7 +1264,7 @@
     function leaveSubstitutePool(tid) {
         if(!confirm("Yedek listesinden çıkmak istediğinize emin misiniz?")) return;
         let t = allTourneys[tid];
-        let pool = _arr(t.substitutePool || []);
+        let pool = _arr(t.substitutePool);
         let index = pool.indexOf(loggedInUser.id);
         if(index > -1) {
             pool.splice(index, 1);
@@ -1285,7 +1286,7 @@
             if(!confirm(msg)) return;
         }
         
-        let regs = _arr(t.registeredPlayers || []);
+        let regs = _arr(t.registeredPlayers);
         if(!regs.includes(loggedInUser.id)) {
             regs.push(loggedInUser.id);
             allTourneys[tid].registeredPlayers = regs;
@@ -1299,7 +1300,7 @@
     function leaveTournament(tid) {
         if(!confirm("Turnuvadan çıkmak (kaydınızı iptal etmek) istediğinize emin misiniz?")) return;
         let t = allTourneys[tid];
-        let regs = _arr(t.registeredPlayers || []);
+        let regs = _arr(t.registeredPlayers);
         let index = regs.indexOf(loggedInUser.id);
         if(index > -1) {
             regs.splice(index, 1);
@@ -1334,6 +1335,7 @@
         });
         items.forEach(el => list.appendChild(el));
     }
+    
     function toggleSelectAll() { let isChecked = document.getElementById('selectAllChk').checked; document.querySelectorAll('.admin-player-item').forEach(el => { if (el.style.display !== 'none') { let chk = el.querySelector('.admin-chk'); if (chk) chk.checked = isChecked; } }); updateSelectedCount(); }
     
     function renderAdminChecklist() {
@@ -1351,9 +1353,9 @@
     function renderAdminPendingPanel() {
         let t = allTourneys[currentTid];
         if(!t) return;
-        let s = t.settings;
+        let s = t.settings || {};
         let cap = s.maxCapacity || 23;
-        let regs = _arr(t.registeredPlayers || []);
+        let regs = _arr(t.registeredPlayers);
         
         document.getElementById('pendingAdminTitle').innerText = `KAYIT YÖNETİMİ: ${s.customName || 'TURNUVA'}`;
         
@@ -1362,7 +1364,7 @@
         
         let manualSelect = document.getElementById('adminManualAddSelect');
         manualSelect.innerHTML = `<option value="">SİSTEMDEN OYUNCU SEÇ...</option>`;
-        Object.values(globalUsers).filter(u => u && u.name && !regs.includes(u.id)).sort((a,b)=>a.name.localeCompare(b.name)).forEach(u => {
+        Object.values(globalUsers).filter(u => u && u.name && !regs.includes(u.id)).sort((a,b)=>String(a.name).localeCompare(String(b.name))).forEach(u => {
             manualSelect.innerHTML += `<option value="${u.id}">${u.name} (${u.tier})</option>`;
         });
 
@@ -1379,7 +1381,8 @@
             else { wList.innerHTML += html; }
         });
 
-        document.getElementById('mainListCount').innerText = `(${mainCount}/${cap})`;
+        let countSpan = document.getElementById('mainListCount');
+        if(countSpan) countSpan.innerText = `(${mainCount}/${cap})`;
 
         if(mList.innerHTML === "") mList.innerHTML = `<div style="font-size:11px; color:#64748b; padding:10px;">Henüz asıl listeye kayıtlı oyuncu yok.</div>`;
         if(wList.innerHTML === "") wList.innerHTML = `<div style="font-size:11px; color:#64748b; padding:10px;">Yedek listede bekleyen oyuncu yok.</div>`;
@@ -1403,7 +1406,7 @@
         let uid = document.getElementById('adminManualAddSelect').value;
         if(!uid) return alert("Lütfen bir oyuncu seçin.");
         let t = allTourneys[currentTid];
-        let regs = _arr(t.registeredPlayers || []);
+        let regs = _arr(t.registeredPlayers);
         if(!regs.includes(uid)) {
             regs.push(uid);
             allTourneys[currentTid].registeredPlayers = regs;
@@ -1414,7 +1417,7 @@
 
     function adminRemovePendingPlayer(uid) {
         let t = allTourneys[currentTid];
-        let regs = _arr(t.registeredPlayers || []);
+        let regs = _arr(t.registeredPlayers);
         let index = regs.indexOf(uid);
         if(index > -1) {
             regs.splice(index, 1);
@@ -1452,7 +1455,7 @@
 
     function startPendingTournament(btn) {
         let t = allTourneys[currentTid];
-        let regs = _arr(t.registeredPlayers || []);
+        let regs = _arr(t.registeredPlayers);
         let cap = t.settings.maxCapacity || 23;
         
         let activeRegs = regs.slice(0, cap);
@@ -1624,340 +1627,3 @@
             if (status === 'pending') {
                 aOpt += `<option value="${tid}">YÖNET (Kayıt): ${n}</option>`;
             } else {
-                aOpt += `<option value="${tid}">YÖNET: ${n}</option>`;
-                if(!isAdmin && loggedInUser && _arr(t.players).some(p => p.id === loggedInUser.id)) uOpt += `<option value="${tid}">${n}</option>`;
-            }
-        });
-        
-        let aPrev = aSel.value, uPrev = uSel.value; aSel.innerHTML = aOpt; uSel.innerHTML = uOpt;
-        if(aPrev !== 'new_pending' && aPrev !== 'new_manual' && aPrev !== 'notifs' && aPrev !== 'tournaments' && allTourneys[aPrev]) aSel.value = aPrev; 
-        if(aPrev === 'notifs') aSel.value = 'notifs';
-        if(aPrev === 'tournaments') aSel.value = 'tournaments';
-        if(uPrev !== 'none' && allTourneys[uPrev]) uSel.value = uPrev;
-    }
-
-    function adminSwitchLeague() {
-        let val = document.getElementById('adminLeagueSelect').value;
-        if(val === 'new_pending') {
-            currentTid = null; document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-            document.getElementById('tabsContainer').style.display = 'none'; document.getElementById('deleteLeagueBtn').style.display = 'none';
-            document.getElementById('setup_pending').classList.add('active'); 
-        } else if(val === 'new_manual') {
-            currentTid = null; document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-            document.getElementById('tabsContainer').style.display = 'none'; document.getElementById('deleteLeagueBtn').style.display = 'none';
-            document.getElementById('setup_manual').classList.add('active'); 
-            renderAdminChecklist();
-        } else if (val === 'notifs') {
-            openAdminGlobalNotifs();
-        } else if (val === 'tournaments') {
-            openAdminGlobalTournaments();
-        } else {
-            currentTid = val; 
-            let t = allTourneys[val];
-            if(!t) return;
-            
-            let status = t.settings.status || 'active';
-            
-            document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-            
-            if (status === 'pending') {
-                document.getElementById('tabsContainer').style.display = 'none'; 
-                document.getElementById('deleteLeagueBtn').style.display = 'inline-block';
-                document.getElementById('admin_pending').classList.add('active');
-                renderAdminPendingPanel();
-            } else {
-                document.getElementById('tabsContainer').style.display = 'flex'; 
-                document.getElementById('deleteLeagueBtn').style.display = 'inline-block';
-                loadTournamentData(val); switchTab('standings');
-            }
-        }
-    }
-
-    function userSwitchLeague() {
-        let val = document.getElementById('userActiveLeagueSelect').value;
-        if(val === 'none') { 
-            currentTid = null; 
-            document.getElementById('navLeagueTitle').innerText = "İZMİR 35 KORTENİS LİGİ";
-            document.getElementById('navLeagueSub').innerText = "KARİYER VE LİG YÖNETİM SİSTEMİ";
-            switchTab('standings'); 
-            return; 
-        }
-        currentTid = val; loadTournamentData(val); switchTab('standings');
-    }
-
-    function goHome() { 
-        if(isAdmin) { openAdminGlobalNotifs(); document.getElementById('adminLeagueSelect').value="notifs"; } 
-        else { switchTab('profile'); } 
-    }
-    
-    function deleteCurrentTournament() { 
-        if(!currentTid || !confirm("Bu ligi kalıcı olarak silmek istiyor musunuz?")) return; 
-        let tid = currentTid; 
-        currentTid = null; 
-        delete allTourneys[tid];
-        goHome();
-        database.ref('the_35_gold_league/multi_v1/' + tid).remove().then(() => alert("Lig silindi.")); 
-    }
-
-    function switchTab(t) {
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); 
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        
-        let targetPanel = document.getElementById(t);
-        if(targetPanel) targetPanel.classList.add('active');
-        
-        document.querySelectorAll('.tab-btn').forEach(b => {
-            let attr = b.getAttribute('onclick');
-            if(attr && (attr.includes(`'${t}'`) || attr.includes(`"${t}"`))) {
-                b.classList.add('active');
-            }
-        });
-
-        let isGeneralMode = currentTid === null;
-        document.getElementById('tabProfileBtn').style.display = isGeneralMode ? 'block' : 'none';
-        document.getElementById('tabTournamentsBtn').style.display = isGeneralMode ? 'block' : 'none';
-        document.getElementById('tabRivalsBtn').style.display = !isGeneralMode ? 'block' : 'none';
-        document.getElementById('tabMatchesBtn').style.display = !isGeneralMode ? 'block' : 'none';
-        document.getElementById('tabTreeBtn').style.display = !isGeneralMode ? 'block' : 'none';
-
-        let rulesBtn = document.getElementById('tabRulesBtn');
-        let stdBtn = document.getElementById('tabStandingsBtn');
-        
-        if(!isGeneralMode) {
-            if(rulesBtn) rulesBtn.innerHTML = "📜 Turnuva Kuralları";
-            if(stdBtn) stdBtn.innerHTML = "📊 Puan Durumu";
-        } else {
-            if(rulesBtn) rulesBtn.innerHTML = "📜 Sistem Rehberi";
-            if(stdBtn) stdBtn.innerHTML = "🏆 Genel Sıralama";
-        }
-
-        if(t === 'profile') renderProfile();
-        if(t === 'tournaments') renderTournamentsList();
-
-        let rf = document.getElementById('playerFilterSelect');
-        let mf = document.getElementById('matchFilterSelect');
-
-        if(!isGeneralMode && allTourneys[currentTid]) {
-            if(t === 'rules') generateDynamicRules(currentSettings);
-            if(t === 'standings') renderLocalStandings();
-            if(t === 'rivals') { if(rf) rf.style.display = 'block'; populateFilterSelects(); renderRivalsGrid(); }
-            if(t === 'matches') { if(mf) mf.style.display = 'block'; populateFilterSelects(); renderMatchesView(); }
-            if(t === 'tree') { document.getElementById('treeDynamicTitle').style.display = 'block'; renderVisualBracket(); }
-        } 
-        else {
-            if(t === 'rules') renderGlobalRules();
-            if(t === 'standings') renderGlobalStandings();
-            if(t === 'rivals') { 
-                if(rf) rf.style.display = 'none'; 
-                document.getElementById('rivalsGridContainer').innerHTML = `<div class="global-alert">⚠️ Bu sekmeyi görüntülemek için lütfen üst menüden oynadığınız bir turnuvayı seçin.</div>`; 
-            }
-            if(t === 'matches') { 
-                if(mf) mf.style.display = 'none'; 
-                document.getElementById('matchListContainer').innerHTML = `<div class="global-alert">⚠️ Bu sekmeyi görüntülemek için lütfen üst menüden oynadığınız bir turnuvayı seçin.</div>`; 
-            }
-            if(t === 'tree') { 
-                document.getElementById('treeDynamicTitle').style.display = 'none';
-                document.getElementById('bracketView').innerHTML = `<div class="global-alert">⚠️ Bu sekmeyi görüntülemek için lütfen üst menüden oynadığınız bir turnuvayı seçin.</div>`; 
-            }
-        }
-    }
-
-    function loadTournamentData(tid) {
-        let t = allTourneys[tid]; if (!t) return;
-        players = _arr(t.players); matches = _arr(t.matches); currentSettings = t.settings || {};
-        
-        let formatText = currentSettings.format === '6_GAME' ? '6 OYUNLUK' : '4 OYUNLUK';
-        let subText = `${formatText} | ${currentSettings.gender || 'ERKEK'} | ${currentSettings.tier || 'GOLD'} | ${currentSettings.region || 'İZMİR'}`;
-        document.getElementById('navLeagueTitle').innerText = currentSettings.customName ? currentSettings.customName : `İZMİR 35 KORTENİS LİGİ`;
-        document.getElementById('navLeagueSub').innerText = subText.toLocaleUpperCase('tr-TR');
-        
-        calculateStats(); 
-    }
-
-    function calculateStats() {
-        if (!players || !matches) return;
-
-        players.forEach(p => { p.wins = 0; p.losses = 0; p.totalMatches = 0; p.setAv = 0; p.kor = 0; p.gamesWon = 0; p.gamesTotal = 0; });
-
-        matches.filter(m => m.played && !m.pending).forEach(m => {
-            let p1 = players.find(x => x.id === m.p1);
-            let p2 = players.find(x => x.id === m.p2);
-            if(!p1 || !p2) return;
-
-            p1.totalMatches++; p2.totalMatches++;
-
-            if(m.isWO) {
-                if(String(m.woWinner) === String(p1.id)) { p1.wins++; m.winnerId = p1.id; p2.losses++; }
-                else if(String(m.woWinner) === String(p2.id)) { p2.wins++; m.winnerId = p2.id; p1.losses++; }
-            } else {
-                let p1Sets = 0, p2Sets = 0;
-                let s1T = parseInt(m.p1S1)||0, s1B = parseInt(m.p2S1)||0;
-                let s2T = parseInt(m.p1S2)||0, s2B = parseInt(m.p2S2)||0;
-                
-                if(s1T > s1B) p1Sets++; else if (s1B > s1T) p2Sets++;
-                if(s2T > s2B) p1Sets++; else if (s2B > s2T) p2Sets++;
-                
-                if(p1Sets === 1 && p2Sets === 1) { let mtT = parseInt(m.p1MT)||0, mtB = parseInt(m.p2MT)||0; if(mtT > mtB) p1Sets++; else p2Sets++; }
-
-                p1.setAv += (p1Sets - p2Sets); p2.setAv += (p2Sets - p1Sets);
-                
-                let p1Games = s1T + s2T; let p2Games = s1B + s2B;
-                p1.gamesWon += p1Games; p1.gamesTotal += (p1Games + p2Games);
-                p2.gamesWon += p2Games; p2.gamesTotal += (p1Games + p2Games);
-
-                if(p1Sets > p2Sets) { p1.wins++; m.winnerId = p1.id; p2.losses++; }
-                else if(p2Sets > p1Sets) { p2.wins++; m.winnerId = p2.id; p1.losses++; }
-            }
-        });
-
-        players.forEach(p => {
-            let playedMatches = matches.filter(m => m.played && !m.pending && !m.isWO && (m.p1 === p.id || m.p2 === p.id));
-            playedMatches.forEach(m => {
-                let oppId = m.p1 === p.id ? m.p2 : m.p1;
-                let opp = players.find(x => x.id === oppId);
-                if(opp) {
-                    let rgc = opp.totalMatches > 0 ? (1 + (opp.wins / opp.totalMatches)) : 1;
-                    let isP1 = (m.p1 === p.id);
-                    let myGames = (parseInt(isP1 ? m.p1S1 : m.p2S1)||0) + (parseInt(isP1 ? m.p1S2 : m.p2S2)||0);
-                    let opGames = (parseInt(isP1 ? m.p2S1 : m.p1S1)||0) + (parseInt(isP1 ? m.p2S2 : m.p1S2)||0);
-                    let totalMatchGames = myGames + opGames;
-                    
-                    let matchMip = totalMatchGames > 0 ? (myGames / totalMatchGames) * 100 : 0;
-                    let matchPoints = matchMip * rgc;
-                    if(m.winnerId === p.id) matchPoints += 30; else matchPoints *= 0.50;
-                    p.kor += matchPoints;
-                }
-            });
-        });
-
-        players.sort((a,b) => b.kor - a.kor);
-        players.forEach((p, i) => p.korRank = i + 1);
-    }
-
-    function renderGlobalRules() {
-        document.getElementById('rulesHeaderTitle').innerText = "📜 İZMİR 35 KORTENİS LİGİ - SİSTEM REHBERİ (BETA)";
-        let html = `
-            <div style="background:#1e293b; padding:15px; border-radius:8px; margin-bottom:15px; border-left:4px solid var(--accent-color);">
-                <h3 style="color:var(--accent-color); margin-top:0;">🌟 VİZYONUMUZ VE AMACIMIZ</h3>
-                <p style="text-align:justify; font-size:12px;">İzmir 35 KorTenis Ligi; tenise gönül vermiş oyuncuları klasik, tek maçta elenilen stresli turnuva formatlarından kurtarmak için tasarlanmış, <strong>ezber bozan yenilikçi bir tenis ekosistemidir.</strong></p>
-            </div>
-            <h3>👤 1. SİSTEME GİRİŞ: KAYIT VE SEVİYE BELİRLEME</h3>
-            <p style="font-size:12px;">Sisteme ilk adım attığınızda, uluslararası geçerliliği olan <strong>NTRP</strong> standartlarındaki 8 aşamalı seviye anketimizi doldurursunuz. Sistem, verdiğiniz cevapları yüzdelik ağırlıklarına göre (Örn: Servis %25, Winner %8) hesaplayarak sizi uygun lig kategorinize (SILVER, GOLD veya PLATIN) atar.</p>
-
-            <h3>🎾 2. LİG ÇEŞİTLİLİĞİ VE MAÇ FORMATLARI</h3>
-            <ul style="font-size:12px;">
-                <li><strong>Lig ve Maç Formatları:</strong> Liglerimiz <strong>"6 Oyunluk Standart Lig"</strong> veya <strong>"4 Oyunluk Kısa Set Ligi (Fast4)"</strong> olarak iki ayrı konseptte başlatılabilir.</li>
-                <li><strong>Karar Puanı (Altın Puan) İnisiyatifi:</strong> Kort sürelerini verimli kullanmak adına, oyunlarda "Avantaj" yerine "Karar Puanı" uygulaması ile oynanıp oynanmayacağı tamamen oyuncuların maç öncesi karşılıklı anlaşmasına bırakılmıştır.</li>
-                <li><strong>Kategori Çeşitliliği:</strong> Liglerimiz cinsiyete göre; Erkek, Kadın veya Karma Lig olarak düzenlenebilir. Seviyeye göre ise SILVER (1.5-3.9), GOLD (4.0-5.9), PLATIN (6.0-7.0) veya tüm seviyelerin karıştığı OPEN LİG olarak kurulabilir.</li>
-            </ul>
-
-            <h3>🏆 3. KATILIMCI SAYISINA GÖRE 3 FARKLI LİG İMKANI</h3>
-            <ul style="font-size:12px;">
-                <li><strong>🧍 Butik Lig (12 - 23 Oyuncu):</strong> Herkes 6 maç yapar. İlk 2 Seribaşı olur, Sonraki 2 Play-Off oynar. Kalan oyunculardan en iyi 4 (En iyi KOR) puanlı oyuncu Play-In oynar.</li>
-                <li><strong>🧍‍♂️ Standart Lig (24 - 47 Oyuncu):</strong> Herkes 8 maç yapar. İlk 4 Seribaşı olur, Sonraki 4 Play-Off oynar. Kalan oyunculardan en iyi 8 (En iyi KOR) puanlı oyuncu Play-In oynar.</li>
-                <li><strong>🏟️ Büyük Lig (48 - 96 Oyuncu):</strong> Herkes 10 maç yapar. İlk 8 Seribaşı olur, Sonraki 8 Play-Off oynar. Kalan oyunculardan en iyi 16 (En iyi KOR) puanlı oyuncu Play-In oynar.</li>
-            </ul>
-
-            <h3>🔮 4. KUSURSUZ KURA VE TORBA (SEEDING) SİSTEMİ</h3>
-            <p style="font-size:12px;">Kayıt olurken elde ettiğiniz "Sistem Puanı"na göre oyuncular büyükten küçüğe doğru sıralanarak <strong>Torbalara (Pots)</strong> ayrılır. Kura motorumuz, her oyuncuya <strong>her torbadan eşit sayıda rakip</strong> atayarak kusursuz bir Çapraz Eşleşme oluşturur.</p>
-
-            <h3>🤝 5. ESNEK FİKSTÜR, ÇİFT TARAFLI ONAY VE HÜKMEN (WO)</h3>
-            <ul style="font-size:12px;">
-                <li><strong>Esnek Fikstür:</strong> Maç oynamak için bir sıra zorunluluğu yoktur. Dilediğiniz rakiple, anlaştığınız zaman korta çıkabilirsiniz.</li>
-                <li><strong>Hükmen (WO) Kuralı:</strong> Anlaşılan maça çıkmayan oyuncu hükmen mağlup sayılır. WO durumunda kazanan 1 Galibiyet, kaybeden 1 Mağlubiyet alır. Her iki tarafa da <strong>Set Averajı veya KOR Puanı hesaplanmaz/verilmez!</strong> Puan, kortta ter dökerek kazanılır.</li>
-            </ul>
-
-            <h3>📊 6. KOR MUCİZESİ VE DİNAMİK SIRALAMA</h3>
-            <ul style="font-size:12px;">
-                <li><strong>MİP (Maç İçi Performans):</strong> Maçta kazandığınız oyun yüzdesidir. Yenilseniz dahi aldığınız her oyun size MİP kazandırır. Formülü: <code>(Kazanılan Oyun / Toplam Oynanan Oyun) × 100</code></li>
-                <li><strong>RGÇ (Rakip Güç Çarpanı):</strong> Rakibinizin ligdeki güncel galibiyet oranıdır. Formülü: <code>1 + (Rakibin Galibiyet Sayısı / Rakibin Toplam Maç Sayısı)</code></li>
-            </ul>
-        `;
-        document.getElementById('dynamicRulesContainer').innerHTML = html;
-    }
-
-    function generateDynamicRules(s) {
-        document.getElementById('rulesHeaderTitle').innerText = "📜 TURNUVA KURALLARI VE LİG FORMATI";
-        let html = `<ul style="list-style-type:none; padding-left:0;">
-            <li><strong style="color:var(--accent-color); font-size:14px;">🗓️ 1. TURNUVA TAKVİMİ VE İŞLEYİŞ</strong></li>
-            <li>• Bu ligin formatı, kura ve eşleşmeleri esnek sistem üzerine kuruludur. İstediğiniz rakiple anlaşıp maçınızı oynayabilirsiniz.</li>
-            <br>
-            <li><strong style="color:var(--accent-color); font-size:14px;">📊 3. KOR (KORT OYUN REYTİNGİ) VE YENİLİKÇİ PUANLAMA</strong></li>
-            <li>• Klasik "oyun averajı" sisteminin ötesine geçen KOR; maçın sonucuna, oyunun bütününe ve gösterilen performansa değer veren, tenisin rekabetçi ruhunu ödüllendiren yenilikçi bir performans analizidir. Sıralama önceliği: 1) Galibiyet Sayısı, 2) Set Averajı, 3) KOR Puanı şeklindedir.</li>
-        </ul>`;
-        document.getElementById('dynamicRulesContainer').innerHTML = html;
-    }
-
-    function filterPlayerFikstur() {
-        let val = document.getElementById('playerFilterSelect').value;
-        document.querySelectorAll('.player-rivals-card').forEach(c => c.style.display = (val === 'all' || c.getAttribute('data-player-id') === val) ? 'block' : 'none');
-    }
-
-    function renderRivalsGrid() {
-        const c = document.getElementById('rivalsGridContainer'); c.innerHTML = "";
-        players.forEach(p => {
-            let card = document.createElement('div'); card.className = "player-rivals-card"; card.setAttribute('data-player-id', p.id);
-            card.innerHTML = `<div class="player-main-title">${p.name} FİKSTÜRÜ</div>`;
-            matches.filter(m => m.p1 === p.id || m.p2 === p.id).forEach((m, idx) => {
-                let oppId = (m.p1 === p.id) ? m.p2 : m.p1; let oppName = (m.p1 === p.id) ? m.p2Name : m.p1Name;
-                
-                let smartCal = ""; let myU = globalUsers[p.id]; let oppU = globalUsers[oppId];
-                if(!m.played && myU && oppU && Array.isArray(myU.availability) && Array.isArray(oppU.availability)) {
-                    let common = myU.availability.filter(v => oppU.availability.includes(v));
-                    if(common.length > 0) smartCal = `<div style="width:100%; font-size:10px; color:var(--success); margin-top:4px;">💡 Ortak Müsaitlik: ${common.map(c=>c.toLocaleUpperCase('tr-TR')).join(', ')}</div>`;
-                }
-                
-                let ds = m.matchDate ? ` <span style="color:var(--success)">(${m.matchDate})</span>` : '';
-                let sIcon = m.played ? (m.pending ? "⏳" : "✅") : "🎾";
-                card.innerHTML += `<div class="rival-line"><div style="width:100%; display:flex; justify-content:space-between;"><span>M${idx+1}: <strong class="player-link" onclick="openPublicProfile('${oppId}')">${oppName}</strong>${ds}</span><span>${sIcon}</span></div>${smartCal}</div>`;
-            });
-            c.appendChild(card);
-        });
-        filterPlayerFikstur();
-    }
-
-    function checkStatus(id, isRev) {
-        let m = matches.find(x => String(x.id) === String(id)); let fmt = (currentSettings && currentSettings.format) ? currentSettings.format : '6_GAME';
-        let getVal = (elId) => document.getElementById(elId) ? document.getElementById(elId).value : '';
-        let nS1T = parseInt(getVal(`m_${id}_t_s1`)), nS1B = parseInt(getVal(`m_${id}_b_s1`));
-        let nS2T = parseInt(getVal(`m_${id}_t_s2`)), nS2B = parseInt(getVal(`m_${id}_b_s2`));
-
-        let tb1Active = false, tb2Active = false;
-        if (fmt === '4_GAME') { tb1Active = (nS1T === 5 && nS1B === 4) || (nS1T === 4 && nS1B === 5); tb2Active = (nS2T === 5 && nS2B === 4) || (nS2T === 4 && nS2B === 5); } 
-        else { tb1Active = (nS1T === 7 && nS1B === 6) || (nS1T === 6 && nS1B === 7); tb2Active = (nS2T === 7 && nS2B === 6) || (nS2T === 6 && nS2B === 7); }
-
-        let t_s1tb = document.getElementById(`m_${id}_t_s1tb`); let b_s1tb = document.getElementById(`m_${id}_b_s1tb`);
-        if(t_s1tb && b_s1tb) { t_s1tb.style.display = tb1Active ? 'inline-block' : 'none'; b_s1tb.style.display = tb1Active ? 'inline-block' : 'none'; }
-        
-        let t_s2tb = document.getElementById(`m_${id}_t_s2tb`); let b_s2tb = document.getElementById(`m_${id}_b_s2tb`);
-        if(t_s2tb && b_s2tb) { t_s2tb.style.display = tb2Active ? 'inline-block' : 'none'; b_s2tb.style.display = tb2Active ? 'inline-block' : 'none'; }
-
-        let checkQuickSet = (t,b) => {
-            if(isNaN(t)||isNaN(b)) return null;
-            if(fmt === '4_GAME'){ if((t===4&&b<=2)||(t===5&&b===3)||(t===5&&b===4)) return 'T'; if((b===4&&t<=2)||(b===5&&t===3)||(b===5&&t===4)) return 'B'; } 
-            else { if((t===6&&b<=4)||(t===7&&b===5)||(t===7&&b===6)) return 'T'; if((b===6&&t<=4)||(b===7&&t===5)||(b===7&&t===6)) return 'B'; } return null;
-        };
-        let win1 = checkQuickSet(nS1T, nS1B); let win2 = checkQuickSet(nS2T, nS2B);
-        let mtActive = (win1 && win2 && win1 !== win2);
-        
-        let mt_head = document.getElementById(`mt_head_${id}`); let t_mt = document.getElementById(`m_${id}_t_mt`); let b_mt = document.getElementById(`m_${id}_b_mt`);
-        if(mt_head) mt_head.style.opacity = mtActive ? '1' : '0.3';
-        if(t_mt && b_mt) {
-            t_mt.disabled = !mtActive; b_mt.disabled = !mtActive;
-            if(!mtActive) { t_mt.value = ''; b_mt.value = ''; }
-        }
-    }
-
-    function toggleWO(id, isRev) {
-        let isWo = document.getElementById("type_" + id).value === 'wo';
-        document.getElementById("score_area_" + id).style.display = isWo ? 'none' : 'block';
-        document.getElementById("wo_area_" + id).style.display = isWo ? 'block' : 'none';
-        
-        let warnEl = document.getElementById(`wo_warn_${id}`);
-        if(warnEl) warnEl.style.display = isWo ? 'none' : 'block';
-
-        checkStatus(id, isRev);
-    }
-</script>
-</body>
-</html>
