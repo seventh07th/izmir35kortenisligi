@@ -1,116 +1,46 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>İzmir 35 KorTenis Ligi</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <style>
-        :root { 
-            --bg-color: #040814; --card-bg: #0b1329; --accent-color: #ffd700; 
-            --text-color: #ffffff; --success: #00ffaa; --warning: #ffbd00; 
-            --danger: #ef4444; --border-color: #1e293b; --sub-text: #94a3b8; --divider: #334155; 
-        }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 10px; transition: 0.3s; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h1, h2, h3 { text-align: center; color: var(--accent-color); margin: 10px 0; letter-spacing: 1px; }
-        
-        .nav-bar { display: none; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px; flex-wrap:wrap; gap:10px;}
-        .nav-btn { background: #1e293b; color: white; border: 1px solid var(--border-color); padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.3s; }
-        .nav-btn:hover { background: #334155; }
-        
-        #authWrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; margin-top: 20px;}
-        .auth-card { background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.5); width: 100%; max-width: 500px; text-align: center; display: none; margin-bottom: 20px; }
-        .auth-input, .auth-select { padding: 12px; width: 100%; border-radius: 6px; border: 1px solid var(--border-color); background: #020617; color: white; text-align: center; font-size: 13px; margin-bottom: 12px; box-sizing: border-box; }
-        .force-upper { text-transform: uppercase; }
-        .auth-btn { background: var(--accent-color); color: #000; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; margin: 5px 0; font-size: 14px; transition: 0.3s; width: 100%; }
-        .switch-link { color: var(--sub-text); font-size: 12px; cursor: pointer; text-decoration: underline; margin-top: 15px; display: inline-block; }
-        .chk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: left; font-size: 11px; margin-bottom: 15px; }
-        .chk-label { background: #1e293b; padding: 6px; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; gap: 5px; }
-        
-        /* SLIDER CSS */
-        .slider-container { background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border-color); text-align:left; box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);}
-        .slider-header { display: flex; justify-content: space-between; align-items:center; font-size: 13px; font-weight: bold; color: white; margin-bottom: 8px; }
-        .slider-badge { background: #020617; color:var(--accent-color); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--accent-color); font-size:14px; font-weight:bold;}
-        .range-slider { width: 100%; cursor: pointer; accent-color: var(--accent-color); height: 6px; border-radius: 4px; outline: none; background: #0b1329; -webkit-appearance: none; }
-        .range-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--accent-color); cursor: pointer; }
-        .slider-desc { font-size: 11px; color: #cbd5e1; margin-top: 8px; min-height: 28px; line-height: 1.4; font-style:italic;}
-
-        .admin-player-list { max-height: 300px; overflow-y: auto; background: #020617; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); text-align: left; margin-bottom: 10px; }
-        .admin-player-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--divider); }
-        .action-sm { background: #334155; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight:bold; margin-left: 4px;}
-
-        #mainApp { display: none; }
-        #adminTopBar { display: none; background: #1e293b; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 15px; border: 1px dashed var(--accent-color); }
-        .tabs { display: flex; gap: 4px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
-        .tab-btn { background-color: var(--card-bg); color: var(--sub-text); border: 1px solid var(--border-color); padding: 11px 8px; cursor: pointer; border-radius: 6px; font-weight: bold; flex: 1; text-align: center; font-size: 12px; white-space: nowrap; transition: 0.3s; }
-        .tab-btn.active { background-color: var(--accent-color); color: #000; border-color: var(--accent-color); }
-        .panel { display: none; background-color: var(--card-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); }
-        .panel.active { display: block; }
-        button.action-btn { background-color: var(--accent-color); color: #000; border: none; padding: 12px; font-size: 15px; font-weight: bold; cursor: pointer; border-radius: 8px; width: 100%; margin-top: 8px; transition: 0.3s; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
-        th, td { padding: 10px 4px; text-align: center; border-bottom: 1px solid var(--border-color); }
-        th { background-color: #1e293b; color: var(--accent-color); }
-        .zone-direct { background-color: rgba(0, 255, 170, 0.08); border-left: 3px solid var(--success); }
-        .zone-playoff { background-color: rgba(255, 189, 0, 0.08); border-left: 3px solid var(--warning); }
-        .zone-eliminated { background-color: rgba(239, 68, 68, 0.05); border-left: 3px solid var(--danger); }
-        .zone-global { background-color: rgba(0, 229, 255, 0.05); border-left: 3px solid #00e5ff; }
-        
-        .rivals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
-        .player-rivals-card { background: #020617; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; }
-        .player-main-title { background: #1e293b; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; color: var(--accent-color); font-size: 14px; }
-        .rival-line { display: flex; justify-content: space-between; padding: 8px 2px; border-bottom: 1px solid #1e293b; font-size: 12px; align-items: center; flex-wrap:wrap;}
-        
-        .matches-grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-top: 15px; }
-        .match-card { background: #020617; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.5); overflow: hidden; margin-bottom: 15px;}
-        .match-card-header { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 8px 12px; border-bottom: 1px solid var(--divider); }
-        
-        .scoreboard { display: flex; flex-direction: column; background: #0f172a; border-radius: 8px; border: 1px solid var(--divider); overflow: hidden; margin-bottom: 10px; }
-        .sb-row { display: flex; border-bottom: 1px solid var(--divider); }
-        .sb-row:last-child { border-bottom: none; }
-        .sb-header { background: #1e293b; color: var(--sub-text); font-size: 10px; font-weight: bold; text-align: center; }
-        .sb-cell { flex: 1; display: flex; justify-content: center; align-items: center; padding: 8px 4px; border-left: 1px dashed var(--divider); position: relative; }
-        .sb-name { flex: 3; padding: 8px 10px; font-size: 13px; font-weight: bold; display: flex; align-items: center; text-transform: uppercase; }
-        .sb-input { width: 34px; background: #020617; color: white; border: 1px solid #475569; padding: 8px 0; text-align: center; font-weight: bold; border-radius: 6px; font-size: 14px; transition: 0.2s; }
-        .sb-input:focus { border-color: var(--accent-color); outline: none; }
-        .sb-tb-input { width: 24px; background: #241c00; color: var(--warning); border: 1px solid #78350f; padding: 6px 0; text-align: center; font-weight: bold; border-radius: 4px; font-size: 11px; margin-left: 4px; display: none; }
-        .mt-col { background: rgba(255, 189, 0, 0.05); }
-
-        .save-btn { background: var(--success); border: none; padding: 12px; color: black; font-weight: bold; cursor: pointer; border-radius: 6px; flex: 1; font-size: 12px; transition: 0.3s; }
-        .pending-btn { background: var(--warning); border: none; padding: 12px; color: black; font-weight: bold; cursor: pointer; border-radius: 6px; flex: 1; font-size: 12px; transition: 0.3s; }
-        .fair-btn { background: #00e5ff; border: none; padding: 8px; color: black; font-weight: bold; cursor: pointer; border-radius: 6px; width:100%; margin-top:5px; font-size: 11px; transition: 0.3s; }
-        .date-box { background: #1e293b; padding: 10px; border-radius: 6px; margin: 10px 15px; font-size: 11px; border-left: 3px solid var(--accent-color); }
-        
-        .bracket-scroll-container { width: 100%; overflow-x: auto; padding-bottom: 15px; margin-top:20px; }
-        .cl-bracket { display: flex; justify-content: space-between; align-items: center; margin: 0 auto; padding: 20px 0; }
-        .bracket-col { display: flex; flex-direction: column; justify-content: space-around; gap: 15px; height: 100%; }
-        .bracket-match { background: #0b1329; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; width: 140px; text-align: center; font-size: 11px; font-weight: bold; }
-        .bracket-center { display: flex; flex-direction: column; align-items: center; padding: 0 20px; }
-        
-        .rules-content { padding: 15px; font-size: 13px; line-height: 1.7; color: #cbd5e1; }
-        .rules-content h3 { color: var(--accent-color); border-bottom: 1px solid var(--divider); padding-bottom: 5px; margin-top: 25px; text-align: left; }
-        .rules-content p, .rules-content ul { text-align: left; margin: 10px 0; }
-        .example-box { background: rgba(255, 215, 0, 0.05); border-left: 3px solid var(--accent-color); padding: 15px; margin-top: 15px; border-radius: 0 6px 6px 0; text-align: left;}
-        .guide-box { background: #1e293b; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 12px; border-left: 4px solid var(--warning); text-align: left;}
-        
-        .notification-card { background:rgba(245, 158, 11, 0.1); border-left:4px solid var(--warning); padding:12px; margin-top:10px; font-size:12px; text-align:left; border-radius:4px; }
-        .admin-notif-row { padding: 10px; border-bottom: 1px solid var(--divider); font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
-        
-        .global-alert { text-align:center; padding:30px; border: 1px dashed var(--warning); border-radius:8px; color:var(--warning); background:#1e293b; margin-top:20px; font-weight:bold;}
-
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99999; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box;}
-        .modal-content { background: #0f172a; padding: 30px; border-radius: 12px; border: 2px solid var(--accent-color); text-align: center; width: 100%; max-width: 450px; color: white; box-shadow: 0 0 30px rgba(255, 215, 0, 0.2); position:relative; }
-        .modal-btn { background: var(--success); color: black; font-weight: bold; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-top: 20px; width: 100%; }
-        .player-link { cursor: pointer; text-decoration: underline; color: inherit; transition: 0.2s; }
-        .player-link:hover { color: var(--success); }
-
-        .tournament-card { background:#1e293b; padding:15px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:15px; display:flex; flex-direction:column; gap:10px; }
-        .tournament-badge { padding:3px 8px; border-radius:4px; font-size:10px; font-weight:bold; }
-        
-        @keyframes blink { 0% {opacity:1;} 50% {opacity:0.4;} 100% {opacity:1;} }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>İzmir 35 KorTenis Ligi</title>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<style>
+:root{--bg-color:#040814;--card-bg:#0b1329;--accent-color:#ffd700;--text-color:#ffffff;--success:#00ffaa;--warning:#ffbd00;--danger:#ef4444;--border-color:#1e293b;--sub-text:#94a3b8;--divider:#334155;}
+body{font-family:'Segoe UI',sans-serif;background-color:var(--bg-color);color:var(--text-color);margin:0;padding:10px;transition:0.3s;}
+.container{max-width:1200px;margin:0 auto;} h1,h2,h3{text-align:center;color:var(--accent-color);margin:10px 0;}
+.nav-bar{display:none;justify-content:space-between;align-items:center;background:var(--card-bg);padding:10px 15px;border-radius:8px;border:1px solid var(--border-color);margin-bottom:15px;flex-wrap:wrap;gap:10px;}
+.nav-btn{background:#1e293b;color:white;border:1px solid var(--border-color);padding:8px 14px;border-radius:6px;font-weight:bold;cursor:pointer;font-size:12px;} .nav-btn:hover{background:#334155;}
+#authWrapper{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;margin-top:20px;}
+.auth-card{background:var(--card-bg);padding:25px;border-radius:12px;border:1px solid var(--border-color);box-shadow:0 4px 20px rgba(0,0,0,0.5);width:100%;max-width:500px;text-align:center;display:none;margin-bottom:20px;}
+.auth-input,.auth-select{padding:12px;width:100%;border-radius:6px;border:1px solid var(--border-color);background:#020617;color:white;text-align:center;font-size:13px;margin-bottom:12px;box-sizing:border-box;}
+.force-upper{text-transform:uppercase;} .auth-btn{background:var(--accent-color);color:#000;border:none;padding:12px;border-radius:6px;font-weight:bold;cursor:pointer;margin:5px 0;font-size:14px;width:100%;}
+.switch-link{color:var(--sub-text);font-size:12px;cursor:pointer;text-decoration:underline;margin-top:15px;display:inline-block;}
+.chk-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:left;font-size:11px;margin-bottom:15px;} .chk-label{background:#1e293b;padding:6px;border-radius:6px;border:1px solid var(--border-color);cursor:pointer;display:flex;align-items:center;gap:5px;}
+.slider-container{background:#1e293b;padding:12px;border-radius:8px;margin-bottom:15px;border:1px solid var(--border-color);text-align:left;}
+.slider-header{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:bold;color:white;margin-bottom:8px;}
+.slider-badge{background:#020617;color:var(--accent-color);padding:4px 10px;border-radius:6px;border:1px solid var(--accent-color);font-size:14px;font-weight:bold;}
+.range-slider{width:100%;cursor:pointer;accent-color:var(--accent-color);height:6px;border-radius:4px;outline:none;background:#0b1329;-webkit-appearance:none;} .range-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent-color);cursor:pointer;}
+.slider-desc{font-size:11px;color:#cbd5e1;margin-top:8px;min-height:28px;line-height:1.4;font-style:italic;}
+.admin-player-list{max-height:300px;overflow-y:auto;background:#020617;padding:10px;border-radius:8px;border:1px solid var(--border-color);text-align:left;margin-bottom:10px;} .admin-player-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed var(--divider);}
+.action-sm{background:#334155;color:white;border:none;padding:6px 10px;border-radius:4px;font-size:11px;cursor:pointer;font-weight:bold;margin-left:4px;}
+#mainApp{display:none;} #adminTopBar{display:none;background:#1e293b;padding:12px;border-radius:8px;text-align:center;margin-bottom:15px;border:1px dashed var(--accent-color);}
+.tabs{display:flex;gap:4px;margin-bottom:15px;overflow-x:auto;padding-bottom:5px;} .tab-btn{background-color:var(--card-bg);color:var(--sub-text);border:1px solid var(--border-color);padding:11px 8px;cursor:pointer;border-radius:6px;font-weight:bold;flex:1;text-align:center;font-size:12px;white-space:nowrap;} .tab-btn.active{background-color:var(--accent-color);color:#000;border-color:var(--accent-color);}
+.panel{display:none;background-color:var(--card-bg);padding:15px;border-radius:12px;border:1px solid var(--border-color);} .panel.active{display:block;}
+.action-btn{background-color:var(--accent-color);color:#000;border:none;padding:12px;font-size:15px;font-weight:bold;cursor:pointer;border-radius:8px;width:100%;margin-top:8px;}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;} th,td{padding:10px 4px;text-align:center;border-bottom:1px solid var(--border-color);} th{background-color:#1e293b;color:var(--accent-color);}
+.zone-direct{background-color:rgba(0,255,170,0.08);border-left:3px solid var(--success);} .zone-playoff{background-color:rgba(255,189,0,0.08);border-left:3px solid var(--warning);} .zone-eliminated{background-color:rgba(239,68,68,0.05);border-left:3px solid var(--danger);} .zone-global{background-color:rgba(0,229,255,0.05);border-left:3px solid #00e5ff;}
+.rivals-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;} .player-rivals-card{background:#020617;border:1px solid var(--border-color);border-radius:8px;padding:10px;} .player-main-title{background:#1e293b;padding:6px;text-align:center;font-weight:bold;border-radius:4px;color:var(--accent-color);font-size:14px;} .rival-line{display:flex;justify-content:space-between;padding:8px 2px;border-bottom:1px solid #1e293b;font-size:12px;align-items:center;flex-wrap:wrap;}
+.match-card{background:#020617;border-radius:12px;border:1px solid var(--border-color);box-shadow:0 4px 15px rgba(0,0,0,0.5);overflow:hidden;margin-bottom:15px;} .match-card-header{display:flex;justify-content:space-between;align-items:center;background:#0f172a;padding:8px 12px;border-bottom:1px solid var(--divider);}
+.scoreboard{display:flex;flex-direction:column;background:#0f172a;border-radius:8px;border:1px solid var(--divider);overflow:hidden;margin-bottom:10px;} .sb-row{display:flex;border-bottom:1px solid var(--divider);} .sb-row:last-child{border-bottom:none;} .sb-header{background:#1e293b;color:var(--sub-text);font-size:10px;font-weight:bold;text-align:center;} .sb-cell{flex:1;display:flex;justify-content:center;align-items:center;padding:8px 4px;border-left:1px dashed var(--divider);} .sb-name{flex:3;padding:8px 10px;font-size:13px;font-weight:bold;display:flex;align-items:center;text-transform:uppercase;} .sb-input{width:34px;background:#020617;color:white;border:1px solid #475569;padding:8px 0;text-align:center;font-weight:bold;border-radius:6px;font-size:14px;} .sb-input:focus{border-color:var(--accent-color);outline:none;} .sb-tb-input{width:24px;background:#241c00;color:var(--warning);border:1px solid #78350f;padding:6px 0;text-align:center;font-weight:bold;border-radius:4px;font-size:11px;margin-left:4px;display:none;} .mt-col{background:rgba(255,189,0,0.05);}
+.save-btn{background:var(--success);border:none;padding:12px;color:black;font-weight:bold;cursor:pointer;border-radius:6px;flex:1;font-size:12px;} .pending-btn{background:var(--warning);border:none;padding:12px;color:black;font-weight:bold;cursor:pointer;border-radius:6px;flex:1;font-size:12px;} .fair-btn{background:#00e5ff;border:none;padding:8px;color:black;font-weight:bold;cursor:pointer;border-radius:6px;width:100%;margin-top:5px;font-size:11px;} .date-box{background:#1e293b;padding:10px;border-radius:6px;margin:10px 15px;font-size:11px;border-left:3px solid var(--accent-color);}
+.bracket-scroll-container{width:100%;overflow-x:auto;padding-bottom:15px;margin-top:20px;} .cl-bracket{display:flex;justify-content:space-between;align-items:center;margin:0 auto;padding:20px 0;} .bracket-col{display:flex;flex-direction:column;justify-content:space-around;gap:15px;height:100%;} .bracket-match{background:#0b1329;border:1px solid var(--border-color);border-radius:6px;padding:10px;width:140px;text-align:center;font-size:11px;font-weight:bold;} .bracket-center{display:flex;flex-direction:column;align-items:center;padding:0 20px;}
+.rules-content{padding:15px;font-size:13px;line-height:1.7;color:#cbd5e1;} .rules-content h3{color:var(--accent-color);border-bottom:1px solid var(--divider);padding-bottom:5px;margin-top:25px;} .rules-content p,.rules-content ul{margin:10px 0;} .example-box{background:rgba(255,215,0,0.05);border-left:3px solid var(--accent-color);padding:15px;margin-top:15px;border-radius:0 6px 6px 0;}
+.notification-card{background:rgba(245,158,11,0.1);border-left:4px solid var(--warning);padding:12px;margin-top:10px;font-size:12px;text-align:left;border-radius:4px;} .admin-notif-row{padding:10px;border-bottom:1px solid var(--divider);font-size:12px;display:flex;justify-content:space-between;align-items:center;} .global-alert{text-align:center;padding:30px;border:1px dashed var(--warning);border-radius:8px;color:var(--warning);background:#1e293b;margin-top:20px;font-weight:bold;}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999;justify-content:center;align-items:center;padding:15px;box-sizing:border-box;} .modal-content{background:#0f172a;padding:30px;border-radius:12px;border:2px solid var(--accent-color);text-align:center;width:100%;max-width:450px;color:white;box-shadow:0 0 30px rgba(255,215,0,0.2);position:relative;} .modal-btn{background:var(--success);color:black;font-weight:bold;border:none;padding:12px 20px;border-radius:6px;cursor:pointer;font-size:14px;margin-top:20px;width:100%;}
+.player-link{cursor:pointer;text-decoration:underline;color:inherit;transition:0.2s;} .player-link:hover{color:var(--success);}
+.tournament-card{background:#1e293b;padding:15px;border-radius:8px;border:1px solid var(--border-color);margin-bottom:15px;display:flex;flex-direction:column;gap:10px;} .tournament-badge{padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;}
+@keyframes blink{0%{opacity:1;}50%{opacity:0.4;}100%{opacity:1;}}
+</style>
 </head>
 <body>
 
@@ -127,7 +57,7 @@
     <div class="modal-content" style="max-width:350px;">
         <button style="position:absolute; top:10px; right:15px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer;" onclick="closePublicProfile()">✖</button>
         <div style="font-size:35px; margin-bottom:10px;">👤</div>
-        <h2 id="pubName" style="margin:0; color:white; text-transform:uppercase;">İSİM YÜKLENİYOR...</h2>
+        <h2 id="pubName" style="margin:0; color:white; text-transform:uppercase;">İSİM</h2>
         <div style="margin-top:5px; display:flex; justify-content:center; flex-wrap:wrap; gap:5px;">
             <span id="pubTier" style="background:var(--accent-color); color:black; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px;">SEVİYE</span>
             <span id="pubGender" style="background:#1e293b; color:white; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px; border:1px solid var(--border-color);">CİNSİYET</span>
@@ -150,17 +80,14 @@
         <button style="position:absolute; top:10px; right:15px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer;" onclick="closeSubstituteModal()">✖</button>
         <h3 style="color:var(--warning); margin-top:0;">🔄 OYUNCU DEĞİŞTİR (TRANSFER)</h3>
         <p style="font-size:11px; color:#cbd5e1; text-align:left;">Bu işlem, ligden ayrılan oyuncunun fikstürünü ve şu ana kadar olan yerini yeni oyuncuya devreder. K-KOR matematiği korunur.</p>
-        
         <div style="background:#1e293b; padding:10px; border-radius:6px; margin-bottom:15px; text-align:left;">
             <strong style="font-size:11px; color:var(--danger);">Çıkan Oyuncu:</strong><br>
             <span id="subOutName" style="font-weight:bold; font-size:14px;">-</span>
         </div>
-        
         <div style="text-align:left;">
             <strong style="font-size:11px; color:var(--success);">Yerine Girecek Yeni Oyuncu:</strong><br>
             <select id="subInSelect" class="auth-select force-upper" style="margin-top:5px; margin-bottom:0;"><option value="">SEÇİNİZ...</option></select>
         </div>
-        
         <button class="modal-btn" onclick="executeSubstitution()">Transferi Gerçekleştir</button>
     </div>
 </div>
@@ -198,7 +125,6 @@
                     <span class="switch-link" style="margin:0; color:var(--warning);" onclick="forgotPassword()">Şifremi Unuttum</span>
                 </div>
             </div>
-            
             <p class="switch-link" style="color:var(--danger); margin-top:25px; display:block;" onclick="toggleAuth('adminLoginPanel')">Yönetici Paneli</p>
         </div>
 
@@ -234,53 +160,14 @@
 
             <div style="font-size:13px; color:var(--warning); font-weight:bold; margin-top:20px; margin-bottom:10px; border-bottom:1px solid var(--divider); padding-bottom:5px;">📊 PROFESYONEL SEVİYE ANKETİ (NTRP)</div>
             
-            <div class="slider-container">
-                <div class="slider-header"><span>1. Forehand Becerisi</span><span class="slider-badge" id="val_fh">5</span></div>
-                <input type="range" id="sl_fh" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('fh')">
-                <div class="slider-desc" id="desc_fh">Standart rallilerde forehand tarafım güvenilir. Çapraz ve ortaya kontrollü oynayabiliyorum.</div>
-            </div>
-
-            <div class="slider-container">
-                <div class="slider-header"><span>2. Backhand Becerisi</span><span class="slider-badge" id="val_bh">5</span></div>
-                <input type="range" id="sl_bh" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('bh')">
-                <div class="slider-desc" id="desc_bh">Standart tempoda backhand tarafım güvenilir. Topu oyunda tutabiliyorum.</div>
-            </div>
-
-            <div class="slider-container">
-                <div class="slider-header"><span>3. Servis Etkinliği</span><span class="slider-badge" id="val_sv">5</span></div>
-                <input type="range" id="sl_sv" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('sv')">
-                <div class="slider-desc" id="desc_sv">Servisim güvenilir. Çok etkili olmasa da oyuna düzenli başlayabiliyorum.</div>
-            </div>
-
-            <div class="slider-container">
-                <div class="slider-header"><span>4. Servis Karşılama (Return)</span><span class="slider-badge" id="val_rt">5</span></div>
-                <input type="range" id="sl_rt" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('rt')">
-                <div class="slider-desc" id="desc_rt">Return ile ralliyi başlatabiliyorum. Genelde güvenli bölgeye dönüyorum.</div>
-            </div>
-
-            <div class="slider-container">
-                <div class="slider-header"><span>5. Ralli ve Oyun Kurma</span><span class="slider-badge" id="val_ok">5</span></div>
-                <input type="range" id="sl_ok" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('ok')">
-                <div class="slider-desc" id="desc_ok">Ralliyi sürdürebiliyor, topu genelde güvenli bölgelere atabiliyorum.</div>
-            </div>
-
-            <div class="slider-container">
-                <div class="slider-header"><span>6. Maç Planı ve Taktik</span><span class="slider-badge" id="val_tk">5</span></div>
-                <input type="range" id="sl_tk" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('tk')">
-                <div class="slider-desc" id="desc_tk">Maç içinde neyin işe yaradığını anlayıp aynı planı sürdürmeye çalışıyorum.</div>
-            </div>
-
-            <div class="slider-container">
-                <div class="slider-header"><span>7. Winner (Bitiricilik) Becerisi</span><span class="slider-badge" id="val_wn">5</span></div>
-                <input type="range" id="sl_wn" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('wn')">
-                <div class="slider-desc" id="desc_wn">Açık kort bulduğumda winner alabiliyorum ama risk-hata dengesi ortalama.</div>
-            </div>
-
-            <div class="slider-container">
-                <div class="slider-header"><span>8. File Önü ve Vole</span><span class="slider-badge" id="val_vl">5</span></div>
-                <input type="range" id="sl_vl" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('vl')">
-                <div class="slider-desc" id="desc_vl">Standart volelerde güvenilirim. Kolay topları bitirebiliyorum.</div>
-            </div>
+            <div class="slider-container"><div class="slider-header"><span>1. Forehand Becerisi</span><span class="slider-badge" id="val_fh">5</span></div><input type="range" id="sl_fh" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('fh')"><div class="slider-desc" id="desc_fh">Standart rallilerde forehand tarafım güvenilir. Çapraz ve ortaya kontrollü oynayabiliyorum.</div></div>
+            <div class="slider-container"><div class="slider-header"><span>2. Backhand Becerisi</span><span class="slider-badge" id="val_bh">5</span></div><input type="range" id="sl_bh" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('bh')"><div class="slider-desc" id="desc_bh">Standart tempoda backhand tarafım güvenilir. Topu oyunda tutabiliyorum.</div></div>
+            <div class="slider-container"><div class="slider-header"><span>3. Servis Etkinliği</span><span class="slider-badge" id="val_sv">5</span></div><input type="range" id="sl_sv" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('sv')"><div class="slider-desc" id="desc_sv">Servisim güvenilir. Çok etkili olmasa da oyuna düzenli başlayabiliyorum.</div></div>
+            <div class="slider-container"><div class="slider-header"><span>4. Servis Karşılama (Return)</span><span class="slider-badge" id="val_rt">5</span></div><input type="range" id="sl_rt" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('rt')"><div class="slider-desc" id="desc_rt">Return ile ralliyi başlatabiliyorum. Genelde güvenli bölgeye dönüyorum.</div></div>
+            <div class="slider-container"><div class="slider-header"><span>5. Ralli ve Oyun Kurma</span><span class="slider-badge" id="val_ok">5</span></div><input type="range" id="sl_ok" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('ok')"><div class="slider-desc" id="desc_ok">Ralliyi sürdürebiliyor, topu genelde güvenli bölgelere atabiliyorum.</div></div>
+            <div class="slider-container"><div class="slider-header"><span>6. Maç Planı ve Taktik</span><span class="slider-badge" id="val_tk">5</span></div><input type="range" id="sl_tk" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('tk')"><div class="slider-desc" id="desc_tk">Maç içinde neyin işe yaradığını anlayıp aynı planı sürdürmeye çalışıyorum.</div></div>
+            <div class="slider-container"><div class="slider-header"><span>7. Winner (Bitiricilik) Becerisi</span><span class="slider-badge" id="val_wn">5</span></div><input type="range" id="sl_wn" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('wn')"><div class="slider-desc" id="desc_wn">Açık kort bulduğumda winner alabiliyorum ama risk-hata dengesi ortalama.</div></div>
+            <div class="slider-container"><div class="slider-header"><span>8. File Önü ve Vole</span><span class="slider-badge" id="val_vl">5</span></div><input type="range" id="sl_vl" class="range-slider" min="1" max="10" value="5" oninput="updateSlider('vl')"><div class="slider-desc" id="desc_vl">Standart volelerde güvenilirim. Kolay topları bitirebiliyorum.</div></div>
 
             <button class="auth-btn" style="background:var(--success); margin-top:20px; font-size:16px; padding:15px;" onclick="registerNewUser()">🚀 KAYDINI TAMAMLA</button>
             <p class="switch-link" onclick="toggleAuth('loginPanel')">Vazgeç ve Geri Dön</p>
@@ -315,10 +202,8 @@
 
         <div id="tournaments" class="panel">
             <h2 style="color:var(--accent-color); margin-top:0;">🎾 LİG VE TURNUVA MERKEZİ</h2>
-            
             <h3 style="text-align:left; color:var(--success); border-bottom:1px dashed var(--divider); padding-bottom:5px;">AÇIK KAYITLAR (Yaklaşan)</h3>
             <div id="pendingTournamentsList">Yükleniyor...</div>
-
             <h3 style="text-align:left; color:var(--warning); border-bottom:1px dashed var(--divider); padding-bottom:5px; margin-top:20px;">AKTİF TURNUVALAR (Oynanıyor)</h3>
             <div id="activeTournamentsList">Yükleniyor...</div>
         </div>
@@ -332,7 +217,6 @@
                     <span id="profStyle" style="background:#1e293b; color:var(--warning); font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px; border:1px solid var(--border-color);">STİL BELİRTİLMEDİ</span>
                     <button class="action-sm" style="background:var(--danger); font-size:10px;" onclick="changeOwnPassword()">🔑 Şifre Değiştir</button>
                 </div>
-                
                 <div style="display:flex; justify-content:space-around; margin-top:20px;">
                     <div><div id="profKKor" style="font-size:24px; font-weight:bold; color:var(--accent-color);">0</div><div style="font-size:10px; color:var(--sub-text);">Kariyer K-KOR</div></div>
                     <div><div id="profFame" style="font-size:24px; font-weight:bold; color:var(--success);">0</div><div style="font-size:10px; color:var(--sub-text);">Şöhret Puanı</div></div>
@@ -340,9 +224,7 @@
                 </div>
                 <div style="margin-top:15px; font-size:12px; color:var(--warning);" id="profTournaments">Katıldığı Turnuva: 0</div>
             </div>
-            
             <div id="profNotificationsContainer"></div>
-            
             <div style="background:#1e293b; padding:15px; border-radius:8px; margin-top:15px; font-size:12px; border-left:4px solid var(--success);">
                 <h4 style="margin:0 0 5px 0; color:var(--success);">📅 Oyun Saatleriniz</h4>
                 <div id="profAvail" style="color:var(--text-color);">Yükleniyor...</div>
@@ -371,7 +253,6 @@
         <div id="admin_pending" class="panel">
             <h2 style="color:var(--accent-color); margin-top:0;" id="pendingAdminTitle">KAYIT YÖNETİMİ</h2>
             <p style="font-size:12px; color:var(--sub-text); margin-bottom:15px;">Bu turnuva henüz başlatılmadı. Oyuncular kayıt olabilir veya siz manuel ekleyebilirsiniz. Asıl liste dolarsa gelenler yedek listeye geçer.</p>
-            
             <div style="background:#1e293b; padding:15px; border-radius:8px; margin-bottom:15px;">
                 <h4 style="margin:0 0 10px 0; color:var(--success);">📥 MANUEL OYUNCU EKLE</h4>
                 <div style="display:flex; gap:10px;">
@@ -379,28 +260,22 @@
                     <button class="action-sm" style="background:var(--success); color:black;" onclick="adminManualAddPlayer()">LİSTEYE EKLE</button>
                 </div>
             </div>
-
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
                 <h4 style="margin:0; color:white;">ASIL LİSTE <span id="mainListCount" style="color:var(--accent-color);">(0/23)</span></h4>
             </div>
             <div class="admin-player-list" id="pendingMainList" style="min-height:50px;"></div>
-
             <h4 style="margin:15px 0 5px 0; color:var(--warning);">YEDEK LİSTE (Bekleyenler)</h4>
             <div class="admin-player-list" id="pendingWaitlist" style="min-height:50px;"></div>
-
             <div class="global-alert" id="pendingReadyAlert" style="display:none; margin:15px 0; padding:15px;">
                 ✅ Minimum oyuncu sayısına (12) ulaşıldı. Turnuvayı dilediğiniz zaman başlatabilirsiniz.
             </div>
-
             <button class="action-btn" id="startPendingBtn" onclick="startPendingTournament(this)" disabled style="background:#334155; color:#94a3b8;">⏳ KURAYI ÇEK VE TURNUVAYI BAŞLAT (Min 12 Kişi)</button>
         </div>
 
         <div id="setup_pending" class="panel">
             <h2 style="color:var(--accent-color); margin-top:0;">➕ YENİ TURNUVA OLUŞTUR (KAYDA AÇ)</h2>
-            <p style="font-size:12px; color:var(--sub-text);">Turnuva ayarlarını yapıp kayda açtığınızda oyuncular "Turnuvalar" sekmesinden kayıt olabilirler.</p>
-            
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px;">
-                <input type="text" id="leagueCustomName" class="auth-input force-upper" style="width:100%; margin:0;" placeholder="🏆 TURNUVA ADI (ÖRN: BAHAR KUPASI)" oninput="this.value = this.value.toLocaleUpperCase('tr-TR')">
+                <input type="text" id="leagueCustomName" class="auth-input force-upper" style="width:100%; margin:0;" placeholder="🏆 TURNUVA ADI" oninput="this.value = this.value.toLocaleUpperCase('tr-TR')">
                 <select id="leagueCapacity" class="auth-input force-upper" style="width:100%; margin:0; border-color: var(--accent-color); font-weight:bold;">
                     <option value="23" selected>🧍 BUTİK LİG (12-23 Kişi)</option>
                     <option value="47">🧍‍♂️ STANDART LİG (24-47 Kişi)</option>
@@ -408,10 +283,8 @@
                 </select>
                 <select id="leagueGender" class="auth-input force-upper" style="width:100%; margin:0;"><option value="ERKEK" selected>👨 ERKEK LİGİ</option><option value="KADIN">👩 KADIN LİGİ</option><option value="KARMA">🤝 KARMA LİG</option></select>
                 <select id="leagueFormat" class="auth-input force-upper" style="width:100%; margin:0;"><option value="6_GAME" selected>🎾 6 OYUNLUK FORMAT</option><option value="4_GAME">⚡ 4 OYUNLUK FORMAT</option></select>
-                
                 <input type="text" id="leagueRegion" list="districts" class="auth-input force-upper" style="width:100%; margin:0;" placeholder="📍 İLÇE (SEÇ VEYA YAZ)" oninput="this.value = this.value.toLocaleUpperCase('tr-TR')">
                 <datalist id="districts"><option value="BOSTANLI"><option value="BORNOVA"><option value="İNCİRALTI"><option value="KONAK"><option value="ÇİĞLİ"><option value="BUCA"></datalist>
-                
                 <select id="leagueTier" class="auth-input force-upper" style="width:100%; margin:0;">
                     <option value="SILVER">🥈 SILVER (1.5 - 3.9)</option>
                     <option value="GOLD" selected>🥇 GOLD (4.0 - 5.9)</option>
@@ -420,31 +293,25 @@
                 </select>
                 <input type="date" id="startDate" class="auth-input" style="width:100%; margin:0;">
             </div>
-            
             <button class="action-btn" onclick="createPendingTournament()">🚀 TURNUVAYI KAYDA AÇ</button>
         </div>
 
         <div id="setup_manual" class="panel">
             <h2 style="color:var(--success); margin-top:0;">⚙️ GELİŞMİŞ KURA MOTORU VE OYUNCU YÖNETİMİ</h2>
-            <p style="font-size:12px; color:var(--sub-text);">Tüm sistem oyuncularını yönetebilir ve listeden seçtiğiniz oyuncularla anında kura çekip aktif bir turnuva başlatabilirsiniz.</p>
-            
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 10px;">
-                <input type="text" id="leagueCustomName_m" class="auth-input force-upper" style="width:100%; margin:0;" placeholder="🏆 ÖZEL AD (ÖRN: BAHAR KUPASI)" oninput="this.value = this.value.toLocaleUpperCase('tr-TR')">
+                <input type="text" id="leagueCustomName_m" class="auth-input force-upper" style="width:100%; margin:0;" placeholder="🏆 ÖZEL AD" oninput="this.value = this.value.toLocaleUpperCase('tr-TR')">
                 <select id="leagueGender_m" class="auth-input force-upper" style="width:100%; margin:0; border-color: var(--accent-color); font-weight:bold;"><option value="ERKEK" selected>👨 ERKEK LİGİ</option><option value="KADIN">👩 KADIN LİGİ</option><option value="KARMA">🤝 KARMA LİG</option></select>
                 <select id="leagueFormat_m" class="auth-input force-upper" style="width:100%; margin:0; border-color: var(--success); font-weight: bold;"><option value="6_GAME" selected>🎾 6 OYUNLUK FORMAT</option><option value="4_GAME">⚡ 4 OYUNLUK FORMAT</option></select>
-                
-                <input type="text" id="leagueRegion_m" list="districts_m" class="auth-input force-upper" style="width:100%; margin:0;" placeholder="📍 İLÇE (SEÇ VEYA YAZ)" oninput="this.value = this.value.toLocaleUpperCase('tr-TR')">
+                <input type="text" id="leagueRegion_m" list="districts_m" class="auth-input force-upper" style="width:100%; margin:0;" placeholder="📍 İLÇE" oninput="this.value = this.value.toLocaleUpperCase('tr-TR')">
                 <datalist id="districts_m"><option value="BOSTANLI"><option value="BORNOVA"><option value="İNCİRALTI"><option value="KONAK"><option value="ÇİĞLİ"><option value="BUCA"></datalist>
-                
                 <select id="leagueTier_m" class="auth-input force-upper" style="width:100%; margin:0;">
                     <option value="SILVER">🥈 SILVER (1.5 - 3.9)</option>
                     <option value="GOLD" selected>🥇 GOLD (4.0 - 5.9)</option>
                     <option value="PLATIN">💎 PLATIN (6.0 - 7.0)</option>
-                    <option value="OPEN">🌍 OPEN LİG (Açık Kategori)</option>
+                    <option value="OPEN">🌍 OPEN LİG</option>
                 </select>
                 <input type="date" id="startDate_m" class="auth-input" style="width:100%; margin:0;">
             </div>
-
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; margin-top:20px;">
                 <span style="font-size:12px; color:var(--sub-text);">Tüm Oyuncular (Havuz):</span>
                 <div style="display:flex; align-items:center; gap:10px;">
@@ -452,22 +319,15 @@
                     <span id="playerCountDisplay" style="background:var(--accent-color); color:black; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:11px;">0 SEÇİLDİ</span>
                 </div>
             </div>
-            
             <div style="display:flex; gap:5px; margin-bottom:10px;">
                 <input type="text" id="adminSearchName" class="auth-input force-upper" style="margin:0; flex:1;" placeholder="🔍 İSİMLE ARA..." oninput="adminFilterPlayers()">
                 <select id="adminFilterGender" class="auth-select force-upper" style="margin:0; flex:1;" onchange="adminFilterPlayers()">
-                    <option value="all">CİNSİYET (TÜMÜ)</option><option value="ERKEK">ERKEK</option><option value="KADIN">KADIN</option>
+                    <option value="all">CİNSİYET</option><option value="ERKEK">ERKEK</option><option value="KADIN">KADIN</option>
                 </select>
                 <select id="adminFilterTier" class="auth-select force-upper" style="margin:0; flex:1;" onchange="adminFilterPlayers()">
-                    <option value="all">SEVİYE (TÜMÜ)</option><option value="SILVER">SILVER</option><option value="GOLD">GOLD</option><option value="PLATIN">PLATIN</option>
-                </select>
-                <select id="adminSortList" class="auth-select force-upper" style="margin:0; flex:1;" onchange="adminFilterPlayers()">
-                    <option value="az">A-Z SIRALA</option>
-                    <option value="score_desc">PUAN (YÜKSEK)</option>
-                    <option value="score_asc">PUAN (DÜŞÜK)</option>
+                    <option value="all">SEVİYE</option><option value="SILVER">SILVER</option><option value="GOLD">GOLD</option><option value="PLATIN">PLATIN</option>
                 </select>
             </div>
-            
             <div class="admin-player-list" id="adminChecklist"></div>
             <button class="action-btn" style="background:#1e293b; color:white; border:1px dashed var(--success); margin-bottom:15px;" onclick="previewPots()">📦 SEÇİLENLER İÇİN TORBALARI ÖNİZLE</button>
             <div id="potPreviewContainer" style="display:none; margin-bottom:15px;"></div>
@@ -510,112 +370,16 @@
 </div>
 
 <script>
-    // --- 1. DİNAMİK SLIDER METİNLERİ (NTRP SİSTEMİ) ---
+    // 1. DINAMIK SLIDER METİNLERİ
     const sliderTexts = {
-        fh: [
-            "",
-            "Topu fileden geçirmekte zorlanıyorum. Forehand vuruşum temel seviyede bile çok dengesiz.",
-            "Sadece çok yavaş ve rahat toplarda karşıya atabiliyorum. Yön ve derinlik kontrolüm yok.",
-            "Yavaş tempoda kısa ralli yapabiliyorum ama hata oranım yüksek.",
-            "Orta tempoda forehand kullanabiliyorum; ancak baskı altında topu kısa bırakıyor veya dışarı atıyorum.",
-            "Standart rallilerde forehand tarafım güvenilir. Çapraz ve ortaya kontrollü oynayabiliyorum.",
-            "Spin, derinlik ve yönlendirme yapabiliyorum; fakat hız artırınca hata oranım yükseliyor.",
-            "Forehand belirgin güçlü yönüm. Açı, tempo ve derinlikle rakibi baskılayabiliyorum.",
-            "Forehand ile güçlü winner'lar alabiliyor, inside-out veya paralel gibi bitirici vuruşlar yapabiliyorum.",
-            "Baskı altında bile forehand ile oyunu yönlendirebiliyorum. Savunmadan hücuma geçişte etkiliyim.",
-            "Forehand maç kazandıran ana silahım. Yüksek tempoda, derin, yönlü ve düşük hata oranıyla oynuyorum."
-        ],
-        bh: [
-            "",
-            "Backhand ile topu oyuna sokmakta ciddi zorlanıyorum. Genelde bu vuruştan kaçıyorum.",
-            "Sadece çok rahat toplarda karşıya atabiliyorum; kontrolüm zayıf.",
-            "Yavaş tempoda backhand rallisi yapabiliyorum ama yönlendirme ve derinlik yok.",
-            "Backhand tarafıma oynanınca çoğunlukla savunmada kalıyorum. Hata riskim yüksek.",
-            "Standart tempoda backhand tarafım güvenilir. Topu oyunda tutabiliyorum.",
-            "Backhand ile çapraz, ortaya ve zaman zaman paralel oynayabiliyorum. Slice veya spin kullanabiliyorum.",
-            "Backhand zayıf yön olmaktan çıktı. Rallide denge sağlayıp rakibi geride tutabiliyorum.",
-            "Backhand ile baskı kurabiliyor, yön değiştirebiliyor ve uygun toplarda winner deneyebiliyorum.",
-            "Baskı altında backhand ile hem savunma hem hücum üretebiliyorum. Paralel değişimler güvenilir.",
-            "Backhand üst düzey silahtır. Hızlı toplarda, zor pozisyonlarda ve kritik puanlarda istikrarlıdır."
-        ],
-        sv: [
-            "",
-            "Servisi oyuna sokmakta zorlanıyorum. Çift hata çok yüksek.",
-            "Servisi bazen oyuna sokabiliyorum ama güç, yön ve güven yok.",
-            "İkinci servisle oyuna başlayabiliyorum; birinci servis çoğunlukla riskli.",
-            "Servis genelde oyuna giriyor ama rakibe kolay hücum fırsatı veriyor.",
-            "Servisim güvenilir. Çok etkili olmasa da oyuna düzenli başlayabiliyorum.",
-            "Birinci serviste yön deniyorum; ikinci servis daha güvenli. Çift hata oranım makul.",
-            "Servisle avantaj kurabiliyorum. Zayıf return aldırıp puana önde başlayabiliyorum.",
-            "Birinci servis güçlü ve yönlü. İkinci servis de güvenilir. Servis oyunlarında belirgin avantaj sağlıyorum.",
-            "Servis oyunlarımı çoğunlukla kontrol ediyorum. Kick, slice, düz servis gibi varyasyon kullanabiliyorum.",
-            "Servis maç kazandıran ana silahlarımdan biri. Kolay puan, zayıf return ve oyun kontrolü sağlıyor."
-        ],
-        rt: [
-            "",
-            "Returnlerde topu karşıya geçirmekte zorlanıyorum.",
-            "Sadece yavaş servisleri karşılayabiliyorum; yönlendirme yok.",
-            "Zayıf servislerde topu oyuna sokabiliyorum ama hata oranım yüksek.",
-            "Standart servisleri karşılayabiliyorum; fakat güçlü servislerde zorlanıyorum.",
-            "Return ile ralliyi başlatabiliyorum. Genelde güvenli bölgeye dönüyorum.",
-            "Returnlerde çapraz, ortaya veya derine bilinçli dönüş yapabiliyorum.",
-            "Zayıf ikinci servisleri cezalandırabiliyorum. Return ile puana dengeli başlayabiliyorum.",
-            "Return ile doğrudan baskı kurabiliyorum. Kısa servisleri hücum fırsatına çevirebiliyorum.",
-            "Rakibin servis yönünü, hızını ve alışkanlıklarını okuyabiliyorum. Return pozisyonumu buna göre ayarlıyorum.",
-            "Return oyunum seviye belirleyen güçlü yönüm. Rakibin servis oyununu sürekli tehdit ediyorum."
-        ],
-        ok: [
-            "",
-            "2-3 vuruşluk ralliyi sürdürmekte zorlanıyorum.",
-            "Yavaş toplarda kısa ralli yapabiliyorum ama hata çok fazla.",
-            "Topu oyunda tutmaya çalışıyorum; yönlendirme becerim sınırlı.",
-            "Orta tempoda ralli sürdürebiliyorum ama derinlik ve yerleşim zayıf.",
-            "Ralliyi sürdürebiliyor, topu genelde güvenli bölgelere atabiliyorum.",
-            "Rakibi sağa-sola oynatabiliyor, derinlik ve tempo değiştirmeye başlayabiliyorum.",
-            "Puanı bilinçli kuruyorum. Rakibin zayıf tarafına oynayıp avantaj yaratabiliyorum.",
-            "Tempo, spin, açı ve derinlik değiştirerek oyunu yönlendirebiliyorum.",
-            "Rallide kontrol çoğunlukla bende. Savunma-hücum geçişlerini bilinçli yapıyorum.",
-            "Oyunun ritmini ben belirliyorum. Rakibi sürekli dengesiz pozisyona sokacak planlı ralliler kuruyorum."
-        ],
-        tk: [
-            "",
-            "Maç içinde planım yok. Sadece topu karşıya atmaya çalışıyorum.",
-            "Rakibin güçlü ve zayıf yönlerini fark etmekte zorlanıyorum.",
-            "Rakibin zayıf tarafını bazen görüyorum ama uygulamakta zorlanıyorum.",
-            "Basit taktikler kullanabiliyorum: backhand'e oynama, topu derin tutma gibi.",
-            "Maç içinde neyin işe yaradığını anlayıp aynı planı sürdürmeye çalışıyorum.",
-            "Rakibin temposuna, zayıf yönüne veya hareket kabiliyetine göre oyunumu kısmen değiştiriyorum.",
-            "Rakibe göre servis yönü, ralli yönü, tempo ve risk seviyemi ayarlayabiliyorum.",
-            "Plan A çalışmazsa plan B'ye geçebiliyorum. Güçlü yönlerimi bilinçli kullanıyorum.",
-            "Rakibin alışkanlıklarını okuyabiliyor, kritik puanlarda özel taktik uygulayabiliyorum.",
-            "Maçı stratejik olarak yönetiyorum. Rakibin oyun stiline göre tempo, spin, derinlik, file oyunu ve risk seviyesini sürekli ayarlıyorum."
-        ],
-        wn: [
-            "",
-            "Winner üretmekte zorlanıyorum. Puanları genelde rakibin hatasıyla kazanıyorum.",
-            "Çok kolay toplarda bile bitirici vuruşta hata yapma ihtimalim yüksek.",
-            "Uygun toplarda winner deniyorum ama başarı oranım düşük.",
-            "Kısa topları bazen bitirebiliyorum; seçicilik ve zamanlama eksik.",
-            "Açık kort bulduğumda winner alabiliyorum ama risk-hata dengesi ortalama.",
-            "Forehand veya backhand tarafında belirli pozisyonlardan winner üretebiliyorum.",
-            "Kısa top, zayıf servis veya açık kortu düzenli cezalandırabiliyorum.",
-            "Güçlü winner'lar alabiliyor, puanı bitirme konusunda keskin oyunlar sergileyebiliyorum.",
-            "Winner seçiciliğim yüksek. Gereksiz risk almadan doğru anda bitiriyorum.",
-            "Bitiricilik önemli silahım. Winner tehdidim rakibin oyun planını değiştiriyor."
-        ],
-        vl: [
-            "",
-            "Fileye gelmekten kaçınıyorum. Vole tekniğim çok zayıf.",
-            "Çok kolay toplarda vole yapabiliyorum ama kontrolsüz.",
-            "Basit voleleri karşıya atabiliyorum; yön ve derinlik zayıf.",
-            "Fileye geldiğimde bazen puanı bitirebiliyorum ama pozisyon alma sorunum var.",
-            "Standart volelerde güvenilirim. Kolay topları bitirebiliyorum.",
-            "Forehand ve backhand volede yönlendirme yapabiliyorum. Yaklaşma vuruşundan sonra fileye gelebiliyorum.",
-            "Filede özgüvenliyim. Açılı vole, derin vole ve kısa vole seçeneklerini kullanabiliyorum.",
-            "Fileye bilinçli çıkıyorum. Voleyle puanı bitirme oranım yüksek.",
-            "Hızlı değişimlerde, refleks volelerde ve baskı altında etkiliyim.",
-            "File oyunum üst düzey. Servis-vole, yaklaşma-vole ve çiftlerde file hakimiyetim güçlü."
-        ]
+        fh: ["","Topu fileden geçirmekte zorlanıyorum. Forehand vuruşum temel seviyede bile çok dengesiz.","Sadece çok yavaş ve rahat toplarda karşıya atabiliyorum. Yön ve derinlik kontrolüm yok.","Yavaş tempoda kısa ralli yapabiliyorum ama hata oranım yüksek.","Orta tempoda forehand kullanabiliyorum; ancak baskı altında topu kısa bırakıyor veya dışarı atıyorum.","Standart rallilerde forehand tarafım güvenilir. Çapraz ve ortaya kontrollü oynayabiliyorum.","Spin, derinlik ve yönlendirme yapabiliyorum; fakat hız artırınca hata oranım yükseliyor.","Forehand belirgin güçlü yönüm. Açı, tempo ve derinlikle rakibi baskılayabiliyorum.","Forehand ile güçlü winner'lar alabiliyor, inside-out veya paralel gibi bitirici vuruşlar yapabiliyorum.","Baskı altında bile forehand ile oyunu yönlendirebiliyorum. Savunmadan hücuma geçişte etkiliyim.","Forehand maç kazandıran ana silahım. Yüksek tempoda, derin, yönlü ve düşük hata oranıyla oynuyorum."],
+        bh: ["","Backhand ile topu oyuna sokmakta ciddi zorlanıyorum. Genelde bu vuruştan kaçıyorum.","Sadece çok rahat toplarda karşıya atabiliyorum; kontrolüm zayıf.","Yavaş tempoda backhand rallisi yapabiliyorum ama yönlendirme ve derinlik yok.","Backhand tarafıma oynanınca çoğunlukla savunmada kalıyorum. Hata riskim yüksek.","Standart tempoda backhand tarafım güvenilir. Topu oyunda tutabiliyorum.","Backhand ile çapraz, ortaya ve zaman zaman paralel oynayabiliyorum. Slice veya spin kullanabiliyorum.","Backhand zayıf yön olmaktan çıktı. Rallide denge sağlayıp rakibi geride tutabiliyorum.","Backhand ile baskı kurabiliyor, yön değiştirebiliyor ve uygun toplarda winner deneyebiliyorum.","Baskı altında backhand ile hem savunma hem hücum üretebiliyorum. Paralel değişimler güvenilir.","Backhand üst düzey silahtır. Hızlı toplarda, zor pozisyonlarda ve kritik puanlarda istikrarlıdır."],
+        sv: ["","Servisi oyuna sokmakta zorlanıyorum. Çift hata çok yüksek.","Servisi bazen oyuna sokabiliyorum ama güç, yön ve güven yok.","İkinci servisle oyuna başlayabiliyorum; birinci servis çoğunlukla riskli.","Servis genelde oyuna giriyor ama rakibe kolay hücum fırsatı veriyor.","Servisim güvenilir. Çok etkili olmasa da oyuna düzenli başlayabiliyorum.","Birinci serviste yön deniyorum; ikinci servis daha güvenli. Çift hata oranım makul.","Servisle avantaj kurabiliyorum. Zayıf return aldırıp puana önde başlayabiliyorum.","Birinci servis güçlü ve yönlü. İkinci servis de güvenilir. Servis oyunlarında belirgin avantaj sağlıyorum.","Servis oyunlarımı çoğunlukla kontrol ediyorum. Kick, slice, düz servis gibi varyasyon kullanabiliyorum.","Servis maç kazandıran ana silahlarımdan biri. Kolay puan, zayıf return ve oyun kontrolü sağlıyor."],
+        rt: ["","Returnlerde topu karşıya geçirmekte zorlanıyorum.","Sadece yavaş servisleri karşılayabiliyorum; yönlendirme yok.","Zayıf servislerde topu oyuna sokabiliyorum ama hata oranım yüksek.","Standart servisleri karşılayabiliyorum; fakat güçlü servislerde zorlanıyorum.","Return ile ralliyi başlatabiliyorum. Genelde güvenli bölgeye dönüyorum.","Returnlerde çapraz, ortaya veya derine bilinçli dönüş yapabiliyorum.","Zayıf ikinci servisleri cezalandırabiliyorum. Return ile puana dengeli başlayabiliyorum.","Return ile doğrudan baskı kurabiliyorum. Kısa servisleri hücum fırsatına çevirebiliyorum.","Rakibin servis yönünü, hızını ve alışkanlıklarını okuyabiliyorum. Return pozisyonumu buna göre ayarlıyorum.","Return oyunum seviye belirleyen güçlü yönüm. Rakibin servis oyununu sürekli tehdit ediyorum."],
+        ok: ["","2-3 vuruşluk ralliyi sürdürmekte zorlanıyorum.","Yavaş toplarda kısa ralli yapabiliyorum ama hata çok fazla.","Topu oyunda tutmaya çalışıyorum; yönlendirme becerim sınırlı.","Orta tempoda ralli sürdürebiliyorum ama derinlik ve yerleşim zayıf.","Ralliyi sürdürebiliyor, topu genelde güvenli bölgelere atabiliyorum.","Rakibi sağa-sola oynatabiliyor, derinlik ve tempo değiştirmeye başlayabiliyorum.","Puanı bilinçli kuruyorum. Rakibin zayıf tarafına oynayıp avantaj yaratabiliyorum.","Tempo, spin, açı ve derinlik değiştirerek oyunu yönlendirebiliyorum.","Rallide kontrol çoğunlukla bende. Savunma-hücum geçişlerini bilinçli yapıyorum.","Oyunun ritmini ben belirliyorum. Rakibi sürekli dengesiz pozisyona sokacak planlı ralliler kuruyorum."],
+        tk: ["","Maç içinde planım yok. Sadece topu karşıya atmaya çalışıyorum.","Rakibin güçlü ve zayıf yönlerini fark etmekte zorlanıyorum.","Rakibin zayıf tarafını bazen görüyorum ama uygulamakta zorlanıyorum.","Basit taktikler kullanabiliyorum: backhand'e oynama, topu derin tutma gibi.","Maç içinde neyin işe yaradığını anlayıp aynı planı sürdürmeye çalışıyorum.","Rakibin temposuna, zayıf yönüne veya hareket kabiliyetine göre oyunumu kısmen değiştiriyorum.","Rakibe göre servis yönü, ralli yönü, tempo ve risk seviyemi ayarlayabiliyorum.","Plan A çalışmazsa plan B'ye geçebiliyorum. Güçlü yönlerimi bilinçli kullanıyorum.","Rakibin alışkanlıklarını okuyabiliyor, kritik puanlarda özel taktik uygulayabiliyorum.","Maçı stratejik olarak yönetiyorum. Rakibin oyun stiline göre tempo, spin, derinlik, file oyunu ve risk seviyesini sürekli ayarlıyorum."],
+        wn: ["","Winner üretmekte zorlanıyorum. Puanları genelde rakibin hatasıyla kazanıyorum.","Çok kolay toplarda bile bitirici vuruşta hata yapma ihtimalim yüksek.","Uygun toplarda winner deniyorum ama başarı oranım düşük.","Kısa topları bazen bitirebiliyorum; seçicilik ve zamanlama eksik.","Açık kort bulduğumda winner alabiliyorum ama risk-hata dengesi ortalama.","Forehand veya backhand tarafında belirli pozisyonlardan winner üretebiliyorum.","Kısa top, zayıf servis veya açık kortu düzenli cezalandırabiliyorum.","Güçlü winner'lar alabiliyor, puanı bitirme konusunda keskin oyunlar sergileyebiliyorum.","Winner seçiciliğim yüksek. Gereksiz risk almadan doğru anda bitiriyorum.","Bitiricilik önemli silahım. Winner tehdidim rakibin oyun planını değiştiriyor."],
+        vl: ["","Fileye gelmekten kaçınıyorum. Vole tekniğim çok zayıf.","Çok kolay toplarda vole yapabiliyorum ama kontrolsüz.","Basit voleleri karşıya atabiliyorum; yön ve derinlik zayıf.","Fileye geldiğimde bazen puanı bitirebiliyorum ama pozisyon alma sorunum var.","Standart volelerde güvenilirim. Kolay topları bitirebiliyorum.","Forehand ve backhand volede yönlendirme yapabiliyorum. Yaklaşma vuruşundan sonra fileye gelebiliyorum.","Filede özgüvenliyim. Açılı vole, derin vole ve kısa vole seçeneklerini kullanabiliyorum.","Fileye bilinçli çıkıyorum. Voleyle puanı bitirme oranım yüksek.","Hızlı değişimlerde, refleks volelerde ve baskı altında etkiliyim.","File oyunum üst düzey. Servis-vole, yaklaşma-vole ve çiftlerde file hakimiyetim güçlü."]
     };
 
     function updateSlider(cat) {
@@ -624,7 +388,7 @@
         document.getElementById('desc_' + cat).innerText = sliderTexts[cat][val];
     }
 
-    // --- 2. VERİTABANI VE İSKELET AYARLARI ---
+    // 2. VERITABANI VE GLOBAL DEGISKENLER
     const firebaseConfig = { databaseURL: "https://device-streaming-c489eab4-default-rtdb.europe-west1.firebasedatabase.app/" };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const database = firebase.database();
@@ -632,13 +396,10 @@
     let globalUsers = {}; let allTourneys = {}; let currentTid = null;
     let isAdmin = false; let loggedInUser = null; 
     let players = []; let matches = []; let currentSettings = null;
-    let passwordResets = {};
-    let systemAdminPassword = "admin35";
-    
-    let derivedGlobalStats = {}; 
-    let substituteOldUid = null;
+    let passwordResets = {}; let systemAdminPassword = "admin35";
+    let derivedGlobalStats = {}; let substituteOldUid = null;
 
-    // Firebase "null" dizilerini temizleyen ÇELİK YELEK
+    // SESSİZ ÇÖKMEYİ ENGELLEYEN HATA YUTUCU (GÜVENLİ LİSTE)
     function _arr(obj) { 
         if(!obj) return []; 
         let arr = Array.isArray(obj) ? obj : Object.values(obj);
@@ -654,13 +415,16 @@
             if(parts.length < 2) return null;
             let d = parts[0]; 
             let t = parts[1].split(' - ')[0]; 
-            return new Date(`${d}T${t}:00`).getTime();
+            // Türkiye yerel saati formatı için küçük düzeltme
+            let isoDate = `${d}T${t}:00`;
+            let timeMs = new Date(isoDate).getTime();
+            if(isNaN(timeMs)) return null;
+            return timeMs;
         } catch(e) { return null; }
     }
 
     function buildGlobalStats() {
         derivedGlobalStats = {};
-        
         Object.values(globalUsers).forEach(u => {
             if(!u) return;
             derivedGlobalStats[u.id] = { k_kor: parseFloat(u.k_kor_base || 0), gWins: 0, gLoss: 0, gMatch: 0, fame: u.fame || 0 };
@@ -682,7 +446,6 @@
                     if (m.played && !m.pending && !m.isWO) {
                         if (derivedGlobalStats[m.p1]) derivedGlobalStats[m.p1].gMatch++;
                         if (derivedGlobalStats[m.p2]) derivedGlobalStats[m.p2].gMatch++;
-                        
                         if (m.winnerId) {
                             let loserId = m.winnerId === m.p1 ? m.p2 : m.p1;
                             if (derivedGlobalStats[m.winnerId]) derivedGlobalStats[m.winnerId].gWins++;
@@ -698,19 +461,10 @@
                 });
             }
         });
-
-        let activePanel = document.querySelector('.panel.active');
-        if(activePanel) {
-            if(activePanel.id === 'profile') renderProfile();
-            if(activePanel.id === 'standings' && currentTid === null) renderGlobalStandings();
-        }
     }
 
     function listenToCloud() {
-        const errHandler = (error) => {
-            console.error("Firebase Bağlantı Hatası:", error);
-            document.getElementById('loginGlobalUserSelect').innerHTML = '<option value="">BAĞLANTI HATASI!</option>';
-        };
+        const errHandler = (error) => { console.error("Firebase Hatası:", error); document.getElementById('loginGlobalUserSelect').innerHTML = '<option value="">BAĞLANTI HATASI!</option>'; };
 
         database.ref('the_35_gold_league/admin/password').on('value', (s) => {
             try { if(s.val()) systemAdminPassword = s.val(); } catch(e){}
@@ -737,7 +491,6 @@
 
                 let activePanel = document.querySelector('.panel.active');
                 if(activePanel && activePanel.id) switchTab(activePanel.id);
-
             } catch(e) { console.error("Kullanıcı okuma hatası:", e); }
         }, errHandler);
 
@@ -745,6 +498,7 @@
             try {
                 allTourneys = s.val() || {}; 
                 
+                // 24 SAAT OTO-ONAY SİSTEMİ
                 let isAnyAutoApproved = false;
                 Object.keys(allTourneys).forEach(tid => {
                     let t = allTourneys[tid];
@@ -752,8 +506,7 @@
                         _arr(t.matches).forEach(m => {
                             if(m.played && m.pending && m.savedAt) {
                                 if(Date.now() - m.savedAt > 24 * 60 * 60 * 1000) {
-                                    m.pending = false; 
-                                    isAnyAutoApproved = true;
+                                    m.pending = false; isAnyAutoApproved = true;
                                 }
                             }
                         });
@@ -781,9 +534,7 @@
                         }
                     }
                 }
-                
                 if(activePanelId) switchTab(activePanelId); 
-
             } catch(e) { console.error("Turnuva okuma hatası:", e); }
         }, errHandler);
 
@@ -808,11 +559,9 @@
         if(p) sel.value = p; 
     }
 
-    // --- 3. YENİ NTRP KAYIT MATEMATİĞİ ---
     function registerNewUser() {
         let nameRaw = document.getElementById('regName').value.trim();
         let name = nameRaw.replace(/[<>]/g, '').toLocaleUpperCase('tr-TR'); 
-        
         let nameExists = Object.values(globalUsers).some(u => u && u.name === name);
         if(nameExists) { return alert("HATA: Bu isimde bir oyuncu zaten kayıtlı! Lütfen adınızı veya soyadınızı farklılaştırarak (Örn: İkinci isim ekleyerek) tekrar deneyin."); }
 
@@ -823,9 +572,7 @@
 
         let avail = []; document.querySelectorAll('.avail-chk:checked').forEach(c => avail.push(c.value));
         
-        if(!name || !pass || !gender || !dHand || !dBackhand || avail.length===0) {
-            return alert("Lütfen ad, şifre, cinsiyet, el tercihleri ve maç müsaitliği alanlarını eksiksiz doldurun.");
-        }
+        if(!name || !pass || !gender || !dHand || !dBackhand || avail.length===0) { return alert("Lütfen ad, şifre, cinsiyet, el tercihleri ve maç müsaitliği alanlarını eksiksiz doldurun."); }
         
         let vFh = parseInt(document.getElementById('sl_fh').value);
         let vBh = parseInt(document.getElementById('sl_bh').value);
@@ -840,34 +587,20 @@
         let totalRaw = (vFh * 0.20) + (vBh * 0.18) + (srTotal * 0.25) + (vOk * 0.12) + (vTk * 0.10) + (vWn * 0.08) + (vVl * 0.07);
         
         let ntrp = 1.0;
-        if (totalRaw >= 9.20) ntrp = 7.0;
-        else if (totalRaw >= 8.50) ntrp = 6.5;
-        else if (totalRaw >= 7.80) ntrp = 6.0;
-        else if (totalRaw >= 7.10) ntrp = 5.5;
-        else if (totalRaw >= 6.40) ntrp = 5.0;
-        else if (totalRaw >= 5.70) ntrp = 4.5;
-        else if (totalRaw >= 5.00) ntrp = 4.0;
-        else if (totalRaw >= 4.30) ntrp = 3.5;
-        else if (totalRaw >= 3.60) ntrp = 3.0;
-        else if (totalRaw >= 2.90) ntrp = 2.5;
-        else if (totalRaw >= 2.20) ntrp = 2.0;
-        else if (totalRaw >= 1.50) ntrp = 1.5;
+        if (totalRaw >= 9.20) ntrp = 7.0; else if (totalRaw >= 8.50) ntrp = 6.5; else if (totalRaw >= 7.80) ntrp = 6.0;
+        else if (totalRaw >= 7.10) ntrp = 5.5; else if (totalRaw >= 6.40) ntrp = 5.0; else if (totalRaw >= 5.70) ntrp = 4.5;
+        else if (totalRaw >= 5.00) ntrp = 4.0; else if (totalRaw >= 4.30) ntrp = 3.5; else if (totalRaw >= 3.60) ntrp = 3.0;
+        else if (totalRaw >= 2.90) ntrp = 2.5; else if (totalRaw >= 2.20) ntrp = 2.0; else if (totalRaw >= 1.50) ntrp = 1.5;
 
         let tier = "SILVER";
-        if (ntrp >= 6.0) tier = "PLATIN";
-        else if (ntrp >= 4.0) tier = "GOLD";
-        else tier = "SILVER"; 
+        if (ntrp >= 6.0) tier = "PLATIN"; else if (ntrp >= 4.0) tier = "GOLD"; else tier = "SILVER"; 
 
-        let sysScore = ntrp.toFixed(1); 
-        let uid = "USR_" + Date.now();
+        let sysScore = ntrp.toFixed(1); let uid = "USR_" + Date.now();
         
         database.ref('the_35_gold_league/users/' + uid).set({
             id: uid, name: name, password: pass, gender: gender, hand: dHand, backhand: dBackhand, 
             availability: avail, tier: tier, sysScore: sysScore, welcomed: false, fame: 0, k_kor_base: 0
-        }).then(() => { 
-            alert(`Kayıt Başarılı!\nSistem Puanınız (NTRP): ${sysScore}\nAtanan Lig: ${tier}\n\nArtık giriş yapabilirsiniz.`); 
-            toggleAuth('loginPanel'); 
-        });
+        }).then(() => { alert(`Kayıt Başarılı!\nSistem Puanınız (NTRP): ${sysScore}\nAtanan Lig: ${tier}\n\nArtık giriş yapabilirsiniz.`); toggleAuth('loginPanel'); });
     }
 
     function loginGlobalUser() { 
@@ -887,17 +620,14 @@
         let u = globalUsers[uid];
         if (!u) return alert("Oyuncu verisi bulunamadı.");
         let dStats = derivedGlobalStats[uid] || { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0, fame: 0 };
-        
         document.getElementById('pubName').innerText = u.name || 'BİLİNMİYOR';
         document.getElementById('pubTier').innerText = `${u.tier || 'BELİRSİZ'} (${u.sysScore || '-'})`;
         document.getElementById('pubGender').innerText = u.gender || '-';
         document.getElementById('pubStyle').innerText = (u.hand && u.backhand) ? (u.hand + " / " + u.backhand + " BH") : "BELİRTİLMEDİ";
-
         document.getElementById('pubKKor').innerText = (dStats.k_kor || 0).toFixed(1);
-        document.getElementById('pubFame').innerText = (dStats.fame || 0);
+        document.getElementById('pubFame').innerText = (u.fame || 0);
         document.getElementById('pubWinLoss').innerText = `${dStats.gWins || 0}G - ${dStats.gLoss || 0}M`;
         document.getElementById('pubAvail').innerText = (u.availability && u.availability.length) ? u.availability.map(a=>a.toLocaleUpperCase('tr-TR')).join(", ") : "BELİRTİLMEDİ";
-        
         document.getElementById('publicProfileModal').style.display = 'flex';
     }
     function closePublicProfile() { document.getElementById('publicProfileModal').style.display = 'none'; }
@@ -908,61 +638,35 @@
             localStorage.setItem('korTennisUserId', 'ADMIN'); enterApp(); 
         } else { alert("❌ Hatalı şifre!"); } 
     }
-    
     function changeOwnPassword() { let oldP = prompt("Mevcut şifrenizi girin:"); if(oldP !== loggedInUser.password) return alert("Hatalı şifre girdiniz!"); let newP = prompt("Yeni şifrenizi belirleyin:"); if(!newP) return; database.ref('the_35_gold_league/users/' + loggedInUser.id + '/password').set(newP).then(() => { loggedInUser.password = newP; alert("Şifreniz başarıyla değiştirildi!"); }); }
     function changeAdminPassword() { let oldP = prompt("Mevcut yönetici şifresini girin:"); if(oldP !== systemAdminPassword) return alert("Hatalı şifre!"); let newP = prompt("Yeni Yönetici Şifresini Belirleyin:"); if(!newP) return; database.ref('the_35_gold_league/admin/password').set(newP).then(() => { systemAdminPassword = newP; alert("Yönetici şifresi güncellendi!"); }); }
     function logoutSession() { localStorage.removeItem('korTennisUserId'); location.reload(); }
 
-    function addAlertToUser(uid, msg) {
-        if(!uid) return;
-        database.ref(`the_35_gold_league/users/${uid}/alerts`).push({ text: msg, time: Date.now() });
-    }
-
-    window.dismissAlert = function(key) {
-        if(loggedInUser && loggedInUser.id) {
-            database.ref(`the_35_gold_league/users/${loggedInUser.id}/alerts/${key}`).remove();
-        }
-    };
-    
-    window.deletePwReset = function(key) {
-        database.ref('the_35_gold_league/password_resets/' + key).remove();
-    };
+    function addAlertToUser(uid, msg) { if(!uid) return; database.ref(`the_35_gold_league/users/${uid}/alerts`).push({ text: msg, time: Date.now() }); }
+    window.dismissAlert = function(key) { if(loggedInUser && loggedInUser.id) { database.ref(`the_35_gold_league/users/${loggedInUser.id}/alerts/${key}`).remove(); } };
+    window.deletePwReset = function(key) { database.ref('the_35_gold_league/password_resets/' + key).remove(); };
 
     function enterApp() {
-        document.getElementById('authWrapper').style.display = "none"; 
-        document.getElementById('mainApp').style.display = "block"; 
-        document.getElementById('appNavBar').style.display = "flex";
-        
+        document.getElementById('authWrapper').style.display = "none"; document.getElementById('mainApp').style.display = "block"; document.getElementById('appNavBar').style.display = "flex";
         if(isAdmin) {
-            document.getElementById('adminTopBar').style.display = "block"; 
-            document.getElementById('homeBtn').style.display = "inline-block"; 
-            document.getElementById('navAdminNotifBtn').style.display = "inline-block";
-            document.getElementById('navAdminTournamentsBtn').style.display = "inline-block";
-            populateLeagueDropdowns(); 
-            openAdminGlobalNotifs(); 
+            document.getElementById('adminTopBar').style.display = "block"; document.getElementById('homeBtn').style.display = "inline-block"; 
+            document.getElementById('navAdminNotifBtn').style.display = "inline-block"; document.getElementById('navAdminTournamentsBtn').style.display = "inline-block";
+            populateLeagueDropdowns(); openAdminGlobalNotifs(); 
         } else {
-            document.getElementById('tabsContainer').style.display = "flex"; 
-            document.getElementById('userActiveLeagueSelect').style.display = "inline-block";
+            document.getElementById('tabsContainer').style.display = "flex"; document.getElementById('userActiveLeagueSelect').style.display = "inline-block";
             populateLeagueDropdowns(); switchTab('profile');
         }
     }
 
     function openAdminGlobalNotifs() {
         document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-        document.getElementById('tabsContainer').style.display = 'none';
-        document.getElementById('deleteLeagueBtn').style.display = 'none';
-        document.getElementById('adminLeagueSelect').value = 'notifs'; 
-        document.getElementById('admin_notifs').classList.add('active');
-        renderAdminNotifs();
+        document.getElementById('tabsContainer').style.display = 'none'; document.getElementById('deleteLeagueBtn').style.display = 'none';
+        document.getElementById('adminLeagueSelect').value = 'notifs'; document.getElementById('admin_notifs').classList.add('active'); renderAdminNotifs();
     }
-    
     function openAdminGlobalTournaments() {
         document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-        document.getElementById('tabsContainer').style.display = 'none';
-        document.getElementById('deleteLeagueBtn').style.display = 'none';
-        document.getElementById('adminLeagueSelect').value = 'tournaments'; 
-        document.getElementById('tournaments').classList.add('active');
-        renderTournamentsList();
+        document.getElementById('tabsContainer').style.display = 'none'; document.getElementById('deleteLeagueBtn').style.display = 'none';
+        document.getElementById('adminLeagueSelect').value = 'tournaments'; document.getElementById('tournaments').classList.add('active'); renderTournamentsList();
     }
 
     function renderProfile() {
@@ -980,16 +684,10 @@
         document.getElementById('profAvail').innerText = loggedInUser.availability ? loggedInUser.availability.map(a=>a.toLocaleUpperCase('tr-TR')).join(', ') : "Belirtilmedi";
 
         let notifHtml = '';
-        
         if(loggedInUser.alerts) {
             Object.keys(loggedInUser.alerts).forEach(alertKey => {
                 let alertObj = loggedInUser.alerts[alertKey];
-                notifHtml += `<div class="notification-card" style="border-color:var(--success); background:rgba(0,255,170,0.1); margin-bottom:10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                        <span style="flex:1;">${alertObj.text}</span>
-                        <button class="action-sm" style="background:transparent; color:var(--text-color); font-size:16px; margin:0; padding:0 5px;" onclick="dismissAlert('${alertKey}')">✖</button>
-                    </div>
-                </div>`;
+                notifHtml += `<div class="notification-card" style="border-color:var(--success); background:rgba(0,255,170,0.1); margin-bottom:10px;"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><span style="flex:1;">${alertObj.text}</span><button class="action-sm" style="background:transparent; color:var(--text-color); font-size:16px; margin:0; padding:0 5px;" onclick="dismissAlert('${alertKey}')">✖</button></div></div>`;
             });
         }
 
@@ -997,20 +695,16 @@
         Object.keys(allTourneys).forEach(tid => {
             let t = allTourneys[tid];
             if(!t || !t.settings) return;
-            let status = t.settings.status || 'active';
-            if (status !== 'active') return; 
+            if (t.settings.status !== 'active') return; 
             if (!t.matches) return;
-            let tMatches = _arr(t.matches);
-            let tName = t.settings.customName || "Turnuva";
             
-            tMatches.forEach(m => {
-                let isMyMatch = m.p1 === loggedInUser.id || m.p2 === loggedInUser.id;
-                if (!isMyMatch) return;
+            _arr(t.matches).forEach(m => {
+                if (m.p1 !== loggedInUser.id && m.p2 !== loggedInUser.id) return;
                 if (m.played && m.pending && m.enteredBy !== loggedInUser.id) {
-                    myPendingScore.push(`<strong>[${tName}]</strong> ${m.p1Name} vs ${m.p2Name}`);
+                    myPendingScore.push(`<strong>[${t.settings.customName || "Turnuva"}]</strong> ${m.p1Name} vs ${m.p2Name}`);
                 }
                 if (!m.played && m.proposedDates && m.proposedDates.length > 0 && m.proposedBy !== loggedInUser.id) {
-                    myPendingDate.push(`<strong>[${tName}]</strong> ${m.p1Name} vs ${m.p2Name}`);
+                    myPendingDate.push(`<strong>[${t.settings.customName || "Turnuva"}]</strong> ${m.p1Name} vs ${m.p2Name}`);
                 }
             });
         });
@@ -1021,60 +715,36 @@
         } else if (!loggedInUser.alerts) {
             notifHtml += `<div style="text-align:center; color:var(--sub-text); font-size:11px; margin-top:20px;">Bekleyen bir eyleminiz bulunmuyor.</div>`;
         }
-        
         document.getElementById('profNotificationsContainer').innerHTML = notifHtml;
     }
 
     function renderAdminNotifs() {
         if(!isAdmin) return;
-        let pwList = document.getElementById('adminPasswordResets');
-        let pendingList = document.getElementById('adminPendingList');
-        let finishedList = document.getElementById('adminFinishedScoresList');
+        let pwList = document.getElementById('adminPasswordResets'); let pendingList = document.getElementById('adminPendingList'); let finishedList = document.getElementById('adminFinishedScoresList');
         
         if(pwList) {
-            pwList.innerHTML = Object.keys(passwordResets).length > 0 ? 
-                Object.keys(passwordResets).map(key => {
-                    let r = passwordResets[key];
-                    return `<div class="admin-notif-row">
-                        <span>${r.name} şifre sıfırlama talep etti.</span>
-                        <button class="action-sm" style="background:var(--success); color:black;" onclick="deletePwReset('${key}')">✅ Tamamlandı (Sil)</button>
-                    </div>`;
-                }).join('') : 'Bulunmuyor.';
+            pwList.innerHTML = Object.keys(passwordResets).length > 0 ? Object.keys(passwordResets).map(key => { let r = passwordResets[key]; return `<div class="admin-notif-row"><span>${r.name} şifre sıfırlama talep etti.</span><button class="action-sm" style="background:var(--success); color:black;" onclick="deletePwReset('${key}')">✅ Tamamlandı (Sil)</button></div>`; }).join('') : 'Bulunmuyor.';
         }
         
         let pHtml = '', fHtml = '';
-            
         Object.keys(allTourneys).forEach(tid => {
             let t = allTourneys[tid];
-            if(!t || !t.settings) return;
-            let status = t.settings.status || 'active';
-            if (status !== 'active') return; 
-            
-            if (!t.matches) return;
-            let tMatches = _arr(t.matches);
+            if(!t || !t.settings || t.settings.status !== 'active' || !t.matches) return; 
             let tName = t.settings.customName || "İsimsiz Turnuva";
             
+            let tMatches = _arr(t.matches);
             let pending = tMatches.filter(m => m.played && m.pending);
             let pDates = tMatches.filter(m => !m.played && m.proposedDates && m.proposedDates.length > 0);
             let finished = tMatches.filter(m => m.played && !m.pending).sort((a,b) => (b.savedAt || 0) - (a.savedAt || 0)).slice(0, 10);
             
             if(pending.length > 0) {
-                pHtml += pending.map(m => {
-                    let approverName = m.enteredBy === m.p1 ? m.p2Name : m.p1Name;
-                    return `<div class="admin-notif-row"><span><strong style="color:var(--accent-color)">[${tName}]</strong> ${m.p1Name} vs ${m.p2Name} <br><span style="font-size:9px; color:var(--sub-text);">⚠️ ${approverName} onaylaması bekleniyor.</span></span> <span style="background:var(--warning); color:black; padding:2px 5px; border-radius:4px; font-weight:bold;">Skor Onayı</span></div>`;
-                }).join('');
+                pHtml += pending.map(m => { let approverName = m.enteredBy === m.p1 ? m.p2Name : m.p1Name; return `<div class="admin-notif-row"><span><strong style="color:var(--accent-color)">[${tName}]</strong> ${m.p1Name} vs ${m.p2Name} <br><span style="font-size:9px; color:var(--sub-text);">⚠️ ${approverName} onaylaması bekleniyor.</span></span> <span style="background:var(--warning); color:black; padding:2px 5px; border-radius:4px; font-weight:bold;">Skor Onayı</span></div>`; }).join('');
             }
             if(pDates.length > 0) {
-                pHtml += pDates.map(m => {
-                    let approverName = m.proposedBy === m.p1 ? m.p2Name : m.p1Name;
-                    return `<div class="admin-notif-row"><span><strong style="color:var(--accent-color)">[${tName}]</strong> ${m.p1Name} vs ${m.p2Name} <br><span style="font-size:9px; color:var(--sub-text);">⚠️ ${approverName} onaylaması bekleniyor.</span></span> <span style="background:#3b82f6; color:white; padding:2px 5px; border-radius:4px; font-weight:bold;">Tarih Onayı</span></div>`;
-                }).join('');
+                pHtml += pDates.map(m => { let approverName = m.proposedBy === m.p1 ? m.p2Name : m.p1Name; return `<div class="admin-notif-row"><span><strong style="color:var(--accent-color)">[${tName}]</strong> ${m.p1Name} vs ${m.p2Name} <br><span style="font-size:9px; color:var(--sub-text);">⚠️ ${approverName} onaylaması bekleniyor.</span></span> <span style="background:#3b82f6; color:white; padding:2px 5px; border-radius:4px; font-weight:bold;">Tarih Onayı</span></div>`; }).join('');
             }
             if(finished.length > 0) {
-                fHtml += finished.map(m => {
-                    let scoreText = m.isWO ? `WO - Galip: ${m.woWinner === m.p1 ? m.p1Name : m.p2Name}` : `${m.p1S1}-${m.p2S1} / ${m.p1S2}-${m.p2S2}`;
-                    return `<div class="admin-notif-row"><span><strong style="color:var(--accent-color)">[${tName}]</strong> ${m.p1Name} vs ${m.p2Name}</span> <span style="background:var(--success); color:black; font-weight:bold; padding:2px 6px; border-radius:4px; font-size:10px;">${scoreText}</span></div>`;
-                }).join('');
+                fHtml += finished.map(m => { let scoreText = m.isWO ? `WO - Galip: ${m.woWinner === m.p1 ? m.p1Name : m.p2Name}` : `${m.p1S1}-${m.p2S1} / ${m.p1S2}-${m.p2S2}`; return `<div class="admin-notif-row"><span><strong style="color:var(--accent-color)">[${tName}]</strong> ${m.p1Name} vs ${m.p2Name}</span> <span style="background:var(--success); color:black; font-weight:bold; padding:2px 6px; border-radius:4px; font-size:10px;">${scoreText}</span></div>`; }).join('');
             }
         });
         
@@ -1083,23 +753,16 @@
     }
 
     function renderTournamentsList() {
-        let pList = document.getElementById('pendingTournamentsList');
-        let aList = document.getElementById('activeTournamentsList');
-        if(!pList || !aList) return;
-        
-        pList.innerHTML = ""; aList.innerHTML = "";
+        let pList = document.getElementById('pendingTournamentsList'); let aList = document.getElementById('activeTournamentsList');
+        if(!pList || !aList) return; pList.innerHTML = ""; aList.innerHTML = "";
         let pendingCount = 0; let activeCount = 0;
 
         Object.keys(allTourneys).forEach(tid => {
             let t = allTourneys[tid];
             if(!t || !t.settings) return;
-            let s = t.settings;
-            let status = s.status || 'active';
-            let tName = s.customName || "İZMİR 35 LİGİ";
+            let s = t.settings; let status = s.status || 'active'; let tName = s.customName || "İZMİR 35 LİGİ";
             let formatText = s.format === '6_GAME' ? '6 Oyunluk 2 Normal Set' : '4 Oyunluk 2 Kısa Set';
-            let cap = s.maxCapacity || (s.playerCount || 23);
-            let mLimit = cap >= 48 ? 10 : (cap >= 24 ? 8 : 6);
-            
+            let cap = s.maxCapacity || (s.playerCount || 23); let mLimit = cap >= 48 ? 10 : (cap >= 24 ? 8 : 6);
             let ligType = cap >= 48 ? "BÜYÜK LİG (48-96 Kişi)" : (cap >= 24 ? "STANDART LİG (24-47 Kişi)" : "BUTİK LİG (12-23 Kişi)");
             let poText = cap >= 48 ? "İlk 8 Seribaşı, İkinci 8 Play-Off, Sonraki 16 (En iyi KOR) Play-In" : (cap >= 24 ? "İlk 4 Seribaşı, İkinci 4 Play-Off, Sonraki 8 (En iyi KOR) Play-In" : "İlk 2 Seribaşı, İkinci 2 Play-Off, Sonraki 4 (En iyi KOR) Play-In");
             
@@ -1107,55 +770,27 @@
             if(s.startDate) {
                 let st = new Date(s.startDate);
                 if(!isNaN(st.getTime())) {
-                    sDateObj = st;
-                    eDateObj = new Date(st.getTime() + (mLimit * 7 * 24*60*60*1000));
-                    poS = new Date(eDateObj.getTime() + (1 * 24*60*60*1000));
-                    poE = new Date(poS.getTime() + (14 * 24*60*60*1000));
-                    fSat = new Date(poE.getTime());
-                    let ds = (6 - fSat.getDay() + 7) % 7; if (ds === 0) ds = 7; 
-                    fSat.setDate(fSat.getDate() + ds); 
+                    sDateObj = st; eDateObj = new Date(st.getTime() + (mLimit * 7 * 24*60*60*1000));
+                    poS = new Date(eDateObj.getTime() + (1 * 24*60*60*1000)); poE = new Date(poS.getTime() + (14 * 24*60*60*1000));
+                    fSat = new Date(poE.getTime()); let ds = (6 - fSat.getDay() + 7) % 7; if (ds === 0) ds = 7; fSat.setDate(fSat.getDate() + ds); 
                 }
             }
 
-            let countdownHtml = '';
-            let isRegistrationExpired = false;
-            
+            let countdownHtml = ''; let isRegistrationExpired = false;
             if (sDateObj && status === 'pending') {
-                let now = Date.now();
-                let diffMs = sDateObj.getTime() - now;
-                isRegistrationExpired = diffMs <= 0;
-                
+                let now = Date.now(); let diffMs = sDateObj.getTime() - now; isRegistrationExpired = diffMs <= 0;
                 if (!isRegistrationExpired && diffMs <= 86400000) { 
-                    let hours = Math.floor(diffMs / (1000 * 60 * 60));
-                    let minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                    let hours = Math.floor(diffMs / (1000 * 60 * 60)); let minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
                     countdownHtml = `<div style="background:var(--danger); color:white; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold; text-align:center; margin-bottom:8px; animation: blink 1.5s infinite;">⏳ KAYITLAR KAPANMAK ÜZERE: Son ${hours} Saat ${minutes} Dakika</div>`;
                 }
             }
 
             let pInfo = sDateObj ? 
-                `<div style="display:flex; flex-direction:column; gap:4px;">
-                    ${countdownHtml}
-                    <strong style="color:var(--accent-color);">📋 FORMAT: ${ligType} | Şehir: İZMİR | İlçe: ${s.region || 'Belirtilmedi'}</strong>
-                    <span>🎾 <strong>Maç Sistemi:</strong> ${formatText}</span>
-                    <span>⚔️ <strong>Kural:</strong> ${poText} kalır.</span>
-                    <hr style="border:0; border-top:1px dashed var(--divider); margin:4px 0;">
-                    <strong style="color:var(--success);">🗓️ TAKVİM VE İŞLEYİŞ:</strong>
-                    <span>• <strong>Son Kayıt ve Başlangıç:</strong> ${sDateObj.toLocaleDateString('tr-TR')}</span>
-                    <span>• <strong>Lig Aşaması (${mLimit} Maç):</strong> ${sDateObj.toLocaleDateString('tr-TR')} - ${eDateObj.toLocaleDateString('tr-TR')}</span>
-                    <span>• <strong>Play-Off Turları:</strong> ${poS.toLocaleDateString('tr-TR')} - ${poE.toLocaleDateString('tr-TR')}</span>
-                    <span>• <strong>Büyük Final:</strong> ~${fSat.toLocaleDateString('tr-TR')} (Hafta Sonu)</span>
-                    <div style="margin-top:5px; color:var(--warning); font-weight:bold; font-size:10px;">⚠️ NOT: Lig aşaması başlamadan önce kayıtların tamamlanması gerekmektedir. Son kayıt tarihi turnuva başlangıç günüdür.</div>
-                </div>` : '<div style="color:var(--sub-text);">Tarih ve Format Belirlenmedi</div>';
+                `<div style="display:flex; flex-direction:column; gap:4px;">${countdownHtml}<strong style="color:var(--accent-color);">📋 FORMAT: ${ligType} | Şehir: İZMİR | İlçe: ${s.region || 'Belirtilmedi'}</strong><span>🎾 <strong>Maç Sistemi:</strong> ${formatText}</span><span>⚔️ <strong>Kural:</strong> ${poText} kalır.</span><hr style="border:0; border-top:1px dashed var(--divider); margin:4px 0;"><strong style="color:var(--success);">🗓️ TAKVİM VE İŞLEYİŞ:</strong><span>• <strong>Son Kayıt ve Başlangıç:</strong> ${sDateObj.toLocaleDateString('tr-TR')}</span><span>• <strong>Lig Aşaması (${mLimit} Maç):</strong> ${sDateObj.toLocaleDateString('tr-TR')} - ${eDateObj.toLocaleDateString('tr-TR')}</span><span>• <strong>Play-Off Turları:</strong> ${poS.toLocaleDateString('tr-TR')} - ${poE.toLocaleDateString('tr-TR')}</span><span>• <strong>Büyük Final:</strong> ~${fSat.toLocaleDateString('tr-TR')} (Hafta Sonu)</span><div style="margin-top:5px; color:var(--warning); font-weight:bold; font-size:10px;">⚠️ NOT: Lig aşaması başlamadan önce kayıtların tamamlanması gerekmektedir. Son kayıt tarihi turnuva başlangıç günüdür.</div></div>` : '<div style="color:var(--sub-text);">Tarih ve Format Belirlenmedi</div>';
             
-            let regs = _arr(t.registeredPlayers);
-            let N = status === 'pending' ? regs.length : _arr(t.players).length;
-
-            let amIIn = false;
-            let myIndex = -1;
-            if(!isAdmin && loggedInUser) {
-                myIndex = regs.indexOf(loggedInUser.id);
-                amIIn = myIndex !== -1;
-            }
+            let regs = _arr(t.registeredPlayers); let N = status === 'pending' ? regs.length : _arr(t.players).length;
+            let amIIn = false; let myIndex = -1;
+            if(!isAdmin && loggedInUser) { myIndex = regs.indexOf(loggedInUser.id); amIIn = myIndex !== -1; }
             
             if (status === 'pending') {
                 pendingCount++;
@@ -1166,81 +801,29 @@
                 }
                 
                 let btnHtml = '';
-                if(isAdmin) {
-                    btnHtml = `<button class="action-sm" style="background:var(--warning); color:black; padding:8px 12px;" onclick="document.getElementById('adminLeagueSelect').value='${tid}'; adminSwitchLeague();">⚙️ Yönet</button>`;
-                } else if (amIIn) {
-                    btnHtml = `<button class="action-sm" style="background:var(--danger); padding:8px 12px;" onclick="leaveTournament('${tid}')">Çıkış Yap / Ayrıl</button>`;
-                } else {
-                    if(isRegistrationExpired) {
-                        btnHtml = `<button class="action-sm" style="background:#334155; color:#94a3b8; padding:8px 12px; cursor:not-allowed;" disabled>Katılım Süresi Bitti</button>`;
-                    } else {
-                        btnHtml = `<button class="action-sm" style="background:var(--accent-color); color:black; padding:8px 12px;" onclick="joinTournament('${tid}')">Turnuvaya Katıl</button>`;
-                    }
+                if(isAdmin) { btnHtml = `<button class="action-sm" style="background:var(--warning); color:black; padding:8px 12px;" onclick="document.getElementById('adminLeagueSelect').value='${tid}'; adminSwitchLeague();">⚙️ Yönet</button>`; } 
+                else if (amIIn) { btnHtml = `<button class="action-sm" style="background:var(--danger); padding:8px 12px;" onclick="leaveTournament('${tid}')">Çıkış Yap / Ayrıl</button>`; } 
+                else {
+                    if(isRegistrationExpired) { btnHtml = `<button class="action-sm" style="background:#334155; color:#94a3b8; padding:8px 12px; cursor:not-allowed;" disabled>Katılım Süresi Bitti</button>`; } 
+                    else { btnHtml = `<button class="action-sm" style="background:var(--accent-color); color:black; padding:8px 12px;" onclick="joinTournament('${tid}')">Turnuvaya Katıl</button>`; }
                 }
                 
-                pList.innerHTML += `<div class="tournament-card">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                        <strong style="color:var(--accent-color); font-size:14px;">🏆 ${tName}</strong>
-                        ${statusHtml}
-                    </div>
-                    <div style="font-size:11px; color:#cbd5e1; margin-top:5px; background:#0f172a; padding:10px; border-radius:6px; border-left:3px solid var(--accent-color); line-height:1.4;">
-                        ${pInfo}
-                    </div>
-                    <div style="font-size:11px; color:#94a3b8; display:flex; gap:10px; margin-top:10px;">
-                        <span>Kapasite: ${N} / ${cap}</span>
-                        <span>Seviye: ${s.tier}</span>
-                        <span>Kategori: ${s.gender}</span>
-                    </div>
-                    <div style="display:flex; justify-content:flex-end; align-items:center; margin-top:5px;">
-                        ${btnHtml}
-                    </div>
-                </div>`;
+                pList.innerHTML += `<div class="tournament-card"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><strong style="color:var(--accent-color); font-size:14px;">🏆 ${tName}</strong>${statusHtml}</div><div style="font-size:11px; color:#cbd5e1; margin-top:5px; background:#0f172a; padding:10px; border-radius:6px; border-left:3px solid var(--accent-color); line-height:1.4;">${pInfo}</div><div style="font-size:11px; color:#94a3b8; display:flex; gap:10px; margin-top:10px;"><span>Kapasite: ${N} / ${cap}</span><span>Seviye: ${s.tier}</span><span>Kategori: ${s.gender}</span></div><div style="display:flex; justify-content:flex-end; align-items:center; margin-top:5px;">${btnHtml}</div></div>`;
             } else if (status === 'active') {
                 activeCount++;
-                let badge = '';
-                let btnHtml = '';
-                let subHtml = ''; 
-                
+                let badge = ''; let btnHtml = ''; let subHtml = ''; 
                 if(isAdmin) {
                     btnHtml = `<button class="action-sm" style="background:var(--warning); color:black; padding:8px 12px;" onclick="document.getElementById('adminLeagueSelect').value='${tid}'; adminSwitchLeague();">⚙️ Yönet</button>`;
                 } else {
-                    let participants = _arr(t.players);
-                    let amIPlaying = participants.some(p => p.id === loggedInUser.id);
-                    
-                    if(amIPlaying) {
-                        badge = `<span class="tournament-badge" style="background:var(--success); color:black;">BU LİGDE OYNUYORSUNUZ</span>`;
-                    } else {
+                    let participants = _arr(t.players); let amIPlaying = participants.some(p => p.id === loggedInUser.id);
+                    if(amIPlaying) { badge = `<span class="tournament-badge" style="background:var(--success); color:black;">BU LİGDE OYNUYORSUNUZ</span>`; } 
+                    else {
                         badge = `<span class="tournament-badge" style="background:#334155;">MAÇLAR DEVAM EDİYOR</span>`;
-                        
-                        let subPool = _arr(t.substitutePool);
-                        let amISub = subPool.includes(loggedInUser.id);
-                        
-                        subHtml = `
-                        <div style="margin-top:10px; background:rgba(0, 229, 255, 0.05); border:1px dashed #00e5ff; padding:10px; border-radius:6px; font-size:11px;">
-                            <div style="color:#00e5ff; font-weight:bold; margin-bottom:5px;">🔄 Yedek Oyuncu Havuzu</div>
-                            <div style="color:#cbd5e1; margin-bottom:8px;">Sakatlık vb. nedenlerle ayrılan oyuncuların yerine geçmek için yedek listesine girebilirsiniz.</div>
-                            ${amISub 
-                                ? `<button class="action-sm" style="background:var(--danger); padding:6px 10px;" onclick="leaveSubstitutePool('${tid}')">Listeden Çık</button> <span style="color:var(--success); font-weight:bold; margin-left:10px;">✅ Listedesiniz</span>` 
-                                : `<button class="action-sm" style="background:#00e5ff; color:black; padding:6px 10px;" onclick="joinSubstitutePool('${tid}')">Ben Katılabilirim (Yedek Ol)</button>`
-                            }
-                        </div>`;
+                        let subPool = _arr(t.substitutePool); let amISub = subPool.includes(loggedInUser.id);
+                        subHtml = `<div style="margin-top:10px; background:rgba(0, 229, 255, 0.05); border:1px dashed #00e5ff; padding:10px; border-radius:6px; font-size:11px;"><div style="color:#00e5ff; font-weight:bold; margin-bottom:5px;">🔄 Yedek Oyuncu Havuzu</div><div style="color:#cbd5e1; margin-bottom:8px;">Sakatlık vb. nedenlerle ayrılan oyuncuların yerine geçmek için yedek listesine girebilirsiniz.</div>${amISub ? `<button class="action-sm" style="background:var(--danger); padding:6px 10px;" onclick="leaveSubstitutePool('${tid}')">Listeden Çık</button> <span style="color:var(--success); font-weight:bold; margin-left:10px;">✅ Listedesiniz</span>` : `<button class="action-sm" style="background:#00e5ff; color:black; padding:6px 10px;" onclick="joinSubstitutePool('${tid}')">Ben Katılabilirim (Yedek Ol)</button>`}</div>`;
                     }
                 }
-                
-                aList.innerHTML += `<div class="tournament-card">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                        <strong style="color:var(--accent-color); font-size:14px;">🏆 ${tName}</strong>
-                        ${badge}
-                    </div>
-                    <div style="font-size:11px; color:#cbd5e1; margin-top:5px; background:#0f172a; padding:10px; border-radius:6px; border-left:3px solid var(--warning); line-height:1.4;">
-                        ${pInfo}
-                    </div>
-                    <div style="font-size:11px; color:#94a3b8; display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
-                        <span>Kategori: ${s.gender} | ${s.tier} | Kapasite: ${N}</span>
-                        ${btnHtml}
-                    </div>
-                    ${subHtml}
-                </div>`;
+                aList.innerHTML += `<div class="tournament-card"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><strong style="color:var(--accent-color); font-size:14px;">🏆 ${tName}</strong>${badge}</div><div style="font-size:11px; color:#cbd5e1; margin-top:5px; background:#0f172a; padding:10px; border-radius:6px; border-left:3px solid var(--warning); line-height:1.4;">${pInfo}</div><div style="font-size:11px; color:#94a3b8; display:flex; justify-content:space-between; align-items:center; margin-top:10px;"><span>Kategori: ${s.gender} | ${s.tier} | Kapasite: ${N}</span>${btnHtml}</div>${subHtml}</div>`;
             }
         });
 
@@ -1248,81 +831,30 @@
         if(activeCount === 0) aList.innerHTML = `<div style="font-size:12px; color:var(--sub-text);">Şu an oynanan aktif bir turnuva bulunmuyor.</div>`;
     }
 
-    function joinSubstitutePool(tid) {
-        let t = allTourneys[tid];
-        let pool = _arr(t.substitutePool);
-        if(!pool.includes(loggedInUser.id)) {
-            pool.push(loggedInUser.id);
-            allTourneys[tid].substitutePool = pool;
-            renderTournamentsList();
-            database.ref(`the_35_gold_league/multi_v1/${tid}/substitutePool`).set(pool).then(() => {
-                alert("Yedek listesine başarıyla eklendiniz! Yönetici ihtiyaç durumunda sizinle iletişime geçecektir.");
-            });
-        }
-    }
-
-    function leaveSubstitutePool(tid) {
-        if(!confirm("Yedek listesinden çıkmak istediğinize emin misiniz?")) return;
-        let t = allTourneys[tid];
-        let pool = _arr(t.substitutePool);
-        let index = pool.indexOf(loggedInUser.id);
-        if(index > -1) {
-            pool.splice(index, 1);
-            allTourneys[tid].substitutePool = pool;
-            renderTournamentsList();
-            database.ref(`the_35_gold_league/multi_v1/${tid}/substitutePool`).set(pool).then(() => {
-                alert("Yedek listesinden ayrıldınız.");
-            });
-        }
-    }
+    function joinSubstitutePool(tid) { let t = allTourneys[tid]; let pool = _arr(t.substitutePool); if(!pool.includes(loggedInUser.id)) { pool.push(loggedInUser.id); allTourneys[tid].substitutePool = pool; renderTournamentsList(); database.ref(`the_35_gold_league/multi_v1/${tid}/substitutePool`).set(pool).then(() => { alert("Yedek listesine başarıyla eklendiniz!"); }); } }
+    function leaveSubstitutePool(tid) { if(!confirm("Yedek listesinden çıkmak istediğinize emin misiniz?")) return; let t = allTourneys[tid]; let pool = _arr(t.substitutePool); let index = pool.indexOf(loggedInUser.id); if(index > -1) { pool.splice(index, 1); allTourneys[tid].substitutePool = pool; renderTournamentsList(); database.ref(`the_35_gold_league/multi_v1/${tid}/substitutePool`).set(pool).then(() => { alert("Yedek listesinden ayrıldınız."); }); } }
 
     function joinTournament(tid) {
         let t = allTourneys[tid]; let s = t.settings;
-        if(s.gender !== 'KARMA' && s.gender !== 'OPEN' && s.gender !== loggedInUser.gender) {
-            return alert(`HATA: Bu turnuva sadece ${s.gender} kategorisi içindir.`);
-        }
-        if(s.tier !== 'OPEN' && s.tier !== loggedInUser.tier) {
-            let msg = `DİKKAT: Kendi seviyeniz (${loggedInUser.tier}) dışında bir turnuvaya (${s.tier}) katılıyorsunuz. Üst veya alt seviyelerde oynamak, MİP (Maç İçi Performans) yüzdenizi ve RGÇ'yi (Rakip Güç Çarpanı) etkileyeceğinden K-KOR puanı kazanım hızınız etkilenebilir. Devam etmek istiyor musunuz?`;
-            if(!confirm(msg)) return;
-        }
+        if(s.gender !== 'KARMA' && s.gender !== 'OPEN' && s.gender !== loggedInUser.gender) { return alert(`HATA: Bu turnuva sadece ${s.gender} kategorisi içindir.`); }
+        if(s.tier !== 'OPEN' && s.tier !== loggedInUser.tier) { let msg = `DİKKAT: Kendi seviyeniz (${loggedInUser.tier}) dışında bir turnuvaya (${s.tier}) katılıyorsunuz. Üst veya alt seviyelerde oynamak, MİP (Maç İçi Performans) yüzdenizi ve RGÇ'yi (Rakip Güç Çarpanı) etkileyeceğinden K-KOR puanı kazanım hızınız etkilenebilir. Devam etmek istiyor musunuz?`; if(!confirm(msg)) return; }
         
         let regs = _arr(t.registeredPlayers);
-        if(!regs.includes(loggedInUser.id)) {
-            regs.push(loggedInUser.id);
-            allTourneys[tid].registeredPlayers = regs;
-            renderTournamentsList();
-            database.ref(`the_35_gold_league/multi_v1/${tid}/registeredPlayers`).set(regs).then(() => {
-                alert("Turnuvaya kaydınız başarıyla alındı!");
-            });
-        }
+        if(!regs.includes(loggedInUser.id)) { regs.push(loggedInUser.id); allTourneys[tid].registeredPlayers = regs; renderTournamentsList(); database.ref(`the_35_gold_league/multi_v1/${tid}/registeredPlayers`).set(regs).then(() => { alert("Turnuvaya kaydınız başarıyla alındı!"); }); }
     }
 
     function leaveTournament(tid) {
         if(!confirm("Turnuvadan çıkmak (kaydınızı iptal etmek) istediğinize emin misiniz?")) return;
-        let t = allTourneys[tid];
-        let regs = _arr(t.registeredPlayers);
-        let index = regs.indexOf(loggedInUser.id);
-        if(index > -1) {
-            regs.splice(index, 1);
-            allTourneys[tid].registeredPlayers = regs;
-            renderTournamentsList();
-            database.ref(`the_35_gold_league/multi_v1/${tid}/registeredPlayers`).set(regs).then(() => {
-                alert("Turnuvadan ayrıldınız.");
-            });
-        }
+        let t = allTourneys[tid]; let regs = _arr(t.registeredPlayers); let index = regs.indexOf(loggedInUser.id);
+        if(index > -1) { regs.splice(index, 1); allTourneys[tid].registeredPlayers = regs; renderTournamentsList(); database.ref(`the_35_gold_league/multi_v1/${tid}/registeredPlayers`).set(regs).then(() => { alert("Turnuvadan ayrıldınız."); }); }
     }
 
     function adminFilterPlayers() {
-        let nameQ = document.getElementById('adminSearchName').value.toLocaleUpperCase('tr-TR'); 
-        let genQ = document.getElementById('adminFilterGender').value;
-        let tierQ = document.getElementById('adminFilterTier').value; 
-        let sortQ = document.getElementById('adminSortList').value;
+        let nameQ = document.getElementById('adminSearchName').value.toLocaleUpperCase('tr-TR'); let genQ = document.getElementById('adminFilterGender').value; let tierQ = document.getElementById('adminFilterTier').value; let sortQ = document.getElementById('adminSortList').value;
         let list = document.getElementById('adminChecklist'); let items = Array.from(list.children);
         
         items.forEach(el => { 
-            let name = el.getAttribute('data-name'); 
-            let tier = el.getAttribute('data-tier'); 
-            let gen = el.getAttribute('data-gender');
+            let name = el.getAttribute('data-name'); let tier = el.getAttribute('data-tier'); let gen = el.getAttribute('data-gender');
             let isMatch = name.includes(nameQ) && (tierQ === 'all' || tier === tierQ) && (genQ === 'all' || gen === genQ);
             el.style.display = isMatch ? 'flex' : 'none'; 
         });
@@ -1330,8 +862,7 @@
         items.sort((a,b) => { 
             if (sortQ === 'az') return a.getAttribute('data-name').localeCompare(b.getAttribute('data-name')); 
             let sa = parseFloat(a.getAttribute('data-score')) || 0; let sb = parseFloat(b.getAttribute('data-score')) || 0; 
-            if (sortQ === 'score_desc') return sb - sa; 
-            if (sortQ === 'score_asc') return sa - sb; 
+            if (sortQ === 'score_desc') return sb - sa; if (sortQ === 'score_asc') return sa - sb; 
         });
         items.forEach(el => list.appendChild(el));
     }
@@ -1351,130 +882,69 @@
     function deleteUser(uid) { if(confirm("DİKKAT: Oyuncuyu silmek istediğinize emin misiniz?")) database.ref(`the_35_gold_league/users/${uid}`).remove(); }
 
     function renderAdminPendingPanel() {
-        let t = allTourneys[currentTid];
-        if(!t) return;
-        let s = t.settings || {};
-        let cap = s.maxCapacity || 23;
-        let regs = _arr(t.registeredPlayers);
+        let t = allTourneys[currentTid]; if(!t) return;
+        let s = t.settings || {}; let cap = s.maxCapacity || 23; let regs = _arr(t.registeredPlayers);
         
         document.getElementById('pendingAdminTitle').innerText = `KAYIT YÖNETİMİ: ${s.customName || 'TURNUVA'}`;
-        
         let mList = document.getElementById('pendingMainList'); mList.innerHTML = "";
         let wList = document.getElementById('pendingWaitlist'); wList.innerHTML = "";
         
         let manualSelect = document.getElementById('adminManualAddSelect');
         manualSelect.innerHTML = `<option value="">SİSTEMDEN OYUNCU SEÇ...</option>`;
-        Object.values(globalUsers).filter(u => u && u.name && !regs.includes(u.id)).sort((a,b)=>String(a.name).localeCompare(String(b.name))).forEach(u => {
-            manualSelect.innerHTML += `<option value="${u.id}">${u.name} (${u.tier})</option>`;
-        });
+        Object.values(globalUsers).filter(u => u && u.name && !regs.includes(u.id)).sort((a,b)=>String(a.name).localeCompare(String(b.name))).forEach(u => { manualSelect.innerHTML += `<option value="${u.id}">${u.name} (${u.tier})</option>`; });
 
         let mainCount = 0;
         regs.forEach((uid, index) => {
-            let u = globalUsers[uid];
-            if(!u) return;
-            let html = `<div class="admin-player-item" style="padding:6px 10px;">
-                <div><strong style="color:white; font-size:12px;">${index+1}. ${u.name}</strong> <span style="font-size:10px; color:var(--accent-color);">(${u.tier} ${u.sysScore})</span></div>
-                <button class="action-sm" style="background:var(--danger);" onclick="adminRemovePendingPlayer('${uid}')">Çıkar</button>
-            </div>`;
-            
-            if(index < cap) { mList.innerHTML += html; mainCount++; }
-            else { wList.innerHTML += html; }
+            let u = globalUsers[uid]; if(!u) return;
+            let html = `<div class="admin-player-item" style="padding:6px 10px;"><div><strong style="color:white; font-size:12px;">${index+1}. ${u.name}</strong> <span style="font-size:10px; color:var(--accent-color);">(${u.tier} ${u.sysScore})</span></div><button class="action-sm" style="background:var(--danger);" onclick="adminRemovePendingPlayer('${uid}')">Çıkar</button></div>`;
+            if(index < cap) { mList.innerHTML += html; mainCount++; } else { wList.innerHTML += html; }
         });
 
-        let countSpan = document.getElementById('mainListCount');
-        if(countSpan) countSpan.innerText = `(${mainCount}/${cap})`;
+        let countSpan = document.getElementById('mainListCount'); if(countSpan) countSpan.innerText = `(${mainCount}/${cap})`;
 
         if(mList.innerHTML === "") mList.innerHTML = `<div style="font-size:11px; color:#64748b; padding:10px;">Henüz asıl listeye kayıtlı oyuncu yok.</div>`;
         if(wList.innerHTML === "") wList.innerHTML = `<div style="font-size:11px; color:#64748b; padding:10px;">Yedek listede bekleyen oyuncu yok.</div>`;
 
-        let startBtn = document.getElementById('startPendingBtn');
-        let rAlert = document.getElementById('pendingReadyAlert');
-        if(regs.length >= 12) {
-            startBtn.disabled = false;
-            startBtn.style.background = "var(--success)";
-            startBtn.style.color = "black";
-            rAlert.style.display = "block";
-        } else {
-            startBtn.disabled = true;
-            startBtn.style.background = "#334155";
-            startBtn.style.color = "#94a3b8";
-            rAlert.style.display = "none";
-        }
+        let startBtn = document.getElementById('startPendingBtn'); let rAlert = document.getElementById('pendingReadyAlert');
+        if(regs.length >= 12) { startBtn.disabled = false; startBtn.style.background = "var(--success)"; startBtn.style.color = "black"; rAlert.style.display = "block"; } 
+        else { startBtn.disabled = true; startBtn.style.background = "#334155"; startBtn.style.color = "#94a3b8"; rAlert.style.display = "none"; }
     }
 
     function adminManualAddPlayer() {
-        let uid = document.getElementById('adminManualAddSelect').value;
-        if(!uid) return alert("Lütfen bir oyuncu seçin.");
-        let t = allTourneys[currentTid];
-        let regs = _arr(t.registeredPlayers);
-        if(!regs.includes(uid)) {
-            regs.push(uid);
-            allTourneys[currentTid].registeredPlayers = regs;
-            renderAdminPendingPanel();
-            database.ref(`the_35_gold_league/multi_v1/${currentTid}/registeredPlayers`).set(regs);
-        }
+        let uid = document.getElementById('adminManualAddSelect').value; if(!uid) return alert("Lütfen bir oyuncu seçin.");
+        let t = allTourneys[currentTid]; let regs = _arr(t.registeredPlayers);
+        if(!regs.includes(uid)) { regs.push(uid); allTourneys[currentTid].registeredPlayers = regs; renderAdminPendingPanel(); database.ref(`the_35_gold_league/multi_v1/${currentTid}/registeredPlayers`).set(regs); }
     }
 
     function adminRemovePendingPlayer(uid) {
-        let t = allTourneys[currentTid];
-        let regs = _arr(t.registeredPlayers);
-        let index = regs.indexOf(uid);
-        if(index > -1) {
-            regs.splice(index, 1);
-            allTourneys[currentTid].registeredPlayers = regs;
-            renderAdminPendingPanel();
-            database.ref(`the_35_gold_league/multi_v1/${currentTid}/registeredPlayers`).set(regs);
-        }
+        let t = allTourneys[currentTid]; let regs = _arr(t.registeredPlayers); let index = regs.indexOf(uid);
+        if(index > -1) { regs.splice(index, 1); allTourneys[currentTid].registeredPlayers = regs; renderAdminPendingPanel(); database.ref(`the_35_gold_league/multi_v1/${currentTid}/registeredPlayers`).set(regs); }
     }
 
     function createPendingTournament() {
-        let format = document.getElementById('leagueFormat').value; 
-        let tier = document.getElementById('leagueTier').value; 
-        let gender = document.getElementById('leagueGender').value; 
-        let region = document.getElementById('leagueRegion').value.trim().toLocaleUpperCase('tr-TR') || 'İZMİR';
-        let cName = document.getElementById('leagueCustomName').value.trim() || `İZMİR 35 KORTENİS LİGİ`; 
-        let sDate = document.getElementById('startDate').value;
-        let cap = parseInt(document.getElementById('leagueCapacity').value);
+        let format = document.getElementById('leagueFormat').value; let tier = document.getElementById('leagueTier').value; let gender = document.getElementById('leagueGender').value; let region = document.getElementById('leagueRegion').value.trim().toLocaleUpperCase('tr-TR') || 'İZMİR';
+        let cName = document.getElementById('leagueCustomName').value.trim() || `İZMİR 35 KORTENİS LİGİ`; let sDate = document.getElementById('startDate').value; let cap = parseInt(document.getElementById('leagueCapacity').value);
         if (!sDate) return alert("Tarih seçiniz!");
 
         let newTid = "LIG_" + Date.now();
         let newSettings = { status: 'pending', maxCapacity: cap, format: format, tier: tier, gender: gender, region: region, startDate: sDate, customName: cName };
-        
-        allTourneys[newTid] = { settings: newSettings, registeredPlayers: [] };
-        populateLeagueDropdowns(); 
-        
-        database.ref('the_35_gold_league/multi_v1/' + newTid).set({ 
-            settings: newSettings,
-            registeredPlayers: [] 
-        });
-        
-        alert("Turnuva başarıyla oluşturuldu ve kayda açıldı!"); 
-        document.getElementById('adminLeagueSelect').value = newTid; 
-        adminSwitchLeague(); 
+        allTourneys[newTid] = { settings: newSettings, registeredPlayers: [] }; populateLeagueDropdowns(); 
+        database.ref('the_35_gold_league/multi_v1/' + newTid).set({ settings: newSettings, registeredPlayers: [] });
+        alert("Turnuva başarıyla oluşturuldu ve kayda açıldı!"); document.getElementById('adminLeagueSelect').value = newTid; adminSwitchLeague(); 
     }
 
     function startPendingTournament(btn) {
-        let t = allTourneys[currentTid];
-        let regs = _arr(t.registeredPlayers);
-        let cap = t.settings.maxCapacity || 23;
-        
-        let activeRegs = regs.slice(0, cap);
-        let N = activeRegs.length;
+        let t = allTourneys[currentTid]; let regs = _arr(t.registeredPlayers); let cap = t.settings.maxCapacity || 23;
+        let activeRegs = regs.slice(0, cap); let N = activeRegs.length;
         if (N < 12) return alert("Minimum 12 kişi gereklidir.");
-
         if(!confirm(`DİKKAT: Asıl listedeki ${N} kişi ile kura çekilecek ve turnuva başlatılacaktır. Onaylıyor musunuz?`)) return;
         
         let originalText = btn.innerHTML; btn.innerHTML = "⏳ KURA ÇEKİLİYOR..."; btn.disabled = true;
 
-        let tempPlayers = activeRegs.map(uid => { 
-            let u = globalUsers[uid]; 
-            return { id: u.id, name: u.name, sysScore: u.sysScore, wins: 0, losses: 0, totalMatches: 0, setAv: 0, kor: 0, korRank: 0 }; 
-        });
+        let tempPlayers = activeRegs.map(uid => { let u = globalUsers[uid]; return { id: u.id, name: u.name, sysScore: u.sysScore, wins: 0, losses: 0, totalMatches: 0, setAv: 0, kor: 0, korRank: 0 }; });
         tempPlayers.sort((a, b) => parseFloat(b.sysScore || 0) - parseFloat(a.sysScore || 0));
 
-        let numPots = N >= 48 ? 5 : (N >= 24 ? 4 : 3); let mLimit = numPots * 2; 
-        let baseSize = Math.floor(N / numPots); let remainder = N % numPots;
-
+        let numPots = N >= 48 ? 5 : (N >= 24 ? 4 : 3); let mLimit = numPots * 2; let baseSize = Math.floor(N / numPots); let remainder = N % numPots;
         let potIndex = 1; let assigned = 0; let currentPotLimit = baseSize + (remainder > 0 ? 1 : 0);
         tempPlayers.forEach(p => { p.pot = potIndex; assigned++; if (assigned >= currentPotLimit && potIndex < numPots) { potIndex++; assigned = 0; remainder--; currentPotLimit = baseSize + (remainder > 0 ? 1 : 0); } });
 
@@ -1487,8 +957,7 @@
                 let attempts = 0;
                 while(pStats[pA.id].pots[targetPot] < 2 && pStats[pA.id].total < mLimit && attempts < 20) {
                     attempts++; let candidates = tempPlayers.filter(pB => pB.id !== pA.id && pB.pot === targetPot && pStats[pB.id].total < mLimit && pStats[pB.id].pots[pA.pot] < 2 && !tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id)));
-                    if(candidates.length === 0) break; 
-                    shuffle(candidates); let pB = candidates[0];
+                    if(candidates.length === 0) break; shuffle(candidates); let pB = candidates[0];
                     tempMatches.push({ id: mId++, p1: pA.id, p2: pB.id, p1Name: pA.name, p2Name: pB.name, p1S1:'', p1S2:'', p1MT:'', p2S1:'', p2S2:'', p2MT:'', p1S1TB:'', p2S1TB:'', p1S2TB:'', p2S2TB:'', played:false, pending:false, enteredBy:'', isWO:false, woWinner:'', matchDate:'', proposedDates:[], proposedBy:'', p1Fair: false, p2Fair: false });
                     pStats[pA.id].total++; pStats[pA.id].pots[targetPot]++; pStats[pB.id].total++; pStats[pB.id].pots[pA.pot]++;
                 }
@@ -1499,26 +968,18 @@
             let pA = tempPlayers[i]; let fallbackAttempts = 0;
             while(pStats[pA.id].total < mLimit && fallbackAttempts < 50) {
                 fallbackAttempts++; let candidates = tempPlayers.filter(pB => pB.id !== pA.id && pStats[pB.id].total < mLimit && !tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id)));
-                if(candidates.length === 0) break;
-                shuffle(candidates); let pB = candidates[0];
+                if(candidates.length === 0) break; shuffle(candidates); let pB = candidates[0];
                 tempMatches.push({ id: mId++, p1: pA.id, p2: pB.id, p1Name: pA.name, p2Name: pB.name, p1S1:'', p1S2:'', p1MT:'', p2S1:'', p2S2:'', p2MT:'', p1S1TB:'', p2S1TB:'', p1S2TB:'', p2S2TB:'', played:false, pending:false, enteredBy:'', isWO:false, woWinner:'', matchDate:'', proposedDates:[], proposedBy:'', p1Fair: false, p2Fair: false });
                 pStats[pA.id].total++; pStats[pB.id].total++;
             }
         }
 
-        t.players = tempPlayers;
-        t.matches = tempMatches;
-        t.settings.status = 'active';
-        t.settings.playerCount = N;
-        t.settings.matchLimit = mLimit;
+        t.players = tempPlayers; t.matches = tempMatches; t.settings.status = 'active'; t.settings.playerCount = N; t.settings.matchLimit = mLimit;
         
         database.ref(`the_35_gold_league/multi_v1/${currentTid}/players`).set(tempPlayers);
         database.ref(`the_35_gold_league/multi_v1/${currentTid}/matches`).set(tempMatches);
         database.ref(`the_35_gold_league/multi_v1/${currentTid}/settings`).set(t.settings).then(() => {
-            btn.innerHTML = originalText; btn.disabled = false; 
-            alert("Turnuva kuraları çekildi ve lig başlatıldı!"); 
-            populateLeagueDropdowns();
-            adminSwitchLeague(); 
+            btn.innerHTML = originalText; btn.disabled = false; alert("Turnuva kuraları çekildi ve lig başlatıldı!"); populateLeagueDropdowns(); adminSwitchLeague(); 
         });
     }
 
@@ -1555,9 +1016,7 @@
         let tempPlayers = Array.from(checked).map(cb => { let u = globalUsers[cb.value]; return { id: u.id, name: u.name, sysScore: u.sysScore, wins: 0, losses: 0, totalMatches: 0, setAv: 0, kor: 0, korRank: 0 }; });
         tempPlayers.sort((a, b) => parseFloat(b.sysScore || 0) - parseFloat(a.sysScore || 0));
 
-        let numPots = N >= 48 ? 5 : (N >= 24 ? 4 : 3); let mLimit = numPots * 2; 
-        let baseSize = Math.floor(N / numPots); let remainder = N % numPots;
-
+        let numPots = N >= 48 ? 5 : (N >= 24 ? 4 : 3); let mLimit = numPots * 2; let baseSize = Math.floor(N / numPots); let remainder = N % numPots;
         let potIndex = 1; let assigned = 0; let currentPotLimit = baseSize + (remainder > 0 ? 1 : 0);
         tempPlayers.forEach(p => { p.pot = potIndex; assigned++; if (assigned >= currentPotLimit && potIndex < numPots) { potIndex++; assigned = 0; remainder--; currentPotLimit = baseSize + (remainder > 0 ? 1 : 0); } });
 
@@ -1570,8 +1029,7 @@
                 let attempts = 0;
                 while(pStats[pA.id].pots[targetPot] < 2 && pStats[pA.id].total < mLimit && attempts < 20) {
                     attempts++; let candidates = tempPlayers.filter(pB => pB.id !== pA.id && pB.pot === targetPot && pStats[pB.id].total < mLimit && pStats[pB.id].pots[pA.pot] < 2 && !tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id)));
-                    if(candidates.length === 0) break; 
-                    shuffle(candidates); let pB = candidates[0];
+                    if(candidates.length === 0) break; shuffle(candidates); let pB = candidates[0];
                     tempMatches.push({ id: mId++, p1: pA.id, p2: pB.id, p1Name: pA.name, p2Name: pB.name, p1S1:'', p1S2:'', p1MT:'', p2S1:'', p2S2:'', p2MT:'', p1S1TB:'', p2S1TB:'', p1S2TB:'', p2S2TB:'', played:false, pending:false, enteredBy:'', isWO:false, woWinner:'', matchDate:'', proposedDates:[], proposedBy:'', p1Fair: false, p2Fair: false });
                     pStats[pA.id].total++; pStats[pA.id].pots[targetPot]++; pStats[pB.id].total++; pStats[pB.id].pots[pA.pot]++;
                 }
@@ -1589,19 +1047,12 @@
             }
         }
 
-        let newTid = "LIG_" + Date.now();
-        let newSettings = { status: 'active', matchLimit: mLimit, format: format, tier: tier, gender: gender, region: region, startDate: sDate, playerCount: N, customName: cName };
+        let newTid = "LIG_" + Date.now(); let newSettings = { status: 'active', matchLimit: mLimit, format: format, tier: tier, gender: gender, region: region, startDate: sDate, playerCount: N, customName: cName };
         let regsArr = Array.from(checked).map(cb => cb.value);
-        
         allTourneys[newTid] = { players: tempPlayers, matches: tempMatches, settings: newSettings, registeredPlayers: regsArr };
         populateLeagueDropdowns(); 
         
-        database.ref('the_35_gold_league/multi_v1/' + newTid).set({ 
-            players: tempPlayers, 
-            matches: tempMatches, 
-            settings: newSettings,
-            registeredPlayers: regsArr
-        }).then(() => { 
+        database.ref('the_35_gold_league/multi_v1/' + newTid).set({ players: tempPlayers, matches: tempMatches, settings: newSettings, registeredPlayers: regsArr }).then(() => { 
             btn.innerHTML = originalText; btn.disabled = false; 
             if(document.getElementById('potPreviewContainer')) document.getElementById('potPreviewContainer').style.display = 'none';
             alert("Turnuva manuel olarak kuraları çekildi ve lig başlatıldı!"); 
@@ -1611,19 +1062,94 @@
 
     function populateLeagueDropdowns() {
         let aSel = document.getElementById('adminLeagueSelect'); let uSel = document.getElementById('userActiveLeagueSelect'); if(!aSel || !uSel) return;
-        let aOpt = '<option value="new_pending">➕ YENİ TURNUVA (KAYDA AÇ)</option>'; 
-        aOpt += '<option value="new_manual">⚙️ YENİ TURNUVA (MANUEL KUR)</option>'; 
+        let aOpt = '<option value="new_pending">➕ YENİ TURNUVA (KAYDA AÇ)</option>'; aOpt += '<option value="new_manual">⚙️ YENİ TURNUVA (MANUEL KUR)</option>'; 
         let uOpt = '<option value="none">GENEL MOD (TÜM ZAMANLAR)</option>';
-        
-        aOpt += '<option value="notifs" style="display:none;">BİLDİRİMLER EKRANI</option>';
-        aOpt += '<option value="tournaments" style="display:none;">TURNUVALAR EKRANI</option>';
+        aOpt += '<option value="notifs" style="display:none;">BİLDİRİMLER EKRANI</option>'; aOpt += '<option value="tournaments" style="display:none;">TURNUVALAR EKRANI</option>';
 
         Object.keys(allTourneys).forEach(tid => {
-            let t = allTourneys[tid];
-            if(!t || !t.settings) return; 
-            let n = t.settings.customName || `İZMİR 35 KORTENİS LİGİ`;
-            let status = t.settings.status || 'active';
+            let t = allTourneys[tid]; if(!t || !t.settings) return; 
+            let n = t.settings.customName || `İZMİR 35 KORTENİS LİGİ`; let status = t.settings.status || 'active';
             
+            if (status === 'pending') { aOpt += `<option value="${tid}">YÖNET (Kayıt): ${n}</option>`; } 
+            else {
+                aOpt += `<option value="${tid}">YÖNET: ${n}</option>`;
+                if(!isAdmin && loggedInUser && _arr(t.players).some(p => p.id === loggedInUser.id)) uOpt += `<option value="${tid}">${n}</option>`;
+            }
+        });
+        
+        let aPrev = aSel.value, uPrev = uSel.value; aSel.innerHTML = aOpt; uSel.innerHTML = uOpt;
+        if(aPrev !== 'new_pending' && aPrev !== 'new_manual' && aPrev !== 'notifs' && aPrev !== 'tournaments' && allTourneys[aPrev]) aSel.value = aPrev; 
+        if(aPrev === 'notifs') aSel.value = 'notifs'; if(aPrev === 'tournaments') aSel.value = 'tournaments';
+        if(uPrev !== 'none' && allTourneys[uPrev]) uSel.value = uPrev;
+    }
+
+    function adminSwitchLeague() {
+        let val = document.getElementById('adminLeagueSelect').value;
+        if(val === 'new_pending') {
+            currentTid = null; document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+            document.getElementById('tabsContainer').style.display = 'none'; document.getElementById('deleteLeagueBtn').style.display = 'none'; document.getElementById('setup_pending').classList.add('active'); 
+        } else if(val === 'new_manual') {
+            currentTid = null; document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+            document.getElementById('tabsContainer').style.display = 'none'; document.getElementById('deleteLeagueBtn').style.display = 'none'; document.getElementById('setup_manual').classList.add('active'); renderAdminChecklist();
+        } else if (val === 'notifs') { openAdminGlobalNotifs(); } else if (val === 'tournaments') { openAdminGlobalTournaments(); } else {
+            currentTid = val; let t = allTourneys[val]; if(!t) return;
+            let status = t.settings.status || 'active';
+            document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
             if (status === 'pending') {
-                aOpt += `<option value="${tid}">YÖNET (Kayıt): ${n}</option>`;
+                document.getElementById('tabsContainer').style.display = 'none'; document.getElementById('deleteLeagueBtn').style.display = 'inline-block';
+                document.getElementById('admin_pending').classList.add('active'); renderAdminPendingPanel();
             } else {
+                document.getElementById('tabsContainer').style.display = 'flex'; document.getElementById('deleteLeagueBtn').style.display = 'inline-block';
+                loadTournamentData(val); switchTab('standings');
+            }
+        }
+    }
+
+    function userSwitchLeague() {
+        let val = document.getElementById('userActiveLeagueSelect').value;
+        if(val === 'none') { currentTid = null; document.getElementById('navLeagueTitle').innerText = "İZMİR 35 KORTENİS LİGİ"; document.getElementById('navLeagueSub').innerText = "KARİYER VE LİG YÖNETİM SİSTEMİ"; switchTab('standings'); return; }
+        currentTid = val; loadTournamentData(val); switchTab('standings');
+    }
+
+    function goHome() { if(isAdmin) { openAdminGlobalNotifs(); document.getElementById('adminLeagueSelect').value="notifs"; } else { switchTab('profile'); } }
+    function deleteCurrentTournament() { if(!currentTid || !confirm("Bu ligi kalıcı olarak silmek istiyor musunuz?")) return; let tid = currentTid; currentTid = null; delete allTourneys[tid]; goHome(); database.ref('the_35_gold_league/multi_v1/' + tid).remove().then(() => alert("Lig silindi.")); }
+
+    function switchTab(t) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); 
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        
+        let targetPanel = document.getElementById(t); if(targetPanel) targetPanel.classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach(b => { let attr = b.getAttribute('onclick'); if(attr && (attr.includes(`'${t}'`) || attr.includes(`"${t}"`))) { b.classList.add('active'); } });
+
+        let isGeneralMode = currentTid === null;
+        let tp = document.getElementById('tabProfileBtn'); if(tp) tp.style.display = isGeneralMode ? 'block' : 'none';
+        let tt = document.getElementById('tabTournamentsBtn'); if(tt) tt.style.display = isGeneralMode ? 'block' : 'none';
+        let tr = document.getElementById('tabRivalsBtn'); if(tr) tr.style.display = !isGeneralMode ? 'block' : 'none';
+        let tm = document.getElementById('tabMatchesBtn'); if(tm) tm.style.display = !isGeneralMode ? 'block' : 'none';
+        let ttree = document.getElementById('tabTreeBtn'); if(ttree) ttree.style.display = !isGeneralMode ? 'block' : 'none';
+
+        let rulesBtn = document.getElementById('tabRulesBtn'); let stdBtn = document.getElementById('tabStandingsBtn');
+        if(!isGeneralMode) { if(rulesBtn) rulesBtn.innerHTML = "📜 Turnuva Kuralları"; if(stdBtn) stdBtn.innerHTML = "📊 Puan Durumu"; } else { if(rulesBtn) rulesBtn.innerHTML = "📜 Sistem Rehberi"; if(stdBtn) stdBtn.innerHTML = "🏆 Genel Sıralama"; }
+
+        if(t === 'profile') renderProfile();
+        if(t === 'tournaments') renderTournamentsList();
+
+        let rf = document.getElementById('playerFilterSelect'); let mf = document.getElementById('matchFilterSelect');
+
+        if(!isGeneralMode && allTourneys[currentTid]) {
+            if(t === 'rules') generateDynamicRules(currentSettings);
+            if(t === 'standings') renderLocalStandings();
+            if(t === 'rivals') { if(rf) rf.style.display = 'block'; populateFilterSelects(); renderRivalsGrid(); }
+            if(t === 'matches') { if(mf) mf.style.display = 'block'; populateFilterSelects(); renderMatchesView(); }
+            if(t === 'tree') { let ttTitle = document.getElementById('treeDynamicTitle'); if(ttTitle) ttTitle.style.display = 'block'; renderVisualBracket(); }
+        } else {
+            if(t === 'rules') renderGlobalRules();
+            if(t === 'standings') renderGlobalStandings();
+            if(t === 'rivals') { if(rf) rf.style.display = 'none'; let c = document.getElementById('rivalsGridContainer'); if(c) c.innerHTML = `<div class="global-alert">⚠️ Bu sekmeyi görüntülemek için lütfen üst menüden oynadığınız bir turnuvayı seçin.</div>`; }
+            if(t === 'matches') { if(mf) mf.style.display = 'none'; let m = document.getElementById('matchListContainer'); if(m) m.innerHTML = `<div class="global-alert">⚠️ Bu sekmeyi görüntülemek için lütfen üst menüden oynadığınız bir turnuvayı seçin.</div>`; }
+            if(t === 'tree') { let ttTitle = document.getElementById('treeDynamicTitle'); if(ttTitle) ttTitle.style.display = 'none'; let b = document.getElementById('bracketView'); if(b) b.innerHTML = `<div class="global-alert">⚠️ Bu sekmeyi görüntülemek için lütfen üst menüden oynadığınız bir turnuvayı seçin.</div>`; }
+        }
+    }
+</script>
+</body>
+</html>
