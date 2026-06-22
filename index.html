@@ -514,41 +514,68 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;} th,td
         let html = `
         <div style="background:#1e293b; padding:15px; border-radius:8px; margin-bottom:15px; border-left:4px solid var(--accent-color);">
             <h3 style="color:var(--accent-color); margin-top:0;">🌟 VİZYONUMUZ VE AMACIMIZ</h3>
-            <p style="text-align:justify; font-size:12px;">Klasik, tek maçta elenilen turnuva formatlarından kurtularak; herkesin bol maç yaptığı, adaletin matematiksel olarak kusursuz sağlandığı ve korttaki terin saygı gördüğü yeni nesil bir ekosistem sunuyoruz.</p>
+            <p style="text-align:justify; font-size:12px;">İzmir 35 KorTenis Ligi; tenise gönül vermiş oyuncuları klasik, tek maçta elenilen stresli turnuva formatlarından kurtarmak için tasarlanmış, ezber bozan yenilikçi bir tenis ekosistemidir.<br><br>Amacımız; sıralamanın en altındaki oyuncuların bile rekabetten kopmadan son maça kadar şansını sürdürebildiği, puanlamanın sürekli değişkenlik gösterdiği heyecan dolu bir platform yaratmaktır. Her oyuncunun kendi yetenek seviyesinde bolca maç yapmasını, esnek fikstür yapımız sayesinde kendi takvimine göre oynamasını ve yeni tenis partnerleri edinmesini sağlıyoruz. Biz burada sadece bir turnuva yapmayı değil, sizlerden gelecek geri bildirimlerle sürekli gelişecek kusursuz ve adil bir "Lig Kültürü" hedefliyoruz.</p>
         </div>
+        
         <h3>1. SİSTEME GİRİŞ: KAYIT VE SEVİYE BELİRLEME</h3>
-        <p style="font-size:12px;">Sisteme ilk adım attığınızda, uluslararası geçerliliği olan NTRP standartlarındaki seviye anketimizi doldurursunuz. Sistem sizi uygun lig kategorinize (SILVER, GOLD, PLATIN) atar.</p>
-        <h3>2. KORTTAKİ GÜCÜ ÖLÇEN TEMEL DEĞİŞKENLER</h3>
+        <p style="font-size:12px;">Sisteme ilk adım attığınızda, uluslararası geçerliliği olan NTRP standartlarındaki 8 aşamalı seviye anketimizi doldurursunuz. Sistem, verdiğiniz cevaplara göre sizi 1.5 ile 7.0 arasında puanlayarak uygun lig kategorinize (SILVER, GOLD veya PLATIN) atar. Seçtiğiniz saat dilimleri sayesinde, rakiplerinizle fikstür üzerinde "Ortak Müsaitlik" eşleşmelerinizi anında görebilirsiniz.</p>
+        
+        <h3>2. LİG FORMATLARI (Özgür Seçim)</h3>
+        <p style="font-size:12px;">• <strong>Format Seçimi Artık Sizin:</strong> Turnuva kurarken herkesi tek bir formata zorlamak yerine özgürlüğü oyuncuya bırakıyoruz. Maçınızı yaparken kort kiralama sürenize göre <strong>"6 Oyunluk Uzun Set"</strong> veya <strong>"4 Oyunluk Kısa Set"</strong> oynamaya rakibinizle siz karar verirsiniz. Şampiyonluk yarışında kimseye haksızlık olmaz!<br>
+        • <strong>Karar Puanı (Altın Puan):</strong> Kort sürelerini verimli kullanmak adına, "Avantaj" yerine "Karar Puanı" oynanıp oynanmayacağı tamamen oyuncuların maç öncesi anlaşmasına bırakılmıştır.</p>
+
+        <h3>3. LİG İMKANLARI VE ESNEK FİKSTÜR</h3>
+        <p style="font-size:12px;">• Katılım sayısına göre ligler 3'e ayrılır: <strong>Butik Lig (12-23 Oyuncu / 6 Maç)</strong>, <strong>Standart Lig (24-47 Oyuncu / 8 Maç)</strong> ve <strong>Büyük Lig (48-96 Oyuncu / 10 Maç)</strong>. Turnuva sonunda ligin kapasitesine göre oyuncular Play-Off veya Play-In aşamasına geçer.<br>
+        • <strong>Kusursuz Kura:</strong> Kayıt anındaki puanınıza göre torbalara (Pots) ayrılırsınız ve sistem herkese eşit zorlukta bir fikstür çeker.<br>
+        • <strong>Sıfır Stres, Kolay Skor Akışı:</strong> Maç oynamak için sistemden randevu atama zorunluluğu yoktur. Anlaştığınız zaman korta çıkın, maç bitiminde "Skor Gir" panelinden skoru yazın, rakibiniz tek tuşla onayladığı an puanlar tablolara işlensin.<br>
+        • <strong>Hükmen (WO) Kuralı:</strong> Maça çıkmayan oyuncu hükmen mağlup sayılır ve <strong>-10 Şöhret Puanı</strong> cezası alır. Hükmen galibiyette KOR puanı verilmez. Puan, kortta ter dökerek kazanılır!</p>
+
+        <div style="background:#1e293b; padding:10px; border-radius:6px; border-left:4px solid var(--warning); margin:15px 0;">
+            <h4 style="margin:0 0 5px 0; color:var(--warning); text-align:center;">📐 SİSTEMİN MATEMATİKSEL İSKELETİ</h4>
+            <p style="font-size:11px; text-align:center; margin:0;">Sistemimizin kaputunun altında yatan, adaleti ve eşitliği %100 oranında sağlayan formüllerimiz aşağıdaki gibidir:</p>
+        </div>
+
+        <h3>4. KORTTAKİ GÜCÜ ÖLÇEN TEMEL DEĞİŞKENLER</h3>
         <ul style="font-size:12px;">
-            <li><strong>A) MİP (Maç İçi Performans):</strong> Korttaki oyun kazanma verimliliğindir. Formül: <code>(Kazanılan Oyun / Toplam Oynanan Oyun) × 100</code></li>
-            <li><strong>B) RGÇ (Rakip Güç Çarpanı):</strong> Rakibin ligdeki form durumudur. Formül: <code>1.0 + (Rakibin Galibiyet / Toplam Maçı)</code>. Namağlup birini yenersen bu çarpan seni zirveye taşır.</li>
+            <li><strong>A) MİP (Maç İçi Performans):</strong> Korttaki oyun kazanma verimliliğindir. Yenilseniz dahi aldığınız her oyun MİP puanınızı artırır. <br><code>Formül: (Kazanılan Oyun / Toplam Oynanan Oyun) × 100</code></li>
+            <li><strong>B) RGÇ (Rakip Güç Çarpanı):</strong> Rakibinizin ligdeki form durumudur. Namağlup birini yenmek çok daha fazla puan verir. <br><code>Formül: 1.0 + (Rakibin Galibiyet Sayısı / Rakibin Toplam Maç Sayısı)</code></li>
         </ul>
-        <h3>3. LİG ÇEŞİTLİLİĞİ VE MAÇ FORMATLARI (Formatı Sen Seç)</h3>
-        <p style="font-size:12px;">Turnuva kurarken herkesi tek bir formata zorlamak yerine özgürlüğü oyuncuya bırakıyoruz. Maçını yaparken kort sürene göre <strong>4 Oyunluk Kısa Set</strong> veya <strong>6 Oyunluk Uzun Set</strong> oynayabileceğine sen karar verirsin. Şampiyonluk yarışında kimseye haksızlık olmaz!</p>
-        <h3>4. YENİ SKOR AKIŞI VE HÜKMEN (WO) KURALI</h3>
-        <p style="font-size:12px;">Randevu stresi bitti. Rakiplerinle dilediğin zaman anlaşıp korta çık. Maç bittiğinde "Skor Gir" panelinden formatı ve skoru yaz, rakibin "Onaylıyorum" dediği an puanlar hesaplansın. Maça çıkmayan Hükmen (WO) kaybeder, -10 Şöhret Puanı cezası alır. KOR puanı kazanmak için korta çıkıp ter dökmek şarttır.</p>
+
         <h3>5. KOR (YEREL TURNUVA PUANI) - ŞAMPİYONLUK YARIŞI</h3>
-        <p style="font-size:12px;">SADECE o an oynanan turnuvanın şampiyonunu belirler. Burada 4'lük ve 6'lık format ayrımı (Efor çarpanı) yoktur, kort bulamayan dezavantaj yaşamaz, herkes eşittir.</p>
+        <p style="font-size:12px;">SADECE o an oynanan turnuvanın şampiyonunu belirler. Bu tabloda 4'lük ve 6'lık format ayrımı (Efor çarpanı) yoktur, kort bulamayan dezavantaj yaşamaz, herkes eşittir.</p>
         <ul style="font-size:12px;">
-            <li>🏆 <strong>Kazananın Puanı:</strong> <code>(MİP × RGÇ) + 10 Puan (Galibiyet Primi)</code></li>
-            <li>🛡️ <strong>Kaybedenin Puanı:</strong> <code>(MİP × RGÇ) × 0.50 (Mağlubiyet Çarpanı)</code></li>
+            <li>🏆 <strong>KAZANAN:</strong> <code>(MİP × RGÇ) + 10 Puan (Galibiyet Primi)</code><br><em>(Galibiyet primi, maçı çok kötü bir yüzdeyle ucu ucuna kazanan oyuncu ile ucu ucuna kaybeden oyuncu arasına adil bir çizgi çeker).</em></li>
+            <li>🛡️ <strong>KAYBEDEN:</strong> <code>(MİP × RGÇ) × 0.50 (Mağlubiyet Çarpanı)</code><br><em>(Kaybeden oyuncu ezilen ile direnen ayrılsın diye oyun yüzdesine göre puan alır, ancak maçı kaybettiği için puanı yarıya düşürülür).</em></li>
         </ul>
+
         <h3>6. K-KOR (GLOBAL KARİYER PUANI) VE ŞÖHRET SİSTEMİ</h3>
-        <p style="font-size:12px;">ATP sıralaması gibi ligdeki tüm geçmişini tutar. 6 oyunluk uzun formatta ter döken oyuncuların ödülü turnuva kupasında değil, bu global sıralamada <strong>Efor Çarpanı</strong> ile verilir.</p>
+        <p style="font-size:12px;">ATP sıralaması gibi sistemdeki tüm geçmişinizi tutar. 6 oyunluk uzun formatta ter döken oyuncuların ödülü turnuva kupasında değil, bu global sıralamada <strong>Efor Çarpanı</strong> ile verilir.</p>
         <ul style="font-size:12px;">
-            <li>⚡ <strong>4 Oyunluk Format (Kısa Set):</strong> 1.0 Çarpan.</li>
-            <li>🎾 <strong>6 Oyunluk Format (Uzun Set):</strong> 1.5 Çarpan. (Maç %50 daha fazla efor gerektirdiği için global puana %50 bonus yansır).</li>
-            <li><strong>Kariyer Başarı Bonusları (Kupa):</strong> PLATİN (Şampiyon +500), OPEN (Şampiyon +400), GOLD (Şampiyon +300), SILVER (Şampiyon +150)</li>
-            <li><strong>Şöhret (Fame) Puanı:</strong> Oynanan her maç (+1), Turnuvayı Firesiz Bitirme (+20), Rakip Onaylı Centilmenlik (+5).</li>
+            <li>⚡ <strong>4 Oyunluk Format:</strong> 1.0 Çarpan.</li>
+            <li>🎾 <strong>6 Oyunluk Format:</strong> 1.5 Çarpan. <em>(Maç %50 daha fazla efor gerektirdiği için K-KOR puanına %50 bonus olarak yansır).</em></li>
+            <li><strong>Kariyer Başarı Bonusları:</strong> Turnuvayı zirvede bitirenler K-KOR tablolarına devasa bonuslar yazdırır:
+                <ul style="margin-top:5px; margin-bottom:5px;">
+                    <li>💎 <strong>PLATİN LİG:</strong> Şampiyon (+500), Finalist (+250), Yarı Finalist (+125)</li>
+                    <li>🌍 <strong>OPEN LİG (Karma):</strong> Şampiyon (+400), Finalist (+200), Yarı Finalist (+100)</li>
+                    <li>🥇 <strong>GOLD LİG:</strong> Şampiyon (+300), Finalist (+150), Yarı Finalist (+75)</li>
+                    <li>🥈 <strong>SILVER LİG:</strong> Şampiyon (+150), Finalist (+75), Yarı Finalist (+40)</li>
+                </ul>
+            </li>
+            <li><strong>Şöhret Puanı (Fame):</strong> Sistemdeki centilmenliğinizi ölçer. Oynanan her maç (+1), ligi maç atlamadan tamamlama (+20), Rakibin profilindeki 'Rakibim centilmendi' butonuna basılması (+5) puan kazandırır.</li>
         </ul>
+
         <h3>7. DİNAMİK NTRP (SEVİYE) GÜNCELLEME ALGORİTMASI</h3>
-        <p style="font-size:12px;">Her 10 maç dolduğunda sistemin seni otomatik kalibre ettiği kusursuz adalettir.</p>
+        <p style="font-size:12px;">Sistem manuel müdahaleye gerek kalmadan, her 10 maçınız dolduğunda kusursuz bir matematikle sizi otomatik olarak kalibre eder (4 Aşamalıdır):</p>
         <ul style="font-size:12px;">
-            <li><strong>1. Güç Farkı (GF):</strong> Kendi NTRP'n - Rakiplerin Ort. NTRP'si</li>
-            <li><strong>2. Beklenen MİP:</strong> <code>50 + (GF × 25)</code> (Güç farkına göre sistemin senden beklediği oyun yüzdesidir).</li>
-            <li><strong>3. Gerçek MİP:</strong> Son 10 Maçta Toplam Kazanılan Oyun / Toplam Oynanan Oyun × 100</li>
-            <li><strong>4. Yeni Seviyen:</strong> <code>Mevcut NTRP + ((Gerçek MİP - Beklenen MİP) × 0.015)</code>. Sistemin beklentisini ne kadar aşarsan seviyen o kadar yükselir!</li>
-        </ul>`;
+            <li><strong>Adım 1 (Güç Farkı):</strong> Kendi seviyeniz ile son 10 maçtaki rakiplerinizin ortalama seviyesi arasındaki farkı (GF) bulur.</li>
+            <li><strong>Adım 2 (Beklenen MİP):</strong> Sistem rakiplerinize bakarak sizden bir oyun yüzdesi bekler. <code>Formül: 50 + (GF × 25)</code></li>
+            <li><strong>Adım 3 (Gerçek MİP):</strong> Son 10 maçta korta yansıttığınız gerçek oyun oranıdır. (Uzun format oynayanların başarısı havuza çok daha ağır ve doğal etki eder).</li>
+            <li><strong>Adım 4 (Yeni Seviyenin Atanması):</strong> Gerçekleşen ile Beklenen arasındaki fark, <strong>Kalibrasyon Hızı (0.015)</strong> çarpanıyla seviyenize eklenir. <code>Yeni NTRP = Eski NTRP + ((Gerçek MİP - Beklenen MİP) × 0.015)</code>. Sistemin beklentisini ne kadar aşarsanız seviyeniz o kadar adil ve istikrarlı bir şekilde yükselir!</li>
+        </ul>
+
+        <h3>⚔️ 8. AKAN AĞAÇ PLAY-OFF SİSTEMİ</h3>
+        <p style="font-size:12px;">Lig bitiminde kura ağacında (Turnuva Ağacı 🏆 sekmesi) rakibinizin kim olduğu netleştiği an, diğer eşleşmeleri beklemeden Play-Off maçınızı hemen oynayabilirsiniz.</p>
+        `;
         let container = document.getElementById('dynamicRulesContainer'); if(container) container.innerHTML = html;
     }
 
