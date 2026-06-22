@@ -323,7 +323,14 @@ document.getElementById('promptSubmitBtn').addEventListener('click', () => {
     }
 
     function toggleAuth(id) { document.querySelectorAll('.auth-card').forEach(c=>c.style.display='none'); document.getElementById(id).style.display='block'; }
-    function forgotPassword() { let n = prompt("Sisteme kayıtlı Adınızı ve Soyadınızı girin:"); if (!n) return; database.ref('the_35_gold_league/password_resets').push({ name: n.toLocaleUpperCase('tr-TR'), timestamp: Date.now() }).then(() => alert("Şifre sıfırlama talebiniz yöneticiye iletildi.")); }
+function forgotPassword() { 
+    showCustomPrompt("ŞİFRE SIFIRLAMA", "Lütfen sisteme kayıtlı <strong>Adınızı ve Soyadınızı</strong> girin:", false, (n) => {
+        if (!n) return;
+        database.ref('the_35_gold_league/password_resets').push({ name: n.toLocaleUpperCase('tr-TR'), timestamp: Date.now() }).then(() => {
+            showToast("Şifre sıfırlama talebiniz yöneticiye iletildi.", "success");
+        });
+    });
+}
     function updateLoginDropdown() { let sel = document.getElementById('loginGlobalUserSelect'); if(!sel) return; let p = sel.value; sel.innerHTML = '<option value="">İSMİNİZİ SEÇİN...</option>'; Object.values(globalUsers).filter(u => u && u.name).sort((a,b)=>String(a.name).localeCompare(String(b.name))).forEach(u => sel.innerHTML += `<option value="${u.id}">${u.name}</option>`); if(p) sel.value = p; }
 
     function registerNewUser() {
@@ -341,7 +348,18 @@ document.getElementById('promptSubmitBtn').addEventListener('click', () => {
         database.ref('the_35_gold_league/users/' + uid).set({ id: uid, name: name, password: pass, gender: gender, hand: dHand, backhand: dBackhand, availability: avail, tier: tier, sysScore: sysScore, welcomed: false, fame: 0, k_kor_base: 0 }).then(() => { alert(`Kayıt Başarılı!\nSistem Puanınız (NTRP): ${sysScore}\nAtanan Lig: ${tier}\n\nArtık giriş yapabilirsiniz.`); toggleAuth('loginPanel'); });
     }
 
-    function loginGlobalUser() { let uid = document.getElementById('loginGlobalUserSelect').value; let pass = document.getElementById('loginGlobalPassword').value; if(!uid) return; let u = globalUsers[uid]; if(u && u.password === pass) { isAdmin = false; loggedInUser = u; localStorage.setItem('korTennisUserId', u.id); enterApp(); setTimeout(() => { if(u.welcomed === false || u.welcomed === undefined) document.getElementById('welcomeModal').style.display = 'flex'; }, 500); } else { alert("❌ Hatalı Şifre!"); } }
+function loginGlobalUser() { 
+    let uid = document.getElementById('loginGlobalUserSelect').value; 
+    let pass = document.getElementById('loginGlobalPassword').value; 
+    if(!uid) return; 
+    let u = globalUsers[uid]; 
+    if(u && u.password === pass) { 
+        isAdmin = false; loggedInUser = u; localStorage.setItem('korTennisUserId', u.id); enterApp(); 
+        setTimeout(() => { if(u.welcomed === false || u.welcomed === undefined) document.getElementById('welcomeModal').style.display = 'flex'; }, 500); 
+    } else { 
+        showToast("Hatalı Şifre Girdiniz!", "error"); 
+    } 
+}
     function closeWelcomeModal() { document.getElementById('welcomeModal').style.display = 'none'; database.ref('the_35_gold_league/users/' + loggedInUser.id + '/welcomed').set(true); loggedInUser.welcomed = true; switchTab('rules'); }
     function openPublicProfile(uid) { let u = globalUsers[uid]; if (!u) return alert("Oyuncu verisi bulunamadı."); let dStats = derivedGlobalStats[uid] || { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0, fame: 0, dynamicNTRP: u.sysScore }; document.getElementById('pubName').innerText = u.name || 'BİLİNMİYOR'; document.getElementById('pubTier').innerText = `${u.tier || 'BELİRSİZ'} (${dStats.dynamicNTRP})`; document.getElementById('pubGender').innerText = u.gender || '-'; document.getElementById('pubStyle').innerText = (u.hand && u.backhand) ? (u.hand + " / " + u.backhand + " BH") : "BELİRTİLMEDİ"; document.getElementById('pubKKor').innerText = (dStats.k_kor || 0).toFixed(1); document.getElementById('pubFame').innerText = (dStats.fame || 0); document.getElementById('pubWinLoss').innerText = `${dStats.gWins || 0}G - ${dStats.gLoss || 0}M`; document.getElementById('pubAvail').innerText = (u.availability && u.availability.length) ? u.availability.map(a=>a.toLocaleUpperCase('tr-TR')).join(", ") : "BELİRTİLMEDİ"; document.getElementById('publicProfileModal').style.display = 'flex'; }
     function closePublicProfile() { document.getElementById('publicProfileModal').style.display = 'none'; }
@@ -432,11 +450,17 @@ document.getElementById('promptSubmitBtn').addEventListener('click', () => {
         let regs = _arr(t.registeredPlayers); if(!regs.includes(loggedInUser.id)) { regs.push(loggedInUser.id); allTourneys[tid].registeredPlayers = regs; renderTournamentsList(); database.ref(`the_35_gold_league/multi_v1/${tid}/registeredPlayers`).set(regs).then(() => { alert("Turnuvaya kaydınız başarıyla alındı!"); }); }
     }
     function leaveTournament(tid) {
-        if(!confirm("Turnuvadan çıkmak (kaydınızı iptal etmek) istediğinize emin misiniz?")) return;
+    showCustomConfirm("KAYIT İPTALİ", "Turnuvadan çıkmak (kaydınızı iptal etmek) istediğinize emin misiniz?", () => {
         let t = allTourneys[tid]; let regs = _arr(t.registeredPlayers); let index = regs.indexOf(loggedInUser.id);
-        if(index > -1) { regs.splice(index, 1); allTourneys[tid].registeredPlayers = regs; renderTournamentsList(); database.ref(`the_35_gold_league/multi_v1/${tid}/registeredPlayers`).set(regs).then(() => { alert("Turnuvadan ayrıldınız."); }); }
-    }
-
+        if(index > -1) { 
+            regs.splice(index, 1); allTourneys[tid].registeredPlayers = regs; 
+            renderTournamentsList(); 
+            database.ref(`the_35_gold_league/multi_v1/${tid}/registeredPlayers`).set(regs).then(() => { 
+                showToast("Turnuvadan ayrıldınız.", "warning"); 
+            }); 
+        }
+    }, true); // true parametresi "Evet" butonunu kırmızı yapar
+}
     function adminFilterPlayers() {
         let nameQ = document.getElementById('adminSearchName').value.toLocaleUpperCase('tr-TR'); 
         let genQ = document.getElementById('adminFilterGender').value; 
@@ -920,29 +944,37 @@ function submitScore(mId, isP2, btn) {
     function approveScore(mId, btn) { btn.innerHTML = "⏳ İŞLENİYOR..."; btn.disabled = true; let m = matches.find(x => String(x.id) === String(mId)); m.pending = false; let tName = currentSettings.customName || "Turnuva"; addAlertToUser(m.enteredBy, `✅ <strong>[${tName}]</strong> ${m.p1Name} vs ${m.p2Name} maçınızın skoru rakibiniz tarafından onaylandı! Puanlar işlendi.`); saveToDb("Skor Onaylandı ve Tablolara İşlendi!"); }
     function giveFairPlay(mId, opponentId, btn) { btn.innerHTML = "⏳..."; btn.disabled = true; let m = matches.find(x => String(x.id) === String(mId)); if(!m) return; if (m.p1 === loggedInUser.id) m.p1Fair = true; else if (m.p2 === loggedInUser.id) m.p2Fair = true; let uRef = database.ref(`the_35_gold_league/users/${opponentId}/fame`); uRef.once('value').then((s) => { let currentFame = s.val() || 0; uRef.set(currentFame + 5).then(() => { saveToDb("Rakibinizi kutladınız! +5 Şöhret Puanı eklendi. 👏"); }); }); }
     function clearScoreCloud(id, btn) { 
-    if(!confirm("Bu maçın skorunu iptal etmek/sıfırlamak istiyor musunuz?")) return; 
-    btn.innerHTML = "⏳..."; btn.disabled = true; 
-    let m = matches.find(x => String(x.id) === String(id)); 
-    m.played = false; m.pending = false; m.isWO = false; m.woWinner = ''; m.enteredBy = ''; 
-    m.p1S1 = ''; m.p2S1 = ''; m.p1S2 = ''; m.p2S2 = ''; 
-    m.p1S1TB = ''; m.p2S1TB = ''; m.p1S2TB = ''; m.p2S2TB = ''; 
-    m.p1MT = ''; m.p2MT = ''; m.p1Fair = false; m.p2Fair = false; 
-    
-    // DÜZELTME 3: İptal durumunda formatı tamamen boşaltmak yerine varsayılan değere döndür
-    m.matchFormat = '6_GAME'; 
-    
-    saveToDb("Skor sıfırlandı!"); 
+    showCustomConfirm("SKOR İPTALİ", "Bu maçın skorunu iptal etmek/sıfırlamak istiyor musunuz?", () => {
+        btn.innerHTML = "⏳..."; btn.disabled = true; 
+        let m = matches.find(x => String(x.id) === String(id)); 
+        m.played = false; m.pending = false; m.isWO = false; m.woWinner = ''; m.enteredBy = ''; 
+        m.p1S1 = ''; m.p2S1 = ''; m.p1S2 = ''; m.p2S2 = ''; 
+        m.p1S1TB = ''; m.p2S1TB = ''; m.p1S2TB = ''; m.p2S2TB = ''; 
+        m.p1MT = ''; m.p2MT = ''; m.p1Fair = false; m.p2Fair = false; 
+        
+        m.matchFormat = '6_GAME'; 
+        saveToDb("Skor sıfırlandı!");
+    }, true);
 }
     
-    function saveToDb(msg) {
-        calculateStats(); 
-        try {
-            let cleanPlayers = JSON.parse(JSON.stringify(_arr(players))); let cleanMatches = JSON.parse(JSON.stringify(_arr(matches)));
-            database.ref('the_35_gold_league/multi_v1/' + currentTid).set({ players: cleanPlayers, matches: cleanMatches, settings: currentSettings, registeredPlayers: _arr(allTourneys[currentTid].registeredPlayers || []), substitutePool: _arr(allTourneys[currentTid].substitutePool || []) })
-            .then(() => { if(msg) alert(msg); let activePanel = document.querySelector('.panel.active'); if(activePanel) { if(activePanel.id === 'matches') renderMatchesView(); if(activePanel.id === 'standings') renderLocalStandings(); if(activePanel.id === 'profile') renderProfile(); if(activePanel.id === 'rivals') renderRivalsGrid(); } })
-            .catch(err => { console.error("Kayıt Hatası:", err); alert("Bağlantı hatası: Kayıt başarısız oldu."); });
-        } catch(e) { console.error("Veri Temizleme Hatası:", e); alert("Kritik Hata: Veri yapısında bozukluk tespit edildi! İşlem durduruldu."); }
-    }
+   function saveToDb(msg) {
+    calculateStats(); 
+    try {
+        let cleanPlayers = JSON.parse(JSON.stringify(_arr(players))); let cleanMatches = JSON.parse(JSON.stringify(_arr(matches)));
+        database.ref('the_35_gold_league/multi_v1/' + currentTid).set({ players: cleanPlayers, matches: cleanMatches, settings: currentSettings, registeredPlayers: _arr(allTourneys[currentTid].registeredPlayers || []), substitutePool: _arr(allTourneys[currentTid].substitutePool || []) })
+        .then(() => { 
+            if(msg) showToast(msg, "success"); // Alert yerine Toast kullanıldı
+            let activePanel = document.querySelector('.panel.active'); 
+            if(activePanel) { 
+                if(activePanel.id === 'matches') renderMatchesView(); 
+                if(activePanel.id === 'standings') renderLocalStandings(); 
+                if(activePanel.id === 'profile') renderProfile(); 
+                if(activePanel.id === 'rivals') renderRivalsGrid(); 
+            } 
+        })
+        .catch(err => { console.error("Kayıt Hatası:", err); showToast("Bağlantı hatası: Kayıt başarısız oldu.", "error"); });
+    } catch(e) { console.error("Veri Temizleme Hatası:", e); showToast("Kritik Hata: Veri yapısında bozukluk tespit edildi! İşlem durduruldu.", "error"); }
+} 
 </script>
 </body>
 </html>
