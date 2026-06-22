@@ -37,10 +37,54 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;} th,td
 .player-link{cursor:pointer;text-decoration:underline;color:inherit;transition:0.2s;} .player-link:hover{color:var(--success);}
 .tournament-card{background:#1e293b;padding:15px;border-radius:8px;border:1px solid var(--border-color);margin-bottom:15px;display:flex;flex-direction:column;gap:10px;} .tournament-badge{padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;}
 @keyframes blink{0%{opacity:1;}50%{opacity:0.4;}100%{opacity:1;}}
+/* --- YENİ UX BİLEŞENLERİ --- */
+.toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 999999; display: flex; flex-direction: column; gap: 10px; }
+.toast { min-width: 260px; background: #1e293b; color: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); font-size: 13px; font-weight: bold; border-left: 5px solid var(--accent-color); opacity: 0; transform: translateX(100%); animation: slideIn 0.3s forwards; display: flex; gap: 10px; align-items: center; }
+.toast.success { border-left-color: var(--success); }
+.toast.error { border-left-color: var(--danger); }
+.toast.warning { border-left-color: var(--warning); }
+@keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
+@keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
+
+/* Özel Modal Dialogları */
+.dialog-text { font-size: 14px; margin-bottom: 20px; line-height: 1.5; color: #cbd5e1; }
+.dialog-actions { display: flex; gap: 10px; margin-top: 15px; }
+.dialog-btn { flex: 1; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; transition: 0.2s; font-size: 13px; }
+.dialog-btn.cancel { background: #334155; color: white; }
+.dialog-btn.cancel:hover { background: #475569; }
+.dialog-btn.confirm { background: var(--success); color: black; }
+.dialog-btn.danger { background: var(--danger); color: white; }
+
 </style>
 </head>
 <body>
-<div id="welcomeModal" class="modal"><div class="modal-content"><h2 style="color:var(--accent-color); margin-top:0;">🎉 İZMİR 35 KORTENİS LİGİ'NE HOŞ GELDİNİZ!</h2><p style="font-size:14px; line-height:1.6;">Klasik turnuvalardan çok daha fazlası olan bu esnek ve dinamik ekosisteme adım attınız.</p><p style="font-size:13px; color:#cbd5e1; margin-bottom:0;">Sistemimizin sürprizlerle dolu esnek yapısını, maç kurallarını ve Puanlama Matematiğini (K-KOR) tam olarak kavrayabilmek için lütfen öncelikle <strong>Sistem Rehberi</strong> sekmesini dikkatlice okuyunuz.</p><button class="modal-btn" onclick="closeWelcomeModal()">Okudum, Anladım ve Başlıyorum 🚀</button></div></div>
+<div id="welcomeModal" <!-- Toast Bildirim Kapsayıcısı -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- Özel Onay (Confirm) Modalı -->
+<div id="customConfirmModal" class="modal">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+        <h3 id="confirmTitle" style="color:var(--warning); margin-top:0;">⚠️ DİKKAT</h3>
+        <p id="confirmMessage" class="dialog-text">Bu işlemi onaylıyor musunuz?</p>
+        <div class="dialog-actions">
+            <button class="dialog-btn cancel" onclick="closeCustomConfirm()">İptal</button>
+            <button id="confirmYesBtn" class="dialog-btn confirm">Evet, Onaylıyorum</button>
+        </div>
+    </div>
+</div>
+
+<!-- Özel Girdi (Prompt) Modalı -->
+<div id="customPromptModal" class="modal">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+        <h3 id="promptTitle" style="color:var(--accent-color); margin-top:0;">GİRDİ BEKLENİYOR</h3>
+        <p id="promptMessage" class="dialog-text" style="font-size:12px; margin-bottom:10px;"></p>
+        <input type="text" id="promptInput" class="auth-input" style="width:100%; margin-bottom:15px; background:#020617;" placeholder="...">
+        <div class="dialog-actions">
+            <button class="dialog-btn cancel" onclick="closeCustomPrompt()">İptal</button>
+            <button id="promptSubmitBtn" class="dialog-btn confirm">Gönder</button>
+        </div>
+    </div>
+</div>class="modal"><div class="modal-content"><h2 style="color:var(--accent-color); margin-top:0;">🎉 İZMİR 35 KORTENİS LİGİ'NE HOŞ GELDİNİZ!</h2><p style="font-size:14px; line-height:1.6;">Klasik turnuvalardan çok daha fazlası olan bu esnek ve dinamik ekosisteme adım attınız.</p><p style="font-size:13px; color:#cbd5e1; margin-bottom:0;">Sistemimizin sürprizlerle dolu esnek yapısını, maç kurallarını ve Puanlama Matematiğini (K-KOR) tam olarak kavrayabilmek için lütfen öncelikle <strong>Sistem Rehberi</strong> sekmesini dikkatlice okuyunuz.</p><button class="modal-btn" onclick="closeWelcomeModal()">Okudum, Anladım ve Başlıyorum 🚀</button></div></div>
 <div id="publicProfileModal" class="modal"><div class="modal-content" style="max-width:350px;"><button style="position:absolute; top:10px; right:15px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer;" onclick="closePublicProfile()">✖</button><div style="font-size:35px; margin-bottom:10px;">👤</div><h2 id="pubName" style="margin:0; color:white; text-transform:uppercase;">İSİM</h2><div style="margin-top:5px; display:flex; justify-content:center; flex-wrap:wrap; gap:5px;"><span id="pubTier" style="background:var(--accent-color); color:black; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px;">SEVİYE</span><span id="pubGender" style="background:#1e293b; color:white; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px; border:1px solid var(--border-color);">CİNSİYET</span><span id="pubStyle" style="background:#1e293b; color:var(--warning); font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px; border:1px solid var(--border-color);">STİL</span></div><div style="display:flex; justify-content:space-around; margin-top:20px;"><div><div id="pubKKor" style="font-size:20px; font-weight:bold; color:var(--accent-color);">0</div><div style="font-size:9px; color:var(--sub-text);">K-KOR</div></div><div><div id="pubFame" style="font-size:20px; font-weight:bold; color:var(--success);">0</div><div style="font-size:9px; color:var(--sub-text);">Şöhret</div></div><div><div id="pubWinLoss" style="font-size:20px; font-weight:bold; color:white;">0G - 0M</div><div style="font-size:9px; color:var(--sub-text);">Maçlar</div></div></div><div style="background:#1e293b; padding:10px; border-radius:8px; margin-top:15px; font-size:11px; border-left:3px solid var(--success); text-align:left;"><h4 style="margin:0 0 5px 0; color:var(--success);">📅 Oyun Saatleri</h4><div id="pubAvail" style="color:var(--text-color);">Yükleniyor...</div></div></div></div>
 <div id="substituteModal" class="modal"><div class="modal-content" style="max-width:400px;"><button style="position:absolute; top:10px; right:15px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer;" onclick="closeSubstituteModal()">✖</button><h3 style="color:var(--warning); margin-top:0;">🔄 OYUNCU DEĞİŞTİR (TRANSFER)</h3><p style="font-size:11px; color:#cbd5e1; text-align:left;">Bu işlem, ligden ayrılan oyuncunun fikstürünü ve şu ana kadar olan yerini yeni oyuncuya devreder. K-KOR matematiği korunur.</p><div style="background:#1e293b; padding:10px; border-radius:6px; margin-bottom:15px; text-align:left;"><strong style="font-size:11px; color:var(--danger);">Çıkan Oyuncu:</strong><br><span id="subOutName" style="font-weight:bold; font-size:14px;">-</span></div><div style="text-align:left;"><strong style="font-size:11px; color:var(--success);">Yerine Girecek Yeni Oyuncu:</strong><br><select id="subInSelect" class="auth-select force-upper" style="margin-top:5px; margin-bottom:0;"><option value="">SEÇİNİZ...</option></select></div><button class="modal-btn" onclick="executeSubstitution()">Transferi Gerçekleştir</button></div></div>
 
@@ -103,6 +147,70 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;} th,td
 </div>
 
 <script>
+    /* =========================================
+   UX BİLDİRİM VE MODAL MOTORU
+========================================= */
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    let icon = 'ℹ️';
+    if(type === 'success') icon = '✅';
+    else if(type === 'error') icon = '❌';
+    else if(type === 'warning') icon = '⚠️';
+
+    toast.innerHTML = `<span>${icon}</span><span style="flex:1; text-align:left;">${message}</span>`;
+    container.appendChild(toast);
+
+    // 3.5 Saniye sonra animasyonla kaybolur
+    setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.3s forwards';
+        setTimeout(() => toast.remove(), 300);
+    }, 3500);
+}
+
+// 1. Confirm (Onay) Yapısı
+let confirmCallback = null;
+function showCustomConfirm(title, message, callback, isDanger = false) {
+    document.getElementById('confirmTitle').innerHTML = title;
+    document.getElementById('confirmMessage').innerHTML = message;
+    const yesBtn = document.getElementById('confirmYesBtn');
+    yesBtn.className = isDanger ? 'dialog-btn danger' : 'dialog-btn confirm';
+    confirmCallback = callback;
+    document.getElementById('customConfirmModal').style.display = 'flex';
+}
+function closeCustomConfirm() {
+    document.getElementById('customConfirmModal').style.display = 'none';
+    confirmCallback = null;
+}
+document.getElementById('confirmYesBtn').addEventListener('click', () => {
+    if(confirmCallback) confirmCallback();
+    closeCustomConfirm();
+});
+
+// 2. Prompt (Veri Girişi) Yapısı
+let promptCallback = null;
+function showCustomPrompt(title, message, isPassword, callback) {
+    document.getElementById('promptTitle').innerText = title;
+    document.getElementById('promptMessage').innerHTML = message;
+    const input = document.getElementById('promptInput');
+    input.type = isPassword ? 'password' : 'text';
+    input.value = '';
+    promptCallback = callback;
+    document.getElementById('customPromptModal').style.display = 'flex';
+    input.focus();
+}
+function closeCustomPrompt() {
+    document.getElementById('customPromptModal').style.display = 'none';
+    promptCallback = null;
+}
+document.getElementById('promptSubmitBtn').addEventListener('click', () => {
+    const val = document.getElementById('promptInput').value.trim();
+    if(promptCallback) promptCallback(val);
+    closeCustomPrompt();
+});
+/* ========================================= */
     const sliderTexts = { fh: ["","Topu fileden geçirmekte zorlanıyorum. Forehand vuruşum temel seviyede bile çok dengesiz.","Sadece çok yavaş ve rahat toplarda karşıya atabiliyorum. Yön ve derinlik kontrolüm yok.","Yavaş tempoda kısa ralli yapabiliyorum ama hata oranım yüksek.","Orta tempoda forehand kullanabiliyorum; ancak baskı altında topu kısa bırakıyor veya dışarı atıyorum.","Standart rallilerde forehand tarafım güvenilir. Çapraz ve ortaya kontrollü oynayabiliyorum.","Spin, derinlik ve yönlendirme yapabiliyorum; fakat hız artırınca hata oranım yükseliyor.","Forehand belirgin güçlü yönüm. Açı, tempo ve derinlikle rakibi baskılayabiliyorum.","Forehand ile güçlü winner'lar alabiliyor, inside-out veya paralel gibi bitirici vuruşlar yapabiliyorum.","Baskı altında bile forehand ile oyunu yönlendirebiliyorum. Savunmadan hücuma geçişte etkiliyim.","Forehand maç kazandıran ana silahım. Yüksek tempoda, derin, yönlü ve düşük hata oranıyla oynuyorum."], bh: ["","Backhand ile topu oyuna sokmakta ciddi zorlanıyorum. Genelde bu vuruştan kaçıyorum.","Sadece çok rahat toplarda karşıya atabiliyorum; kontrolüm zayıf.","Yavaş tempoda backhand rallisi yapabiliyorum ama yönlendirme ve derinlik yok.","Backhand tarafıma oynanınca çoğunlukla savunmada kalıyorum. Hata riskim yüksek.","Standart tempoda backhand tarafım güvenilir. Topu oyunda tutabiliyorum.","Backhand ile çapraz, ortaya ve zaman zaman paralel oynayabiliyorum. Slice veya spin kullanabiliyorum.","Backhand zayıf yön olmaktan çıktı. Rallide denge sağlayıp rakibi geride tutabiliyorum.","Backhand ile baskı kurabiliyor, yön değiştirebiliyor ve uygun toplarda winner deneyebiliyorum.","Baskı altında backhand ile hem savunma hem hücum üretebiliyorum. Paralel değişimler güvenilir.","Backhand üst düzey silahtır. Hızlı toplarda, zor pozisyonlarda ve kritik puanlarda istikrarlıdır."], sv: ["","Servisi oyuna sokmakta zorlanıyorum. Çift hata çok yüksek.","Servisi bazen oyuna sokabiliyorum ama güç, yön ve güven yok.","İkinci servisle oyuna başlayabiliyorum; birinci servis çoğunlukla riskli.","Servis genelde oyuna giriyor ama rakibe kolay hücum fırsatı veriyor.","Servisim güvenilir. Çok etkili olmasa da oyuna düzenli başlayabiliyorum.","Birinci serviste yön deniyorum; ikinci servis daha güvenli. Çift hata oranım makul.","Servisle avantaj kurabiliyorum. Zayıf return aldırıp puana önde başlayabiliyorum.","Birinci servis güçlü ve yönlü. İkinci servis de güvenilir. Servis oyunlarında belirgin avantaj sağlıyorum.","Servis oyunlarımı çoğunlukla kontrol ediyorum. Kick, slice, düz servis gibi varyasyon kullanabiliyorum.","Servis maç kazandıran ana silahlarımdan biri. Kolay puan, zayıf return ve oyun kontrolü sağlıyor."], rt: ["","Returnlerde topu karşıya geçirmekte zorlanıyorum.","Sadece yavaş servisleri karşılayabiliyorum; yönlendirme yok.","Zayıf servislerde topu oyuna sokabiliyorum ama hata oranım yüksek.","Standart servisleri karşılayabiliyorum; fakat güçlü servislerde zorlanıyorum.","Return ile ralliyi başlatabiliyorum. Genelde güvenli bölgeye dönüyorum.","Returnlerde çapraz, ortaya veya derine bilinçli dönüş yapabiliyorum.","Zayıf ikinci servisleri cezalandırabiliyorum. Return ile puana dengeli başlayabiliyorum.","Return ile doğrudan baskı kurabiliyorum. Kısa servisleri hücum fırsatına çevirebiliyorum.","Rakibin servis yönünü, hızını ve alışkanlıklarını okuyabiliyorum. Return pozisyonumu buna göre ayarlıyorum.","Return oyunum seviye belirleyen güçlü yönüm. Rakibin servis oyununu sürekli tehdit ediyorum."], ok: ["","2-3 vuruşluk ralliyi sürdürmekte zorlanıyorum.","Yavaş toplarda kısa ralli yapabiliyorum ama hata çok fazla.","Topu oyunda tutmaya çalışıyorum; yönlendirme becerim sınırlı.","Orta tempoda ralli sürdürebiliyorum ama derinlik ve yerleşim zayıf.","Ralliyi sürdürebiliyor, topu genelde güvenli bölgelere atabiliyorum.","Rakibi sağa-sola oynatabiliyor, derinlik ve tempo değiştirmeye başlayabiliyorum.","Puanı bilinçli kuruyorum. Rakibin zayıf tarafına oynayıp avantaj yaratabiliyorum.","Tempo, spin, açı ve derinlik değiştirerek oyunu yönlendirebiliyorum.","Rallide kontrol çoğunlukla bende. Savunma-hücum geçişlerini bilinçli yapıyorum.","Oyunun ritmini ben belirliyorum. Rakibi sürekli dengesiz pozisyona sokacak planlı ralliler kuruyorum."], tk: ["","Maç içinde planım yok. Sadece topu karşıya atmaya çalışıyorum.","Rakibin güçlü ve zayıf yönlerini fark etmekte zorlanıyorum.","Rakibin zayıf tarafını bazen görüyorum ama uygulamakta zorlanıyorum.","Basit taktikler kullanabiliyorum: backhand'e oynama, topu derin tutma gibi.","Maç içinde neyin işe yaradığını anlayıp aynı planı sürdürmeye çalışıyorum.","Rakibin temposuna, zayıf yönüne veya hareket kabiliyetine göre oyunumu kısmen değiştiriyorum.","Rakibe göre servis yönü, ralli yönü, tempo ve risk seviyemi ayarlayabiliyorum.","Plan A çalışmazsa plan B'ye geçebiliyorum. Güçlü yönlerimi bilinçli kullanıyorum.","Rakibin alışkanlıklarını okuyabiliyor, kritik puanlarda özel taktik uygulayabiliyorum.","Maçı stratejik olarak yönetiyorum. Rakibin oyun stiline göre tempo, spin, derinlik, file oyunu ve risk seviyesini sürekli ayarlıyorum."], wn: ["","Winner üretmekte zorlanıyorum. Puanları genelde rakibin hatasıyla kazanıyorum.","Çok kolay toplarda bile bitirici vuruşta hata yapma ihtimalim yüksek.","Uygun toplarda winner deniyorum ama başarı oranım düşük.","Kısa topları bazen bitirebiliyorum; seçicilik ve zamanlama eksik.","Açık kort bulduğumda winner alabiliyorum ama risk-hata dengesi ortalama.","Forehand veya backhand tarafında belirli pozisyonlardan winner üretebiliyorum.","Kısa top, zayıf servis veya açık kortu düzenli cezalandırabiliyorum.","Güçlü winner'lar alabiliyor, puanı bitirme konusunda keskin oyunlar sergileyebiliyorum.","Winner seçiciliğim yüksek. Gereksiz risk almadan doğru anda bitiriyorum.","Bitiricilik önemli silahım. Winner tehdidim rakibin oyun planını değiştiriyor."], vl: ["","Fileye gelmekten kaçınıyorum. Vole tekniğim çok zayıf.","Çok kolay toplarda vole yapabiliyorum ama kontrolsüz.","Basit voleleri karşıya atabiliyorum; yön ve derinlik zayıf.","Fileye geldiğimde bazen puanı bitirebiliyorum ama pozisyon alma sorunum var.","Standart volelerde güvenilirim. Kolay topları bitirebiliyorum.","Forehand ve backhand volede yönlendirme yapabiliyorum. Yaklaşma vuruşundan sonra fileye gelebiliyorum.","Filede özgüvenliyim. Açılı vole, derin vole ve kısa vole seçeneklerini kullanabiliyorum.","Fileye bilinçli çıkıyorum. Voleyle puanı bitirme oranım yüksek.","Hızlı değişimlerde, refleks volelerde ve baskı altında etkiliyim.","File oyunum üst düzey. Servis-vole, yaklaşma-vole ve çiftlerde file hakimiyetim güçlü."] };
     function updateSlider(cat) { let val = document.getElementById('sl_' + cat).value; document.getElementById('val_' + cat).innerText = val; document.getElementById('desc_' + cat).innerText = sliderTexts[cat][val]; }
     function updatePlayoffInfo(val, elId) { let el = document.getElementById(elId); if(!el) return; if(val === '23') el.innerText = "🧍 BUTİK LİG (12-23 Kişi): İlk 2 Seribaşı, İkinci 2 Play-Off, Sonraki 4 Play-In oynar."; else if(val === '47') el.innerText = "🧍‍♂️ STANDART LİG (24-47 Kişi): İlk 4 Seribaşı, İkinci 4 Play-Off, Sonraki 8 Play-In oynar."; else if(val === '96') el.innerText = "🏟️ BÜYÜK LİG (48-96 Kişi): İlk 8 Seribaşı, İkinci 8 Play-Off, Sonraki 16 Play-In oynar."; }
@@ -765,37 +873,37 @@ function submitScore(mId, isP2, btn) {
         let t1 = document.getElementById(`m_${mId}_t_s1`).value; let b1 = document.getElementById(`m_${mId}_b_s1`).value; let t2 = document.getElementById(`m_${mId}_t_s2`).value; let b2 = document.getElementById(`m_${mId}_b_s2`).value;
         if((fmt === '6_GAME' && t1 === '6' && b1 === '6') || (fmt === '4_GAME' && t1 === '4' && b1 === '4')) { return alert("HATA: Setler berabere bitemez. Lütfen skoru düzeltin veya Tie-Break sonucunu işleyin (Örn: 7-6)."); }
         if((fmt === '6_GAME' && t2 === '6' && b2 === '6') || (fmt === '4_GAME' && t2 === '4' && b2 === '4')) { return alert("HATA: Setler berabere bitemez. Lütfen 2. set skorunu düzeltin."); }
+        
         let checkSet = (t, b) => { if(t==='' || b==='') return null; let nt = parseInt(t), nb = parseInt(b); if(fmt === '4_GAME') { if ((nt===4 && nb<=2)||(nb===4 && nt<=2)) return nt>nb?'T':'B'; if ((nt===5 && nb===3)||(nb===5 && nt===3)) return nt>nb?'T':'B'; if ((nt===5 && nb===4)||(nb===5 && nt===4)) return nt>nb?'T':'B'; } else { if ((nt===6 && nb<=4)||(nb===6 && nt<=4)) return nt>nb?'T':'B'; if ((nt===7 && nb===5)||(nb===7 && nt===5)) return nt>nb?'T':'B'; if ((nt===7 && nb===6)||(nb===7 && nt===6)) return nt>nb?'T':'B'; } return null; };
         let w1 = checkSet(t1, b1); if(!w1) return alert(`HATA: 1. Set skoru ${fmt==='4_GAME'?"4'lük formata uygun değil! (Örn: 4-2, 5-3, 5-4)":"6'lık formata uygun değil! (Örn: 6-4, 7-5, 7-6)"}`);
         let w2 = checkSet(t2, b2); if(!w2) return alert(`HATA: 2. Set skoru tenisin kurallarına uygun değil!`);
         
-        // DÜZELTME 2: Tie-Break Kontrolü - Format değişkenine göre dinamik limit
-        let tbCheck = (t, b, format) => { 
+        // DÜZELTME 2: Tie-Break Kontrolü - 4'lük ve 6'lık setler için standart 7'li sistem.
+        let tbCheck = (t, b) => { 
             if(t==='' || b==='') return "boş"; 
             let nt = parseInt(t), nb = parseInt(b); 
             let max = Math.max(nt, nb), min = Math.min(nt, nb); 
-            let target = format === '4_GAME' ? 5 : 7; // Kısa setlerde Tie-Break hedefini 5'e çektik
             
-            if(max < target) return "hata"; 
-            if(max === target && (format === '4_GAME' ? min <= 4 : min <= 5)) return "ok"; // 5-4 veya 7-5 kabulü
-            if(max > target && (max - min) === 2) return "ok"; 
+            if(max < 7) return "hata"; 
+            if(max === 7 && min <= 5) return "ok"; 
+            if(max > 7 && (max - min) === 2) return "ok"; 
             return "hata"; 
         };
         
         if((fmt==='6_GAME' && ((t1==='7'&&b1==='6')||(b1==='7'&&t1==='6'))) || (fmt==='4_GAME' && ((t1==='5'&&b1==='4')||(b1==='5'&&t1==='4')))) { 
             let tbT = document.getElementById(`m_${mId}_t_s1tb`).value; let tbB = document.getElementById(`m_${mId}_b_s1tb`).value; 
-            let res = tbCheck(tbT, tbB, fmt); // formata göre gönderildi
+            let res = tbCheck(tbT, tbB); 
             if(res==='boş') return alert("HATA: 1. Set Tie-Break skorunu girmediniz!"); 
-            if(res==='hata') return alert(`HATA: 1. Set Tie-Break skoru kuraldışı (Örn: ${fmt === '4_GAME' ? '5-3, 5-4, 6-4' : '7-5, 8-6, 12-10'}).`); 
+            if(res==='hata') return alert(`HATA: 1. Set Tie-Break skoru kuraldışı (Örn: 7-5, 8-6, 12-10).`); 
             let winSet = parseInt(t1) > parseInt(b1) ? 'T' : 'B'; let winTb = parseInt(tbT) > parseInt(tbB) ? 'T' : 'B'; 
             if (winSet !== winTb) return alert("HATA: 1. Set skorunda kazanan taraf ile Tie-Break skorunda kazanan taraf eşleşmiyor! Lütfen girişleri kontrol edin."); 
         }
         
         if((fmt==='6_GAME' && ((t2==='7'&&b2==='6')||(b2==='7'&&t2==='6'))) || (fmt==='4_GAME' && ((t2==='5'&&b2==='4')||(b2==='5'&&t2==='4')))) { 
             let tbT = document.getElementById(`m_${mId}_t_s2tb`).value; let tbB = document.getElementById(`m_${mId}_b_s2tb`).value; 
-            let res = tbCheck(tbT, tbB, fmt); // formata göre gönderildi
+            let res = tbCheck(tbT, tbB); 
             if(res==='boş') return alert("HATA: 2. Set Tie-Break skorunu girmediniz!"); 
-            if(res==='hata') return alert(`HATA: 2. Set Tie-Break skoru kuraldışı (Örn: ${fmt === '4_GAME' ? '5-3, 5-4, 6-4' : '7-5, 8-6, 12-10'}).`); 
+            if(res==='hata') return alert(`HATA: 2. Set Tie-Break skoru kuraldışı (Örn: 7-5, 8-6, 12-10).`); 
             let winSet = parseInt(t2) > parseInt(b2) ? 'T' : 'B'; let winTb = parseInt(tbT) > parseInt(tbB) ? 'T' : 'B'; 
             if (winSet !== winTb) return alert("HATA: 2. Set skorunda kazanan taraf ile Tie-Break skorunda kazanan taraf eşleşmiyor! Lütfen girişleri kontrol edin."); 
         }
