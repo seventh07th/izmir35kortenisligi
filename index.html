@@ -130,7 +130,6 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;} th,td
         </div>
         <div class="auth-card" id="adminLoginPanel"><h3 style="margin-top:0; color:var(--danger)">Yönetici Girişi</h3><input type="password" id="adminPassword" class="auth-input" placeholder="Yönetici Şifresi"><button class="auth-btn" style="background:var(--danger); color:white;" onclick="loginAdmin()">GİRİŞ YAP</button><p class="switch-link" onclick="toggleAuth('loginPanel')">Oyuncu Girişine Dön</p></div>
     </div>
-
     <div id="mainApp">
         <div id="adminTopBar"><span style="color:var(--warning); font-size:13px; font-weight:bold; margin-right:5px;">⚙️ KONTROL MERKEZİ:</span><select id="adminLeagueSelect" class="auth-input force-upper" style="width:auto; margin:0; padding:6px; font-size:13px; display:inline-block;" onchange="adminSwitchLeague()"><option value="new_pending">➕ YENİ TURNUVA (KAYDA AÇ)</option></select><button class="action-sm" style="background:var(--danger); padding:6px 12px; display:none;" id="deleteLeagueBtn" onclick="deleteCurrentTournament()">🗑️ LİGİ SİL</button></div>
         <div class="tabs" id="tabsContainer" style="display:none;"><button class="tab-btn" id="tabProfileBtn" onclick="switchTab('profile')">👤 Profil</button><button class="tab-btn" id="tabTournamentsBtn" onclick="switchTab('tournaments')">🎾 Turnuvalar</button><button class="tab-btn" id="tabRulesBtn" onclick="switchTab('rules')">📜 Sistem Rehberi</button><button class="tab-btn active" id="tabStandingsBtn" onclick="switchTab('standings')">🏆 Genel Sıralama</button><button class="tab-btn" id="tabRivalsBtn" onclick="switchTab('rivals')">Fikstür</button><button class="tab-btn" id="tabMatchesBtn" onclick="switchTab('matches')">Skor Gir</button><button class="tab-btn" id="tabTreeBtn" onclick="switchTab('tree')">Turnuva Ağacı</button></div>
@@ -227,9 +226,24 @@ document.getElementById('promptSubmitBtn').addEventListener('click', () => {
     function updateSlider(cat) { let val = document.getElementById('sl_' + cat).value; document.getElementById('val_' + cat).innerText = val; document.getElementById('desc_' + cat).innerText = sliderTexts[cat][val]; }
     function updatePlayoffInfo(val, elId) { let el = document.getElementById(elId); if(!el) return; if(val === '23') el.innerText = "🧍 BUTİK LİG (12-23 Kişi): İlk 2 Seribaşı, İkinci 2 Play-Off, Sonraki 4 Play-In oynar."; else if(val === '47') el.innerText = "🧍‍♂️ STANDART LİG (24-47 Kişi): İlk 4 Seribaşı, İkinci 4 Play-Off, Sonraki 8 Play-In oynar."; else if(val === '96') el.innerText = "🏟️ BÜYÜK LİG (48-96 Kişi): İlk 8 Seribaşı, İkinci 8 Play-Off, Sonraki 16 Play-In oynar."; }
 
-    const firebaseConfig = { databaseURL: "https://device-streaming-c489eab4-default-rtdb.europe-west1.firebasedatabase.app/" };
-    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-    const database = firebase.database();
+    // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyApCz945HTBQ_BP8jG0TPpPmLgNoqNhV9k",
+  authDomain: "device-streaming-c489eab4.firebaseapp.com",
+  databaseURL: "https://device-streaming-c489eab4-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "device-streaming-c489eab4",
+  storageBucket: "device-streaming-c489eab4.firebasestorage.app",
+  messagingSenderId: "627974243795",
+  appId: "1:627974243795:web:3f38fdf50b5ab8e3ac1b26"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
     let globalUsers = {}; let allTourneys = {}; let currentTid = null; let isAdmin = false; let loggedInUser = null; 
     let players = []; let matches = []; let currentSettings = null; let passwordResets = {}; let systemAdminPassword = "admin35";
