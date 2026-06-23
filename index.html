@@ -1176,7 +1176,7 @@ function submitScore(mId, isP2, btn) {
         m.p1S1TB = ''; m.p2S1TB = ''; m.p1S2TB = ''; m.p2S2TB = ''; 
         m.p1MT = ''; m.p2MT = '';
     } 
-    else {
+   else {
         m.isWO = false; 
         let fmt = document.getElementById(`m_${mId}_fmt`).value; 
         m.matchFormat = fmt;
@@ -1186,7 +1186,70 @@ function submitScore(mId, isP2, btn) {
         let t2 = document.getElementById(`m_${mId}_t_s2`).value; 
         let b2 = document.getElementById(`m_${mId}_b_s2`).value;
         
-        // ... (Buradaki tüm set ve tie-break validation / alert kontrolleri aynen kalıyor) ...
+        if (t1 === '' || b1 === '' || t2 === '' || b2 === '') {
+            return alert("HATA: Lütfen 1. ve 2. Set skorlarını eksiksiz giriniz!");
+        }
+
+        if((fmt === '6_GAME' && t1 === '6' && b1 === '6') || (fmt === '4_GAME' && t1 === '4' && b1 === '4')) { 
+            return alert("HATA: Setler berabere bitemez. Lütfen skoru düzeltin veya Tie-Break sonucunu işleyin (Örn: 7-6)."); 
+        }
+        if((fmt === '6_GAME' && t2 === '6' && b2 === '6') || (fmt === '4_GAME' && t2 === '4' && b2 === '4')) { 
+            return alert("HATA: Setler berabere bitemez. Lütfen 2. set skorunu düzeltin."); 
+        }
+        
+        let checkSet = (t, b) => { 
+            if(t==='' || b==='') return null; 
+            let nt = parseInt(t), nb = parseInt(b); 
+            if(fmt === '4_GAME') { 
+                if ((nt===4 && nb<=2)||(nb===4 && nt<=2)) return nt>nb?'T':'B'; 
+                if ((nt===5 && nb===3)||(nb===5 && nt===3)) return nt>nb?'T':'B'; 
+                if ((nt===5 && nb===4)||(nb===5 && nt===4)) return nt>nb?'T':'B'; 
+            } else { 
+                if ((nt===6 && nb<=4)||(nb===6 && nt<=4)) return nt>nb?'T':'B'; 
+                if ((nt===7 && nb===5)||(nb===7 && nt===5)) return nt>nb?'T':'B'; 
+                if ((nt===7 && nb===6)||(nb===7 && nt===6)) return nt>nb?'T':'B'; 
+            } 
+            return null; 
+        };
+        
+        let w1 = checkSet(t1, b1); if(!w1) return alert(`HATA: 1. Set skoru format kurallarına uygun değil!`);
+        let w2 = checkSet(t2, b2); if(!w2) return alert(`HATA: 2. Set skoru tenisin kurallarına uygun değil!`);
+        
+        let tbCheck = (t, b) => { 
+            if(t==='' || b==='') return "boş"; 
+            let nt = parseInt(t), nb = parseInt(b); 
+            let max = Math.max(nt, nb), min = Math.min(nt, nb); 
+            if(max < 7) return "hata"; 
+            if(max === 7 && min <= 5) return "ok"; 
+            if(max > 7 && (max - min) === 2) return "ok"; 
+            return "hata"; 
+        };
+        
+        if((fmt==='6_GAME' && ((t1==='7'&&b1==='6')||(b1==='7'&&t1==='6'))) || (fmt==='4_GAME' && ((t1==='5'&&b1==='4')||(b1==='5'&&t1==='4')))) { 
+            let tbT = document.getElementById(`m_${mId}_t_s1tb`).value; let tbB = document.getElementById(`m_${mId}_b_s1tb`).value; 
+            let res = tbCheck(tbT, tbB); 
+            if(res==='boş') return alert("HATA: 1. Set Tie-Break skorunu girmediniz!"); 
+            if(res==='hata') return alert(`HATA: 1. Set Tie-Break skoru kuraldışı.`); 
+            let winSet = parseInt(t1) > parseInt(b1) ? 'T' : 'B'; let winTb = parseInt(tbT) > parseInt(tbB) ? 'T' : 'B'; 
+            if (winSet !== winTb) return alert("HATA: 1. Set kazananı ile Tie-Break kazananı eşleşmiyor!"); 
+        }
+        
+        if((fmt==='6_GAME' && ((t2==='7'&&b2==='6')||(b2==='7'&&t2==='6'))) || (fmt==='4_GAME' && ((t2==='5'&&b2==='4')||(b2==='5'&&t2==='4')))) { 
+            let tbT = document.getElementById(`m_${mId}_t_s2tb`).value; let tbB = document.getElementById(`m_${mId}_b_s2tb`).value; 
+            let res = tbCheck(tbT, tbB); 
+            if(res==='boş') return alert("HATA: 2. Set Tie-Break skorunu girmediniz!"); 
+            if(res==='hata') return alert(`HATA: 2. Set Tie-Break skoru kuraldışı.`); 
+            let winSet = parseInt(t2) > parseInt(b2) ? 'T' : 'B'; let winTb = parseInt(tbT) > parseInt(tbB) ? 'T' : 'B'; 
+            if (winSet !== winTb) return alert("HATA: 2. Set kazananı ile Tie-Break kazananı eşleşmiyor!"); 
+        }
+        
+        if(w1 !== w2) { 
+            let mtT = document.getElementById(`m_${mId}_t_mt`).value; let mtB = document.getElementById(`m_${mId}_b_mt`).value; 
+            if(mtT==='' || mtB==='') return alert("HATA: Setler 1-1 olduğu için 10'luk Maç Tie-Break skoru girmelisiniz!"); 
+            let nt = parseInt(mtT), nb = parseInt(mtB); let max = Math.max(nt, nb), min = Math.min(nt, nb); 
+            if(max < 10) return alert("HATA: Maç Tie-Break skoru kuraldışı (En az 10'da biter)."); 
+            if(max === 10 && min <= 8) {} else if(max > 10 && (max - min) === 2) {} else return alert("HATA: Maç Tie-Break skoru kuraldışı."); 
+        }
 
         let getStr = (s) => { let el = document.getElementById(`m_${mId}_${s}`); return el ? el.value : ''; }; 
         m.p1S1 = isP2 ? getStr('b_s1') : getStr('t_s1'); 
@@ -1199,7 +1262,7 @@ function submitScore(mId, isP2, btn) {
         m.p2S1TB = isP2 ? getStr('t_s1tb') : getStr('b_s1tb'); 
         m.p1S2TB = isP2 ? getStr('b_s2tb') : getStr('t_s2tb'); 
         m.p2S2TB = isP2 ? getStr('t_s2tb') : getStr('b_s2tb');
-    } // <-- else bloğu kapandı
+    }
     
     // DOĞRU YER: Tüm doğrulamalar bittikten sonra işlem başlatılır
     btn.innerHTML = "⏳ İŞLENİYOR..."; 
