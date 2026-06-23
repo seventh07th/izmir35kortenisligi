@@ -242,7 +242,7 @@ if (!firebase.apps.length) {
 const database = firebase.database();
 
     let globalUsers = {}; let allTourneys = {}; let currentTid = null; let isAdmin = false; let loggedInUser = null; 
-    let players = []; let matches = []; let currentSettings = null; let passwordResets = {}; let systemAdminPassword = "admin35";
+    let players = []; let matches = []; let currentSettings = null; let passwordResets = {}; 
     let derivedGlobalStats = {}; let substituteOldUid = null;
 
     function _arr(obj) { if(!obj) return []; let arr = Array.isArray(obj) ? obj : Object.values(obj); return arr.filter(item => item !== null && item !== undefined); }
@@ -328,7 +328,7 @@ const database = firebase.database();
 
     function listenToCloud() {
         const errHandler = (error) => { console.error("Firebase Hatası:", error); document.getElementById('loginGlobalUserSelect').innerHTML = '<option value="">BAĞLANTI HATASI!</option>'; };
-        database.ref('the_35_gold_league/admin/password').on('value', (s) => { try { if(s.val()) systemAdminPassword = s.val(); } catch(e){} }, errHandler);
+        
         database.ref('the_35_gold_league/users').on('value', (s) => {
             try {
                 globalUsers = s.val() || {}; updateLoginDropdown(); buildGlobalStats(); 
@@ -489,7 +489,34 @@ function loginGlobalUser() {
     function closeWelcomeModal() { document.getElementById('welcomeModal').style.display = 'none'; database.ref('the_35_gold_league/users/' + loggedInUser.id + '/welcomed').set(true); loggedInUser.welcomed = true; switchTab('rules'); }
     function openPublicProfile(uid) { let u = globalUsers[uid]; if (!u) return alert("Oyuncu verisi bulunamadı."); let dStats = derivedGlobalStats[uid] || { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0, fame: 0, dynamicNTRP: u.sysScore }; document.getElementById('pubName').innerText = u.name || 'BİLİNMİYOR'; document.getElementById('pubTier').innerText = `${u.tier || 'BELİRSİZ'} (${dStats.dynamicNTRP})`; document.getElementById('pubGender').innerText = u.gender || '-'; document.getElementById('pubStyle').innerText = (u.hand && u.backhand) ? (u.hand + " / " + u.backhand + " BH") : "BELİRTİLMEDİ"; document.getElementById('pubKKor').innerText = (dStats.k_kor || 0).toFixed(1); document.getElementById('pubFame').innerText = (dStats.fame || 0); document.getElementById('pubWinLoss').innerText = `${dStats.gWins || 0}G - ${dStats.gLoss || 0}M`; document.getElementById('pubAvail').innerText = (u.availability && u.availability.length) ? u.availability.map(a=>a.toLocaleUpperCase('tr-TR')).join(", ") : "BELİRTİLMEDİ"; document.getElementById('publicProfileModal').style.display = 'flex'; }
     function closePublicProfile() { document.getElementById('publicProfileModal').style.display = 'none'; }
-    function loginAdmin() { if(document.getElementById('adminPassword').value === systemAdminPassword) { isAdmin = true; loggedInUser = {id:'ADMIN',name:'YÖNETİCİ'}; localStorage.setItem('korTennisUserId', 'ADMIN'); enterApp(); } else { alert("❌ Hatalı şifre!"); } }
+   function loginAdmin() { 
+    // Sabit admin e-postanız (Firebase'de oluşturduğunuz adres)
+    const ADMIN_EMAIL = "admin@kortenisligi.com"; 
+    let pass = document.getElementById('adminPassword').value; 
+    
+    if(!pass) return showToast("Lütfen yönetici şifresini girin.", "warning");
+
+    let btn = document.querySelector('#adminLoginPanel .auth-btn');
+    btn.innerHTML = "⏳ GİRİŞ YAPILIYOR...";
+    btn.disabled = true;
+
+    // Firebase Auth ile güvenli giriş
+    firebase.auth().signInWithEmailAndPassword(ADMIN_EMAIL, pass)
+    .then((userCredential) => {
+        isAdmin = true; 
+        loggedInUser = { id: 'ADMIN', name: 'YÖNETİCİ' }; 
+        localStorage.setItem('korTennisUserId', 'ADMIN'); 
+        enterApp();
+        btn.innerHTML = "GİRİŞ YAP";
+        btn.disabled = false;
+    })
+    .catch((error) => {
+        console.error(error);
+        showToast("Hatalı yönetici şifresi!", "error");
+        btn.innerHTML = "GİRİŞ YAP";
+        btn.disabled = false;
+    });
+}
     function changeOwnPassword() { let oldP = prompt("Mevcut şifrenizi girin:"); if(oldP !== loggedInUser.password) return alert("Hatalı şifre girdiniz!"); let newP = prompt("Yeni şifrenizi belirleyin:"); if(!newP) return; database.ref('the_35_gold_league/users/' + loggedInUser.id + '/password').set(newP).then(() => { loggedInUser.password = newP; alert("Şifreniz başarıyla değiştirildi!"); }); }
     function changeAdminPassword() { let oldP = prompt("Mevcut yönetici şifresini girin:"); if(oldP !== systemAdminPassword) return alert("Hatalı şifre!"); let newP = prompt("Yeni Yönetici Şifresini Belirleyin:"); if(!newP) return; database.ref('the_35_gold_league/admin/password').set(newP).then(() => { systemAdminPassword = newP; alert("Yönetici şifresi güncellendi!"); }); }
     function logoutSession() { localStorage.removeItem('korTennisUserId'); location.reload(); }
