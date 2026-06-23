@@ -307,7 +307,11 @@ document.getElementById('promptSubmitBtn').addEventListener('click', () => {
             
             derivedGlobalStats[u.id].dynamicNTRP = finalNtrp.toFixed(2);
             derivedGlobalStats[u.id].dynamicTier = dynamicTier; // Dinamik atama
-        });
+        }); // KAZA SONUCU SİLİNEN KAPANIŞ PARANTEZİ EKLENDİ
+
+        let activePanel = document.querySelector('.panel.active'); if(activePanel) { if(activePanel.id === 'profile') renderProfile(); if(activePanel.id === 'standings' && currentTid === null) renderGlobalStandings(); }
+    }
+
 
 
     function listenToCloud() {
@@ -394,20 +398,39 @@ function loginGlobalUser() {
     }
     function openAdminGlobalNotifs() { document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tabsContainer').style.display = 'none'; document.getElementById('deleteLeagueBtn').style.display = 'none'; document.getElementById('adminLeagueSelect').value = 'notifs'; document.getElementById('admin_notifs').classList.add('active'); renderAdminNotifs(); }
     function openAdminGlobalTournaments() { document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tabsContainer').style.display = 'none'; document.getElementById('deleteLeagueBtn').style.display = 'none'; document.getElementById('adminLeagueSelect').value = 'tournaments'; document.getElementById('tournaments').classList.add('active'); renderTournamentsList(); }
-
     function renderProfile() {
         if(!loggedInUser || isAdmin) return; let dStats = derivedGlobalStats[loggedInUser.id] || { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0, fame: loggedInUser.fame, dynamicNTRP: loggedInUser.sysScore };
-        document.getElementById('profName').innerText = loggedInUser.name; document.getElementById('profTier').innerText = `${loggedInUser.tier || 'BELİRSİZ'} (${dStats.dynamicNTRP})`; document.getElementById('profStyle').innerText = (loggedInUser.hand && loggedInUser.backhand) ? (loggedInUser.hand + " / " + loggedInUser.backhand + " BH") : "STİL BELİRTİLMEDİ";
+        document.getElementById('profName').innerText = loggedInUser.name; 
+        
+        // PROFIL EKRANINA DA RENKLI ROZET EKLENDI
+        let dynTier = dStats.dynamicTier || loggedInUser.tier || 'BELİRSİZ';
+        document.getElementById('profTier').innerHTML = getTierBadgeHtml(dynTier, dStats.dynamicNTRP); 
+        
+        document.getElementById('profStyle').innerText = (loggedInUser.hand && loggedInUser.backhand) ? (loggedInUser.hand + " / " + loggedInUser.backhand + " BH") : "STİL BELİRTİLMEDİ";
         document.getElementById('profKKor').innerText = (dStats.k_kor || 0).toFixed(1); document.getElementById('profFame').innerText = (dStats.fame || 0); document.getElementById('profWinLoss').innerText = `${dStats.gWins || 0}G - ${dStats.gLoss || 0}M`; document.getElementById('profTournaments').innerText = `Oynadığı Toplam Maç: ${dStats.gMatch || 0}`; document.getElementById('profAvail').innerText = loggedInUser.availability ? loggedInUser.availability.map(a=>a.toLocaleUpperCase('tr-TR')).join(', ') : "Belirtilmedi";
         let notifHtml = '';
         if(loggedInUser.alerts) { Object.keys(loggedInUser.alerts).forEach(alertKey => { let alertObj = loggedInUser.alerts[alertKey]; notifHtml += `<div class="notification-card" style="border-color:var(--success); background:rgba(0,255,170,0.1); margin-bottom:10px;"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><span style="flex:1;">${alertObj.text}</span><button class="action-sm" style="background:transparent; color:var(--text-color); font-size:16px; margin:0; padding:0 5px;" onclick="dismissAlert('${alertKey}')">✖</button></div></div>`; }); }
+        
         let myPendingScore = [];
-        Object.keys(allTourneys).forEach(tid => { let t = allTourneys[tid]; if(!t || !t.settings || t.settings.status !== 'active' || !t.matches) return; _arr(t.matches).forEach(m => { if (m.p1 !== loggedInUser.id && m.p2 !== loggedInUser.id) return;if (m.played && m.pending && m.enteredBy !== loggedInUser.id) { 
-        myPendingScore.push(`<span class="player-link" onclick="switchTab('matches')" style="display:block; padding-top:4px;"><strong>[${t.settings.customName || "Turnuva"}]</strong> ${m.p1Name} vs ${m.p2Name} maçınızın skor onayı için buraya tıklayın.</span>`); 
-    }
-        if (myPendingScore.length > 0) { myPendingScore.forEach(n => notifHtml += `<div class="notification-card" style="margin-bottom:10px;">🚨 <strong>SKOR ONAYI BEKLİYOR:</strong> ${n} maçı skor onayınızı bekliyor! Lütfen 'Skor Gir' sekmesinden işlemi tamamlayın.</div>`); } else if (!loggedInUser.alerts) { notifHtml += `<div style="text-align:center; color:var(--sub-text); font-size:11px; margin-top:20px;">Bekleyen bir eyleminiz bulunmuyor.</div>`; }
+        Object.keys(allTourneys).forEach(tid => { 
+            let t = allTourneys[tid]; 
+            if(!t || !t.settings || t.settings.status !== 'active' || !t.matches) return; 
+            _arr(t.matches).forEach(m => { 
+                if (m.p1 !== loggedInUser.id && m.p2 !== loggedInUser.id) return;
+                if (m.played && m.pending && m.enteredBy !== loggedInUser.id) { 
+                    myPendingScore.push(`<span class="player-link" onclick="switchTab('matches')" style="display:block; padding-top:4px;"><strong>[${t.settings.customName || "Turnuva"}]</strong> ${m.p1Name} vs ${m.p2Name} maçınızın skor onayı için buraya tıklayın.</span>`); 
+                }
+            }); // KAZA SONUCU SİLİNEN KAPANIŞ PARANTEZİ EKLENDİ
+        }); // KAZA SONUCU SİLİNEN KAPANIŞ PARANTEZİ EKLENDİ
+
+        if (myPendingScore.length > 0) { 
+            myPendingScore.forEach(n => notifHtml += `<div class="notification-card" style="margin-bottom:10px;">🚨 <strong>SKOR ONAYI BEKLİYOR:</strong> ${n} Lütfen 'Skor Gir' sekmesinden işlemi tamamlayın.</div>`); 
+        } else if (!loggedInUser.alerts) { 
+            notifHtml += `<div style="text-align:center; color:var(--sub-text); font-size:11px; margin-top:20px;">Bekleyen bir eyleminiz bulunmuyor.</div>`; 
+        }
         document.getElementById('profNotificationsContainer').innerHTML = notifHtml;
     }
+
 
     function renderAdminNotifs() {
         if(!isAdmin) return;
