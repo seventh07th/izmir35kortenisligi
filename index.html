@@ -519,24 +519,25 @@ function loginGlobalUser() {
     });
 }
     
-    function changeAdminPassword() { 
+function changeAdminPassword() { 
     if(!isAdmin || !firebase.auth().currentUser) return alert("Yetkisiz işlem!");
     
     let newP = prompt("Yeni Yönetici Şifresini Belirleyin (En az 6 karakter):"); 
     if(!newP || newP.length < 6) return alert("İşlem iptal edildi veya şifre çok kısa (En az 6 karakter olmalı).");
 
-    btn = document.activeElement; // Tıklanan butonu yakala
+    // CRITICAL FIX: const eklendi, global sızıntı engellendi
+    const btn = document.activeElement; 
     let originalText = btn.innerText;
     btn.innerText = "⏳ GÜNCELLENİYOR...";
 
     firebase.auth().currentUser.updatePassword(newP)
     .then(() => { 
-        alert("Yönetici şifresi Firebase sisteminde başarıyla güncellendi!"); 
+        showToast("Yönetici şifresi Firebase sisteminde başarıyla güncellendi!", "success"); 
         btn.innerText = originalText;
     })
     .catch((error) => {
         console.error(error);
-        alert("Hata: " + error.message + "\n\n(Not: Güvenlik gereği şifre değiştirmeden hemen önce sisteme taze giriş yapmış olmanız gerekir. Çıkış yapıp tekrar girerek deneyin.)");
+        alert("Hata: " + error.message + "\n\nGüvenlik gereği taze giriş yapmanız gerekir. Çıkış yapıp tekrar girin.");
         btn.innerText = originalText;
     }); 
 }
