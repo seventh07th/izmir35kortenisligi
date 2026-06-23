@@ -518,7 +518,7 @@ function loginGlobalUser() {
         btn.disabled = false;
     });
 }
-    function changeOwnPassword() { let oldP = prompt("Mevcut şifrenizi girin:"); if(oldP !== loggedInUser.password) return alert("Hatalı şifre girdiniz!"); let newP = prompt("Yeni şifrenizi belirleyin:"); if(!newP) return; database.ref('the_35_gold_league/users/' + loggedInUser.id + '/password').set(newP).then(() => { loggedInUser.password = newP; alert("Şifreniz başarıyla değiştirildi!"); }); }
+    
     function changeAdminPassword() { 
     if(!isAdmin || !firebase.auth().currentUser) return alert("Yetkisiz işlem!");
     
