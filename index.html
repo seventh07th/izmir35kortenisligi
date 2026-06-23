@@ -519,8 +519,27 @@ function loginGlobalUser() {
     });
 }
     function changeOwnPassword() { let oldP = prompt("Mevcut şifrenizi girin:"); if(oldP !== loggedInUser.password) return alert("Hatalı şifre girdiniz!"); let newP = prompt("Yeni şifrenizi belirleyin:"); if(!newP) return; database.ref('the_35_gold_league/users/' + loggedInUser.id + '/password').set(newP).then(() => { loggedInUser.password = newP; alert("Şifreniz başarıyla değiştirildi!"); }); }
-    function changeAdminPassword() { let oldP = prompt("Mevcut yönetici şifresini girin:"); if(oldP !== systemAdminPassword) return alert("Hatalı şifre!"); let newP = prompt("Yeni Yönetici Şifresini Belirleyin:"); if(!newP) return; database.ref('the_35_gold_league/admin/password').set(newP).then(() => { systemAdminPassword = newP; alert("Yönetici şifresi güncellendi!"); }); }
-    function logoutSession() { localStorage.removeItem('korTennisUserId'); location.reload(); }
+    function changeAdminPassword() { 
+    if(!isAdmin || !firebase.auth().currentUser) return alert("Yetkisiz işlem!");
+    
+    let newP = prompt("Yeni Yönetici Şifresini Belirleyin (En az 6 karakter):"); 
+    if(!newP || newP.length < 6) return alert("İşlem iptal edildi veya şifre çok kısa (En az 6 karakter olmalı).");
+
+    btn = document.activeElement; // Tıklanan butonu yakala
+    let originalText = btn.innerText;
+    btn.innerText = "⏳ GÜNCELLENİYOR...";
+
+    firebase.auth().currentUser.updatePassword(newP)
+    .then(() => { 
+        alert("Yönetici şifresi Firebase sisteminde başarıyla güncellendi!"); 
+        btn.innerText = originalText;
+    })
+    .catch((error) => {
+        console.error(error);
+        alert("Hata: " + error.message + "\n\n(Not: Güvenlik gereği şifre değiştirmeden hemen önce sisteme taze giriş yapmış olmanız gerekir. Çıkış yapıp tekrar girerek deneyin.)");
+        btn.innerText = originalText;
+    }); 
+}
     function addAlertToUser(uid, msg) { if(!uid) return; database.ref(`the_35_gold_league/users/${uid}/alerts`).push({ text: msg, time: Date.now() }); }
     window.dismissAlert = function(key) { if(loggedInUser && loggedInUser.id) { database.ref(`the_35_gold_league/users/${loggedInUser.id}/alerts/${key}`).remove(); } };
     window.deletePwReset = function(key) { database.ref('the_35_gold_league/password_resets/' + key).remove(); };
