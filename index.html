@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>İzmir 35 KorTenis Ligi</title>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script><script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<style>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <style>
 :root{--bg-color:#040814;--card-bg:#0b1329;--accent-color:#ffd700;--text-color:#ffffff;--success:#00ffaa;--warning:#ffbd00;--danger:#ef4444;--border-color:#1e293b;--sub-text:#94a3b8;--divider:#334155;}
 body{font-family:'Segoe UI',sans-serif;background-color:var(--bg-color);color:var(--text-color);margin:0;padding:10px;transition:0.3s;}
 .container{max-width:1200px;margin:0 auto;} h1,h2,h3{text-align:center;color:var(--accent-color);margin:10px 0;letter-spacing:1px;}
@@ -112,6 +113,7 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;} th,td
             <h3 style="margin-top:0; color:var(--accent-color);">KARİYERİNİ OLUŞTUR</h3><p style="font-size:11px; color:#cbd5e1; margin-bottom:15px;">Lütfen teknik seviyenizi en doğru şekilde yansıtacak 8 adımlı anketi dürüstçe doldurun. Sistem sizi uygun lige atayacaktır.</p>
             <input type="text" id="regName" class="auth-input force-upper" placeholder="AD SOYAD (ÖRN: OĞUZ UZUN)">
             <div style="display:flex; gap:10px; margin-bottom:12px;"><select id="regGender" class="auth-select force-upper" style="margin-bottom:0;"><option value="">CİNSİYET</option><option value="ERKEK">👨 ERKEK</option><option value="KADIN">👩 KADIN</option></select><select id="regHand" class="auth-select force-upper" style="margin-bottom:0;"><option value="">DOMİNANT EL</option><option value="SAĞ EL">✋ SAĞ EL</option><option value="SOL EL">🤚 SOL EL</option></select><select id="regBackhand" class="auth-select force-upper" style="margin-bottom:0;"><option value="">BACKHAND</option><option value="TEK EL">🤛 TEK EL</option><option value="ÇİFT EL">👐 ÇİFT EL</option></select></div>
+            <input type="email" id="regEmail" class="auth-input" placeholder="E-posta Adresiniz (Örn: ahmet@gmail.com)">
             <input type="password" id="regPassword" class="auth-input" placeholder="Şifrenizi Belirleyin">
             <div style="font-size:12px; color:var(--accent-color); font-weight:bold; margin-top:15px; margin-bottom:5px;">📅 Maç Müsaitliğiniz (Çoklu Seçim)</div>
             <div class="chk-grid"><label class="chk-label"><input type="checkbox" class="avail-chk" value="H.İçi 06:00-11:00"> H.İçi 06:00-11:00</label><label class="chk-label"><input type="checkbox" class="avail-chk" value="H.Sonu 06:00-11:00"> H.Sonu 06:00-11:00</label><label class="chk-label"><input type="checkbox" class="avail-chk" value="H.İçi 12:00-19:00"> H.İçi 12:00-19:00</label><label class="chk-label"><input type="checkbox" class="avail-chk" value="H.Sonu 12:00-19:00"> H.Sonu 12:00-19:00</label><label class="chk-label"><input type="checkbox" class="avail-chk" value="H.İçi 20:00-24:00"> H.İçi 20:00-24:00</label><label class="chk-label"><input type="checkbox" class="avail-chk" value="H.Sonu 20:00-24:00"> H.Sonu 20:00-24:00</label></div>
@@ -344,42 +346,136 @@ document.getElementById('promptSubmitBtn').addEventListener('click', () => {
 
     function toggleAuth(id) { document.querySelectorAll('.auth-card').forEach(c=>c.style.display='none'); document.getElementById(id).style.display='block'; }
 function forgotPassword() { 
-    showCustomPrompt("ŞİFRE SIFIRLAMA", "Lütfen sisteme kayıtlı <strong>Adınızı ve Soyadınızı</strong> girin:", false, (n) => {
-        if (!n) return;
-        database.ref('the_35_gold_league/password_resets').push({ name: n.toLocaleUpperCase('tr-TR'), timestamp: Date.now() }).then(() => {
-            showToast("Şifre sıfırlama talebiniz yöneticiye iletildi.", "success");
+    showCustomPrompt("ŞİFRE SIFIRLAMA", "Lütfen sisteme kayıtlı <strong>E-posta adresinizi</strong> girin:", false, (email) => {
+        if (!email) return;
+        
+        // Firebase otomatik olarak şifre yenileme maili atar
+        firebase.auth().sendPasswordResetEmail(email)
+        .then(() => {
+            showToast("Şifre sıfırlama linki e-posta adresinize gönderildi. Lütfen gelen kutunuzu (ve spam klasörünü) kontrol edin.", "success");
+        })
+        .catch((error) => {
+            showToast("Hata: " + error.message, "error");
         });
     });
 }
     function updateLoginDropdown() { let sel = document.getElementById('loginGlobalUserSelect'); if(!sel) return; let p = sel.value; sel.innerHTML = '<option value="">İSMİNİZİ SEÇİN...</option>'; Object.values(globalUsers).filter(u => u && u.name).sort((a,b)=>String(a.name).localeCompare(String(b.name))).forEach(u => sel.innerHTML += `<option value="${u.id}">${u.name}</option>`); if(p) sel.value = p; }
 
-    function registerNewUser() {
-        let nameRaw = document.getElementById('regName').value.trim(); let name = nameRaw.replace(/[<>]/g, '').toLocaleUpperCase('tr-TR'); 
-        let nameExists = Object.values(globalUsers).some(u => u && u.name === name); if(nameExists) { return alert("HATA: Bu isimde bir oyuncu zaten kayıtlı!"); }
-        let pass = document.getElementById('regPassword').value; let gender = document.getElementById('regGender').value; let dHand = document.getElementById('regHand').value; let dBackhand = document.getElementById('regBackhand').value;
-        let avail = []; document.querySelectorAll('.avail-chk:checked').forEach(c => avail.push(c.value));
-        if(!name || !pass || !gender || !dHand || !dBackhand || avail.length===0) { return alert("Lütfen ad, şifre, cinsiyet, el tercihleri ve maç müsaitliği alanlarını eksiksiz doldurun."); }
-        
-        let vFh = parseInt(document.getElementById('sl_fh').value); let vBh = parseInt(document.getElementById('sl_bh').value); let vSv = parseInt(document.getElementById('sl_sv').value); let vRt = parseInt(document.getElementById('sl_rt').value); let vOk = parseInt(document.getElementById('sl_ok').value); let vTk = parseInt(document.getElementById('sl_tk').value); let vWn = parseInt(document.getElementById('sl_wn').value); let vVl = parseInt(document.getElementById('sl_vl').value);
-        let srTotal = (vSv * 0.60) + (vRt * 0.40); let totalRaw = (vFh * 0.20) + (vBh * 0.18) + (srTotal * 0.25) + (vOk * 0.12) + (vTk * 0.10) + (vWn * 0.08) + (vVl * 0.07);
-        let ntrp = 1.0; if (totalRaw >= 9.20) ntrp = 7.0; else if (totalRaw >= 8.50) ntrp = 6.5; else if (totalRaw >= 7.80) ntrp = 6.0; else if (totalRaw >= 7.10) ntrp = 5.5; else if (totalRaw >= 6.40) ntrp = 5.0; else if (totalRaw >= 5.70) ntrp = 4.5; else if (totalRaw >= 5.00) ntrp = 4.0; else if (totalRaw >= 4.30) ntrp = 3.5; else if (totalRaw >= 3.60) ntrp = 3.0; else if (totalRaw >= 2.90) ntrp = 2.5; else if (totalRaw >= 2.20) ntrp = 2.0; else if (totalRaw >= 1.50) ntrp = 1.5;
-        let tier = "SILVER"; if (ntrp >= 6.0) tier = "PLATIN"; else if (ntrp >= 4.0) tier = "GOLD"; else tier = "SILVER"; 
-        let sysScore = ntrp.toFixed(1); let uid = "USR_" + Date.now();
-        database.ref('the_35_gold_league/users/' + uid).set({ id: uid, name: name, password: pass, gender: gender, hand: dHand, backhand: dBackhand, availability: avail, tier: tier, sysScore: sysScore, welcomed: false, fame: 0, k_kor_base: 0 }).then(() => { alert(`Kayıt Başarılı!\nSistem Puanınız (NTRP): ${sysScore}\nAtanan Lig: ${tier}\n\nArtık giriş yapabilirsiniz.`); toggleAuth('loginPanel'); });
+function registerNewUser() {
+    let nameRaw = document.getElementById('regName').value.trim(); 
+    let name = nameRaw.replace(/[<>]/g, '').toLocaleUpperCase('tr-TR'); 
+    
+    // Yeni eklediğimiz e-posta alanı
+    let email = document.getElementById('regEmail').value.trim();
+    let pass = document.getElementById('regPassword').value; 
+    let gender = document.getElementById('regGender').value; 
+    let dHand = document.getElementById('regHand').value; 
+    let dBackhand = document.getElementById('regBackhand').value;
+    
+    let avail = []; 
+    document.querySelectorAll('.avail-chk:checked').forEach(c => avail.push(c.value));
+    
+    if(!name || !email || !pass || !gender || !dHand || !dBackhand || avail.length === 0) { 
+        return alert("Lütfen ad, e-posta, şifre, cinsiyet, el tercihleri ve maç müsaitliği alanlarını eksiksiz doldurun."); 
     }
+    
+    let nameExists = Object.values(globalUsers).some(u => u && u.name === name); 
+    if(nameExists) { return alert("HATA: Bu isimde bir oyuncu zaten kayıtlı!"); }
+    
+    // Seviye hesaplama mantığınız aynen kalıyor
+    let vFh = parseInt(document.getElementById('sl_fh').value); 
+    let vBh = parseInt(document.getElementById('sl_bh').value); 
+    let vSv = parseInt(document.getElementById('sl_sv').value); 
+    let vRt = parseInt(document.getElementById('sl_rt').value); 
+    let vOk = parseInt(document.getElementById('sl_ok').value); 
+    let vTk = parseInt(document.getElementById('sl_tk').value); 
+    let vWn = parseInt(document.getElementById('sl_wn').value); 
+    let vVl = parseInt(document.getElementById('sl_vl').value);
+    let srTotal = (vSv * 0.60) + (vRt * 0.40); 
+    let totalRaw = (vFh * 0.20) + (vBh * 0.18) + (srTotal * 0.25) + (vOk * 0.12) + (vTk * 0.10) + (vWn * 0.08) + (vVl * 0.07);
+    
+    let ntrp = 1.0; 
+    if (totalRaw >= 9.20) ntrp = 7.0; 
+    else if (totalRaw >= 8.50) ntrp = 6.5; 
+    else if (totalRaw >= 7.80) ntrp = 6.0; 
+    else if (totalRaw >= 7.10) ntrp = 5.5; 
+    else if (totalRaw >= 6.40) ntrp = 5.0; 
+    else if (totalRaw >= 5.70) ntrp = 4.5; 
+    else if (totalRaw >= 5.00) ntrp = 4.0; 
+    else if (totalRaw >= 4.30) ntrp = 3.5; 
+    else if (totalRaw >= 3.60) ntrp = 3.0; 
+    else if (totalRaw >= 2.90) ntrp = 2.5; 
+    else if (totalRaw >= 2.20) ntrp = 2.0; 
+    else if (totalRaw >= 1.50) ntrp = 1.5;
+    
+    let tier = "SILVER"; 
+    if (ntrp >= 6.0) tier = "PLATIN"; 
+    else if (ntrp >= 4.0) tier = "GOLD"; 
+    
+    let sysScore = ntrp.toFixed(1);
 
+    // BURA DEĞİŞTİ: Firebase Authentication ile kullanıcı oluşturma
+    firebase.auth().createUserWithEmailAndPassword(email, pass)
+    .then((userCredential) => {
+        // Firebase Auth'un atadığı benzersiz güvenli ID
+        let uid = userCredential.user.uid; 
+        
+        // Veritabanına kayıt (ŞİFREYİ BURAYA YAZMIYORUZ, GÜVENLİ)
+        return database.ref('the_35_gold_league/users/' + uid).set({ 
+            id: uid, 
+            name: name, 
+            email: email, // E-posta adresini profilde saklıyoruz
+            gender: gender, 
+            hand: dHand, 
+            backhand: dBackhand, 
+            availability: avail, 
+            tier: tier, 
+            sysScore: sysScore, 
+            welcomed: false, 
+            fame: 0, 
+            k_kor_base: 0 
+        });
+    })
+    .then(() => { 
+        alert(`Kayıt Başarılı!\nSistem Puanınız (NTRP): ${sysScore}\nAtanan Lig: ${tier}\n\nGiriş yapabilirsiniz.`); 
+        toggleAuth('loginPanel'); 
+    })
+    .catch((error) => {
+        console.error(error);
+        alert("Kayıt sırasında bir hata oluştu: " + error.message);
+    });
+}
 function loginGlobalUser() { 
     let uid = document.getElementById('loginGlobalUserSelect').value; 
     let pass = document.getElementById('loginGlobalPassword').value; 
-    if(!uid) return; 
+    if(!uid) return alert("Lütfen isminizi seçin."); 
+    
     let u = globalUsers[uid]; 
-    if(u && u.password === pass) { 
-        isAdmin = false; loggedInUser = u; localStorage.setItem('korTennisUserId', u.id); enterApp(); 
-        setTimeout(() => { if(u.welcomed === false || u.welcomed === undefined) document.getElementById('welcomeModal').style.display = 'flex'; }, 500); 
-    } else { 
-        showToast("Hatalı Şifre Girdiniz!", "error"); 
-    } 
+    if(!u || !u.email) {
+        return alert("Kullanıcı bilgisi veya e-posta adresi bulunamadı.");
+    }
+
+    // BURA DEĞİŞTİ: Firebase Auth ile giriş kontrolü
+    firebase.auth().signInWithEmailAndPassword(u.email, pass)
+    .then((userCredential) => {
+        // Giriş başarılı
+        isAdmin = false; 
+        loggedInUser = u; 
+        localStorage.setItem('korTennisUserId', u.id); 
+        enterApp(); 
+        
+        setTimeout(() => { 
+            if(u.welcomed === false || u.welcomed === undefined) {
+                document.getElementById('welcomeModal').style.display = 'flex'; 
+            }
+        }, 500); 
+    })
+    .catch((error) => {
+        console.error(error);
+        showToast("Hatalı Şifre Girdiniz veya Hesap Doğrulanamadı!", "error"); 
+    });
 }
+
     function closeWelcomeModal() { document.getElementById('welcomeModal').style.display = 'none'; database.ref('the_35_gold_league/users/' + loggedInUser.id + '/welcomed').set(true); loggedInUser.welcomed = true; switchTab('rules'); }
     function openPublicProfile(uid) { let u = globalUsers[uid]; if (!u) return alert("Oyuncu verisi bulunamadı."); let dStats = derivedGlobalStats[uid] || { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0, fame: 0, dynamicNTRP: u.sysScore }; document.getElementById('pubName').innerText = u.name || 'BİLİNMİYOR'; document.getElementById('pubTier').innerText = `${u.tier || 'BELİRSİZ'} (${dStats.dynamicNTRP})`; document.getElementById('pubGender').innerText = u.gender || '-'; document.getElementById('pubStyle').innerText = (u.hand && u.backhand) ? (u.hand + " / " + u.backhand + " BH") : "BELİRTİLMEDİ"; document.getElementById('pubKKor').innerText = (dStats.k_kor || 0).toFixed(1); document.getElementById('pubFame').innerText = (dStats.fame || 0); document.getElementById('pubWinLoss').innerText = `${dStats.gWins || 0}G - ${dStats.gLoss || 0}M`; document.getElementById('pubAvail').innerText = (u.availability && u.availability.length) ? u.availability.map(a=>a.toLocaleUpperCase('tr-TR')).join(", ") : "BELİRTİLMEDİ"; document.getElementById('publicProfileModal').style.display = 'flex'; }
     function closePublicProfile() { document.getElementById('publicProfileModal').style.display = 'none'; }
