@@ -1122,7 +1122,16 @@ function renderRivalsGrid() {
         });
     }
 function submitScore(mId, isP2, btn) {
-    let m = matches.find(x => String(x.id) === String(mId)); let type = document.getElementById(`type_${mId}`).value;
+    let m = matches.find(x => String(x.id) === String(mId));
+    if (!m) return;
+
+    // GÜVENLİK KONTROLÜ: Yönetici değilse ve giriş yapan oyuncu maçın taraflarından biri değilse engelle
+    if (!isAdmin && (!loggedInUser || (m.p1 !== loggedInUser.id && m.p2 !== loggedInUser.id))) {
+        showToast("HATA: Sadece kendi oynadığınız maçların skorunu girebilirsiniz!", "error");
+        return;
+    }
+
+    let type = document.getElementById(`type_${mId}`).value;
     if (!m.played) { 
         let dVal = document.getElementById(`p_date_${mId}`).value; 
         if(!dVal) return showToast("HATA: Maçın oynandığı tarihi seçmelisiniz!", "error"); 
@@ -1140,13 +1149,10 @@ function submitScore(mId, isP2, btn) {
         m.matchDate = dVal; 
     }
 
-    
     if(type === 'wo') {
         m.isWO = true; 
         m.woWinner = document.getElementById(`wo_winner_${mId}`).value; 
         m.matchFormat = '6_GAME';
-        
-        // DÜZELTME 1: WO durumunda eski girilen kalıntı skorları zorla temizle
         m.p1S1 = ''; m.p2S1 = ''; m.p1S2 = ''; m.p2S2 = ''; 
         m.p1S1TB = ''; m.p2S1TB = ''; m.p1S2TB = ''; m.p2S2TB = ''; 
         m.p1MT = ''; m.p2MT = '';
@@ -1158,15 +1164,13 @@ function submitScore(mId, isP2, btn) {
         if((fmt === '6_GAME' && t2 === '6' && b2 === '6') || (fmt === '4_GAME' && t2 === '4' && b2 === '4')) { return alert("HATA: Setler berabere bitemez. Lütfen 2. set skorunu düzeltin."); }
         
         let checkSet = (t, b) => { if(t==='' || b==='') return null; let nt = parseInt(t), nb = parseInt(b); if(fmt === '4_GAME') { if ((nt===4 && nb<=2)||(nb===4 && nt<=2)) return nt>nb?'T':'B'; if ((nt===5 && nb===3)||(nb===5 && nt===3)) return nt>nb?'T':'B'; if ((nt===5 && nb===4)||(nb===5 && nt===4)) return nt>nb?'T':'B'; } else { if ((nt===6 && nb<=4)||(nb===6 && nt<=4)) return nt>nb?'T':'B'; if ((nt===7 && nb===5)||(nb===7 && nt===5)) return nt>nb?'T':'B'; if ((nt===7 && nb===6)||(nb===7 && nt===6)) return nt>nb?'T':'B'; } return null; };
-        let w1 = checkSet(t1, b1); if(!w1) return alert(`HATA: 1. Set skoru ${fmt==='4_GAME'?"4'lük formata uygun değil! (Örn: 4-2, 5-3, 5-4)":"6'lık formata uygun değil! (Örn: 6-4, 7-5, 7-6)"}`);
+        let w1 = checkSet(t1, b1); if(!w1) return alert(`HATA: 1. Set skoru format kurallarına uygun değil!`);
         let w2 = checkSet(t2, b2); if(!w2) return alert(`HATA: 2. Set skoru tenisin kurallarına uygun değil!`);
         
-        // DÜZELTME 2: Tie-Break Kontrolü - 4'lük ve 6'lık setler için standart 7'li sistem.
         let tbCheck = (t, b) => { 
             if(t==='' || b==='') return "boş"; 
             let nt = parseInt(t), nb = parseInt(b); 
             let max = Math.max(nt, nb), min = Math.min(nt, nb); 
-            
             if(max < 7) return "hata"; 
             if(max === 7 && min <= 5) return "ok"; 
             if(max > 7 && (max - min) === 2) return "ok"; 
@@ -1177,21 +1181,21 @@ function submitScore(mId, isP2, btn) {
             let tbT = document.getElementById(`m_${mId}_t_s1tb`).value; let tbB = document.getElementById(`m_${mId}_b_s1tb`).value; 
             let res = tbCheck(tbT, tbB); 
             if(res==='boş') return alert("HATA: 1. Set Tie-Break skorunu girmediniz!"); 
-            if(res==='hata') return alert(`HATA: 1. Set Tie-Break skoru kuraldışı (Örn: 7-5, 8-6, 12-10).`); 
+            if(res==='hata') return alert(`HATA: 1. Set Tie-Break skoru kuraldışı.`); 
             let winSet = parseInt(t1) > parseInt(b1) ? 'T' : 'B'; let winTb = parseInt(tbT) > parseInt(tbB) ? 'T' : 'B'; 
-            if (winSet !== winTb) return alert("HATA: 1. Set skorunda kazanan taraf ile Tie-Break skorunda kazanan taraf eşleşmiyor! Lütfen girişleri kontrol edin."); 
+            if (winSet !== winTb) return alert("HATA: 1. Set kazananı ile Tie-Break kazananı eşleşmiyor!"); 
         }
         
         if((fmt==='6_GAME' && ((t2==='7'&&b2==='6')||(b2==='7'&&t2==='6'))) || (fmt==='4_GAME' && ((t2==='5'&&b2==='4')||(b2==='5'&&t2==='4')))) { 
             let tbT = document.getElementById(`m_${mId}_t_s2tb`).value; let tbB = document.getElementById(`m_${mId}_b_s2tb`).value; 
             let res = tbCheck(tbT, tbB); 
             if(res==='boş') return alert("HATA: 2. Set Tie-Break skorunu girmediniz!"); 
-            if(res==='hata') return alert(`HATA: 2. Set Tie-Break skoru kuraldışı (Örn: 7-5, 8-6, 12-10).`); 
+            if(res==='hata') return alert(`HATA: 2. Set Tie-Break skoru kuraldışı.`); 
             let winSet = parseInt(t2) > parseInt(b2) ? 'T' : 'B'; let winTb = parseInt(tbT) > parseInt(tbB) ? 'T' : 'B'; 
-            if (winSet !== winTb) return alert("HATA: 2. Set skorunda kazanan taraf ile Tie-Break skorunda kazanan taraf eşleşmiyor! Lütfen girişleri kontrol edin."); 
+            if (winSet !== winTb) return alert("HATA: 2. Set kazananı ile Tie-Break kazananı eşleşmiyor!"); 
         }
         
-        if(w1 !== w2) { let mtT = document.getElementById(`m_${mId}_t_mt`).value; let mtB = document.getElementById(`m_${mId}_b_mt`).value; if(mtT==='' || mtB==='') return alert("HATA: Setler 1-1 olduğu için 10'luk Maç Tie-Break skoru girmelisiniz!"); let nt = parseInt(mtT), nb = parseInt(mtB); let max = Math.max(nt, nb), min = Math.min(nt, nb); if(max < 10) return alert("HATA: Maç Tie-Break skoru kuraldışı (En az 10'da biter)."); if(max === 10 && min <= 8) {} else if(max > 10 && (max - min) === 2) {} else return alert("HATA: Maç Tie-Break skoru kuraldışı (Örn: 10-8, 11-9, 14-12)."); }
+        if(w1 !== w2) { let mtT = document.getElementById(`m_${mId}_t_mt`).value; let mtB = document.getElementById(`m_${mId}_b_mt`).value; if(mtT==='' || mtB==='') return alert("HATA: Setler 1-1 olduğu için 10'luk Maç Tie-Break skoru girmelisiniz!"); let nt = parseInt(mtT), nb = parseInt(mtB); let max = Math.max(nt, nb), min = Math.min(nt, nb); if(max < 10) return alert("HATA: Maç Tie-Break skoru kuraldışı (En az 10'da biter)."); if(max === 10 && min <= 8) {} else if(max > 10 && (max - min) === 2) {} else return alert("HATA: Maç Tie-Break skoru kuraldışı."); }
         let getStr = (s) => { let el = document.getElementById(`m_${mId}_${s}`); return el ? el.value : ''; }; m.p1S1 = isP2 ? getStr('b_s1') : getStr('t_s1'); m.p2S1 = isP2 ? getStr('t_s1') : getStr('b_s1'); m.p1S2 = isP2 ? getStr('b_s2') : getStr('t_s2'); m.p2S2 = isP2 ? getStr('t_s2') : getStr('b_s2'); m.p1MT = isP2 ? getStr('b_mt') : getStr('t_mt'); m.p2MT = isP2 ? getStr('t_mt') : getStr('b_mt'); m.p1S1TB = isP2 ? getStr('b_s1tb') : getStr('t_s1tb'); m.p2S1TB = isP2 ? getStr('t_s1tb') : getStr('b_s1tb'); m.p1S2TB = isP2 ? getStr('b_s2tb') : getStr('t_s2tb'); m.p2S2TB = isP2 ? getStr('t_s2tb') : getStr('b_s2tb');
     }
     
@@ -1199,23 +1203,50 @@ function submitScore(mId, isP2, btn) {
     if (isAdmin) { m.pending = false; m.enteredBy = 'ADMIN'; } else { m.pending = true; m.enteredBy = loggedInUser.id; }
     saveToDb(isAdmin ? "Skor Kaydedildi!" : "Skor Rakibin Onayına Gönderildi!");
 }
+    function approveScore(mId, btn) { 
+    let m = matches.find(x => String(x.id) === String(mId)); 
+    if (!m) return;
 
-    function approveScore(mId, btn) { btn.innerHTML = "⏳ İŞLENİYOR..."; btn.disabled = true; let m = matches.find(x => String(x.id) === String(mId)); m.pending = false; let tName = currentSettings.customName || "Turnuva"; addAlertToUser(m.enteredBy, `✅ <strong>[${tName}]</strong> ${m.p1Name} vs ${m.p2Name} maçınızın skoru rakibiniz tarafından onaylandı! Puanlar işlendi.`); saveToDb("Skor Onaylandı ve Tablolara İşlendi!"); }
+    // GÜVENLİK KONTROLÜ
+    if (!isAdmin) {
+        if (!loggedInUser || (m.p1 !== loggedInUser.id && m.p2 !== loggedInUser.id)) {
+            showToast("HATA: Bu maçı onaylama yetkiniz yok!", "error");
+            return;
+        }
+        if (m.enteredBy === loggedInUser.id) {
+            showToast("HATA: Kendi girdiğiniz skoru kendiniz onaylayamazsınız! Rakibin onayı bekleniyor.", "warning");
+            return;
+        }
+    }
+
+    btn.innerHTML = "⏳ İŞLENİYOR..."; 
+    btn.disabled = true; 
+    m.pending = false; 
+    let tName = currentSettings.customName || "Turnuva"; 
+    addAlertToUser(m.enteredBy, `✅ <strong>[${tName}]</strong> ${m.p1Name} vs ${m.p2Name} maçınızın skoru rakibiniz tarafından onaylandı! Puanlar işlendi.`); 
+    saveToDb("Skor Onaylandı ve Tablolara İşlendi!"); 
+}
     function giveFairPlay(mId, opponentId, btn) { btn.innerHTML = "⏳..."; btn.disabled = true; let m = matches.find(x => String(x.id) === String(mId)); if(!m) return; if (m.p1 === loggedInUser.id) m.p1Fair = true; else if (m.p2 === loggedInUser.id) m.p2Fair = true; let uRef = database.ref(`the_35_gold_league/users/${opponentId}/fame`); uRef.once('value').then((s) => { let currentFame = s.val() || 0; uRef.set(currentFame + 5).then(() => { saveToDb("Rakibinizi kutladınız! +5 Şöhret Puanı eklendi. 👏"); }); }); }
     function clearScoreCloud(id, btn) { 
+    let m = matches.find(x => String(x.id) === String(id)); 
+    if (!m) return;
+
+    // GÜVENLİK KONTROLÜ
+    if (!isAdmin && (!loggedInUser || (m.p1 !== loggedInUser.id && m.p2 !== loggedInUser.id))) {
+        showToast("HATA: Bu maçın skorunu sıfırlama veya iptal etme yetkiniz yok!", "error");
+        return;
+    }
+
     showCustomConfirm("SKOR İPTALİ", "Bu maçın skorunu iptal etmek/sıfırlamak istiyor musunuz?", () => {
         btn.innerHTML = "⏳..."; btn.disabled = true; 
-        let m = matches.find(x => String(x.id) === String(id)); 
         m.played = false; m.pending = false; m.isWO = false; m.woWinner = ''; m.enteredBy = ''; 
         m.p1S1 = ''; m.p2S1 = ''; m.p1S2 = ''; m.p2S2 = ''; 
         m.p1S1TB = ''; m.p2S1TB = ''; m.p1S2TB = ''; m.p2S2TB = ''; 
         m.p1MT = ''; m.p2MT = ''; m.p1Fair = false; m.p2Fair = false; 
-        
         m.matchFormat = '6_GAME'; 
         saveToDb("Skor sıfırlandı!");
     }, true);
 }
-    
    function saveToDb(msg) {
     calculateStats(); 
     try {
