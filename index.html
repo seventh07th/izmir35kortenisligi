@@ -147,6 +147,16 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;} th,td
 </div>
 
 <script>
+
+    function getTierBadgeHtml(tier, ntrp) {
+    let bg = "#1e293b", color = "white", border = "var(--border-color)";
+    if(tier === 'PLATIN') { bg = "linear-gradient(135deg, #00e5ff, #007bb5)"; color = "black"; border = "#00e5ff"; }
+    else if(tier === 'GOLD') { bg = "linear-gradient(135deg, #ffd700, #ff8c00)"; color = "black"; border = "#ffd700"; }
+    else if(tier === 'SILVER') { bg = "linear-gradient(135deg, #e2e8f0, #94a3b8)"; color = "black"; border = "#e2e8f0"; }
+    return `<span style="background:${bg}; color:${color}; padding:3px 8px; border-radius:4px; font-size:10px; font-weight:bold; border:1px solid ${border}; white-space:nowrap; display:inline-block; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">${tier} (${ntrp})</span>`;
+}
+  
+    
     /* =========================================
    UX BİLDİRİM VE MODAL MOTORU
 ========================================= */
@@ -288,11 +298,17 @@ document.getElementById('promptSubmitBtn').addEventListener('click', () => {
                 let avgOpp = oppSum / 10; let gf = ntrp - avgOpp; let exp = 50 + (gf * 25); if(exp > 95) exp = 95; if(exp < 5) exp = 5;
                 let act = tTot > 0 ? (tWon/tTot)*100 : 0; ntrp = ntrp + ((act - exp) * 0.015);
             }
-            derivedGlobalStats[u.id].dynamicNTRP = ntrp.toFixed(2);
+            
+            // YENİ EKLENEN KISIM: Seviye (Tier) Güncellemesi
+            let finalNtrp = parseFloat(ntrp.toFixed(2));
+            let dynamicTier = "SILVER";
+            if (finalNtrp >= 6.0) dynamicTier = "PLATIN";
+            else if (finalNtrp >= 4.0) dynamicTier = "GOLD";
+            
+            derivedGlobalStats[u.id].dynamicNTRP = finalNtrp.toFixed(2);
+            derivedGlobalStats[u.id].dynamicTier = dynamicTier; // Dinamik atama
         });
 
-        let activePanel = document.querySelector('.panel.active'); if(activePanel) { if(activePanel.id === 'profile') renderProfile(); if(activePanel.id === 'standings' && currentTid === null) renderGlobalStandings(); }
-    }
 
     function listenToCloud() {
         const errHandler = (error) => { console.error("Firebase Hatası:", error); document.getElementById('loginGlobalUserSelect').innerHTML = '<option value="">BAĞLANTI HATASI!</option>'; };
@@ -386,7 +402,9 @@ function loginGlobalUser() {
         let notifHtml = '';
         if(loggedInUser.alerts) { Object.keys(loggedInUser.alerts).forEach(alertKey => { let alertObj = loggedInUser.alerts[alertKey]; notifHtml += `<div class="notification-card" style="border-color:var(--success); background:rgba(0,255,170,0.1); margin-bottom:10px;"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><span style="flex:1;">${alertObj.text}</span><button class="action-sm" style="background:transparent; color:var(--text-color); font-size:16px; margin:0; padding:0 5px;" onclick="dismissAlert('${alertKey}')">✖</button></div></div>`; }); }
         let myPendingScore = [];
-        Object.keys(allTourneys).forEach(tid => { let t = allTourneys[tid]; if(!t || !t.settings || t.settings.status !== 'active' || !t.matches) return; _arr(t.matches).forEach(m => { if (m.p1 !== loggedInUser.id && m.p2 !== loggedInUser.id) return; if (m.played && m.pending && m.enteredBy !== loggedInUser.id) { myPendingScore.push(`<strong>[${t.settings.customName || "Turnuva"}]</strong> ${m.p1Name} vs ${m.p2Name}`); } }); });
+        Object.keys(allTourneys).forEach(tid => { let t = allTourneys[tid]; if(!t || !t.settings || t.settings.status !== 'active' || !t.matches) return; _arr(t.matches).forEach(m => { if (m.p1 !== loggedInUser.id && m.p2 !== loggedInUser.id) return;if (m.played && m.pending && m.enteredBy !== loggedInUser.id) { 
+        myPendingScore.push(`<span class="player-link" onclick="switchTab('matches')" style="display:block; padding-top:4px;"><strong>[${t.settings.customName || "Turnuva"}]</strong> ${m.p1Name} vs ${m.p2Name} maçınızın skor onayı için buraya tıklayın.</span>`); 
+    }
         if (myPendingScore.length > 0) { myPendingScore.forEach(n => notifHtml += `<div class="notification-card" style="margin-bottom:10px;">🚨 <strong>SKOR ONAYI BEKLİYOR:</strong> ${n} maçı skor onayınızı bekliyor! Lütfen 'Skor Gir' sekmesinden işlemi tamamlayın.</div>`); } else if (!loggedInUser.alerts) { notifHtml += `<div style="text-align:center; color:var(--sub-text); font-size:11px; margin-top:20px;">Bekleyen bir eyleminiz bulunmuyor.</div>`; }
         document.getElementById('profNotificationsContainer').innerHTML = notifHtml;
     }
@@ -444,11 +462,36 @@ function loginGlobalUser() {
 
     function joinSubstitutePool(tid) { let t = allTourneys[tid]; let pool = _arr(t.substitutePool); if(!pool.includes(loggedInUser.id)) { pool.push(loggedInUser.id); allTourneys[tid].substitutePool = pool; renderTournamentsList(); database.ref(`the_35_gold_league/multi_v1/${tid}/substitutePool`).set(pool).then(() => { alert("Yedek listesine başarıyla eklendiniz!"); }); } }
     function leaveSubstitutePool(tid) { if(!confirm("Yedek listesinden çıkmak istediğinize emin misiniz?")) return; let t = allTourneys[tid]; let pool = _arr(t.substitutePool); let index = pool.indexOf(loggedInUser.id); if(index > -1) { pool.splice(index, 1); allTourneys[tid].substitutePool = pool; renderTournamentsList(); database.ref(`the_35_gold_league/multi_v1/${tid}/substitutePool`).set(pool).then(() => { alert("Yedek listesinden ayrıldınız."); }); } }
-    function joinTournament(tid) {
+      function joinTournament(tid) {
         let t = allTourneys[tid]; let s = t.settings;
-        if(s.gender !== 'KARMA' && s.gender !== 'OPEN' && s.gender !== loggedInUser.gender) { return alert(`HATA: Bu turnuva sadece ${s.gender} kategorisi içindir.`); }
-        let regs = _arr(t.registeredPlayers); if(!regs.includes(loggedInUser.id)) { regs.push(loggedInUser.id); allTourneys[tid].registeredPlayers = regs; renderTournamentsList(); database.ref(`the_35_gold_league/multi_v1/${tid}/registeredPlayers`).set(regs).then(() => { alert("Turnuvaya kaydınız başarıyla alındı!"); }); }
+        if(s.gender !== 'KARMA' && s.gender !== 'OPEN' && s.gender !== loggedInUser.gender) { return showToast(`HATA: Bu turnuva sadece ${s.gender} kategorisi içindir.`, "error"); }
+        
+        // Dinamik Seviye (Tier) Haritası
+        let dStats = derivedGlobalStats[loggedInUser.id] || {};
+        let uTier = dStats.dynamicTier || loggedInUser.tier;
+        let tTier = s.tier;
+        
+        const tierMap = { 'SILVER': 1, 'GOLD': 2, 'PLATIN': 3, 'OPEN': 4 };
+        let uVal = tierMap[uTier] || 1; let tVal = tierMap[tTier] || 1;
+        
+        let doJoin = () => {
+            let regs = _arr(t.registeredPlayers); 
+            if(!regs.includes(loggedInUser.id)) { 
+                regs.push(loggedInUser.id); allTourneys[tid].registeredPlayers = regs; 
+                renderTournamentsList(); 
+                database.ref(`the_35_gold_league/multi_v1/${tid}/registeredPlayers`).set(regs).then(() => { showToast("Turnuvaya kaydınız başarıyla alındı!", "success"); }); 
+            }
+        };
+        
+        if (tTier !== 'OPEN') {
+            if (uVal > tVal) return showToast(`HATA: Sizin seviyeniz (${uTier}), bu ligden (${tTier}) daha üstün. Alt liglere katılamazsınız!`, "error");
+            if (tVal - uVal > 1) return showToast(`HATA: Kendi seviyenizden sadece bir üst lige katılabilirsiniz. (${uTier} -> ${tTier} yasaktır.)`, "error");
+            if (tVal - uVal === 1) return showCustomConfirm("ÜST LİGE KATILIM ONAYI", `Bu turnuva (${tTier}) sizin güncel seviyenizden (${uTier}) bir üst kategoride. Rakiplerinize karşı zorlanabilirsiniz. Katılmak istediğinize emin misiniz?`, doJoin, true);
+        }
+        
+        doJoin();
     }
+
     function leaveTournament(tid) {
     showCustomConfirm("KAYIT İPTALİ", "Turnuvadan çıkmak (kaydınızı iptal etmek) istediğinize emin misiniz?", () => {
         let t = allTourneys[tid]; let regs = _arr(t.registeredPlayers); let index = regs.indexOf(loggedInUser.id);
@@ -775,7 +818,14 @@ function loginGlobalUser() {
         let globalArray = Object.keys(globalUsers).map(uid => { let user = globalUsers[uid]; if(!user) return null; let dStats = derivedGlobalStats[uid] || { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0, dynamicNTRP: user.sysScore }; return { id: uid, name: user.name, tier: user.tier || 'BELİRSİZ', sysScore: dStats.dynamicNTRP, k_kor: dStats.k_kor, gMatch: dStats.gMatch, gWins: dStats.gWins, gLoss: dStats.gLoss }; }).filter(u => u !== null);
         let sortedUsers = globalArray.sort((a,b) => (b.k_kor || 0) - (a.k_kor || 0));
         const tbody = document.getElementById("standingsBody"); if(!tbody) return; tbody.innerHTML = "";
-        sortedUsers.forEach((u, i) => { let bdg = i === 0 ? '👑' : ''; tbody.innerHTML += `<tr class="zone-global"><td><strong>${i+1}</strong></td><td style="text-align:left; font-weight:bold;"><span class="player-link" onclick="openPublicProfile('${u.id}')">${u.name}</span> <br> <span style="background:#1e293b; color:var(--accent-color); padding:2px 5px; border-radius:4px; font-size:10px;">${u.tier} (${u.sysScore || '-'})</span></td><td style="color:var(--warning); font-weight:bold;">${u.gMatch || 0}</td><td style="color:var(--success);font-weight:bold;">${u.gWins || 0}</td><td>${u.gLoss || 0}</td><td style="color:var(--accent-color); font-weight:bold;">${(u.k_kor || 0).toFixed(1)} ${bdg}</td></tr>`; });
+                sortedUsers.forEach((u, i) => { 
+            let bdg = i === 0 ? '👑' : ''; 
+            let dynBadge = getTierBadgeHtml(u.dynamicTier, u.sysScore); // Yeni Renkli Rozet Sistemi
+            let rowHighlight = (!isAdmin && loggedInUser && u.id === loggedInUser.id) ? 'background-color: rgba(255, 215, 0, 0.15); box-shadow: inset 4px 0 0 var(--accent-color);' : '';
+            
+            tbody.innerHTML += `<tr class="zone-global" style="${rowHighlight}"><td><strong>${i+1}</strong></td><td style="text-align:left; font-weight:bold;"><span class="player-link" onclick="openPublicProfile('${u.id}')">${u.name}</span> <br> ${dynBadge}</td><td style="color:var(--warning); font-weight:bold;">${u.gMatch || 0}</td><td style="color:var(--success);font-weight:bold;">${u.gWins || 0}</td><td>${u.gLoss || 0}</td><td style="color:var(--accent-color); font-weight:bold;">${(u.k_kor || 0).toFixed(1)} ${bdg}</td></tr>`; 
+        });
+
         let miniContainer = document.getElementById('miniStandingsWrapper'); if(miniContainer) miniContainer.innerHTML = ""; 
     }
 
@@ -789,7 +839,17 @@ function loginGlobalUser() {
         
         players.forEach((p, i) => { if (i < dCount) { p.badgeLabel = `S${i+1}`; p.badgeText = "SERİBAŞI"; p.badgeColor = "var(--accent-color)"; p.rowClass = "zone-direct"; } else if (i < dCount + poCount) { p.badgeLabel = `PO${i - dCount + 1}`; p.badgeText = "PLAY-OFF"; p.badgeColor = "var(--warning)"; p.rowClass = "zone-playoff"; } else { p.rowClass = "zone-eliminated"; let piIndex = piPool.findIndex(x => x.id === p.id); if (piIndex !== -1 && piIndex < piCount) { p.badgeLabel = `Pİ${piIndex + 1}`; p.badgeText = "PLAY-IN"; p.badgeColor = "var(--success)"; } else { p.badgeLabel = ""; p.badgeText = ""; p.badgeColor = ""; } } });
         const tbody = document.getElementById("standingsBody"); if(!tbody) return; tbody.innerHTML = "";
-        players.forEach((p, i) => { let bdg = p.korRank === 1 ? '👑' : `[#${p.korRank}]`; let badgeHtml = p.badgeText ? `<span style="background:#1e293b; color:${p.badgeColor}; padding:2px 5px; border-radius:4px; font-size:10px; margin-left:5px; white-space:nowrap;"><strong>${p.badgeLabel}</strong> | ${p.badgeText}</span>` : ''; let subBtn = isAdmin ? `<button class="action-sm" style="background:var(--warning); color:black; padding:2px 4px; margin-top:2px;" onclick="openSubstituteModal('${p.id}', '${p.name}')">🔄 Transfer</button>` : ''; tbody.innerHTML += `<tr class="${p.rowClass}"><td><strong>${i+1}</strong></td><td style="text-align:left; font-weight:bold;"><span class="player-link" onclick="openPublicProfile('${p.id}')">${p.name}</span> <br> ${badgeHtml} ${subBtn}</td><td style="color:var(--warning); font-weight:bold;">${p.totalMatches}</td><td style="color:var(--success);font-weight:bold;">${p.wins}</td><td>${p.losses}</td><td>${p.setAv>0?'+'+p.setAv:p.setAv}</td><td style="color:var(--accent-color); font-weight:bold;">${p.kor.toFixed(1)} <span style="font-size:10px;color:#94a3b8">${bdg}</span></td></tr>`; });
+               players.forEach((p, i) => { 
+            let bdg = p.korRank === 1 ? '👑' : `[#${p.korRank}]`; 
+            let badgeHtml = p.badgeText ? `<span style="background:#1e293b; color:${p.badgeColor}; padding:2px 5px; border-radius:4px; font-size:10px; margin-left:5px; white-space:nowrap;"><strong>${p.badgeLabel}</strong> | ${p.badgeText}</span>` : ''; 
+            let subBtn = isAdmin ? `<button class="action-sm" style="background:var(--warning); color:black; padding:2px 4px; margin-top:2px;" onclick="openSubstituteModal('${p.id}', '${p.name}')">🔄 Transfer</button>` : ''; 
+            
+            // Vurgu Sınıfı Eklentisi
+            let rowHighlight = (!isAdmin && loggedInUser && p.id === loggedInUser.id) ? 'background-color: rgba(255, 215, 0, 0.15); box-shadow: inset 4px 0 0 var(--accent-color);' : '';
+            
+            tbody.innerHTML += `<tr class="${p.rowClass}" style="${rowHighlight}"><td><strong>${i+1}</strong></td><td style="text-align:left; font-weight:bold;"><span class="player-link" onclick="openPublicProfile('${p.id}')">${p.name}</span> <br> ${badgeHtml} ${subBtn}</td><td style="color:var(--warning); font-weight:bold;">${p.totalMatches}</td><td style="color:var(--success);font-weight:bold;">${p.wins}</td><td>${p.losses}</td><td>${p.setAv>0?'+'+p.setAv:p.setAv}</td><td style="color:var(--accent-color); font-weight:bold;">${p.kor.toFixed(1)} <span style="font-size:10px;color:#94a3b8">${bdg}</span></td></tr>`; 
+        });
+
         let miniContainer = document.getElementById('miniStandingsWrapper'); if(!miniContainer) { miniContainer = document.createElement('div'); miniContainer.id = 'miniStandingsWrapper'; document.getElementById('standings').appendChild(miniContainer); }
         if (piPool.length > 0) { let miniHtml = `<div style="margin-top:25px; background:#0b1329; border:1px solid var(--success); border-radius:8px; padding:10px;"><h3 style="color:var(--success); margin-top:0; border-bottom:1px solid #1e293b; padding-bottom:8px; font-size:13px; text-align:center;">🔥 PLAY-IN KOR YARIŞI (Ana Tablo Dışı)</h3><table style="margin-top:0;"><thead><tr><th>Sıra</th><th style="text-align:left;">Oyuncu</th><th>OM</th><th>KOR 🎯</th><th>Durum</th></tr></thead><tbody>`; piPool.forEach((p, idx) => { let isPi = idx < piCount; let cls = isPi ? "zone-direct" : "zone-eliminated"; let status = isPi ? `<span style="color:var(--success);font-weight:bold;">Bilet Cebinde</span>` : `<span style="color:var(--danger);">Elendi</span>`; miniHtml += `<tr class="${cls}"><td><strong>${idx+1}</strong></td><td style="text-align:left; font-weight:bold;"><span class="player-link" onclick="openPublicProfile('${p.id}')">${p.name}</span></td><td>${p.totalMatches}</td><td style="color:var(--accent-color); font-weight:bold;">${p.kor.toFixed(1)}</td><td>${status}</td></tr>`; }); miniHtml += `</tbody></table></div>`; miniContainer.innerHTML = miniHtml; } else { miniContainer.innerHTML = ""; }
     }
@@ -880,7 +940,23 @@ function loginGlobalUser() {
     }
 function submitScore(mId, isP2, btn) {
     let m = matches.find(x => String(x.id) === String(mId)); let type = document.getElementById(`type_${mId}`).value;
-    if (!m.played) { let dVal = document.getElementById(`p_date_${mId}`).value; if(!dVal) return alert("HATA: Maçın oynandığı tarihi seçmelisiniz!"); m.matchDate = dVal; }
+    if (!m.played) { 
+        let dVal = document.getElementById(`p_date_${mId}`).value; 
+        if(!dVal) return showToast("HATA: Maçın oynandığı tarihi seçmelisiniz!", "error"); 
+        
+        let matchDateObj = new Date(dVal);
+        let today = new Date(); today.setHours(23, 59, 59, 999);
+        
+        if (matchDateObj > today) return showToast("HATA: Henüz oynanmamış ileri bir tarih seçemezsiniz!", "error");
+        
+        if(currentSettings.startDate) {
+            let startDateObj = new Date(currentSettings.startDate); startDateObj.setHours(0,0,0,0);
+            if(matchDateObj < startDateObj) return showToast("HATA: Maç tarihi, turnuvanın başlangıç tarihinden önce olamaz!", "error");
+        }
+        
+        m.matchDate = dVal; 
+    }
+
     
     if(type === 'wo') {
         m.isWO = true; 
@@ -975,6 +1051,57 @@ function submitScore(mId, isP2, btn) {
         .catch(err => { console.error("Kayıt Hatası:", err); showToast("Bağlantı hatası: Kayıt başarısız oldu.", "error"); });
     } catch(e) { console.error("Veri Temizleme Hatası:", e); showToast("Kritik Hata: Veri yapısında bozukluk tespit edildi! İşlem durduruldu.", "error"); }
 } 
+    function openSubstituteModal(uid, name) {
+        document.getElementById('subOutName').innerText = name;
+        document.getElementById('subOutName').setAttribute('data-uid', uid);
+        let select = document.getElementById('subInSelect');
+        select.innerHTML = '<option value="">YENİ OYUNCUYU SEÇİNİZ...</option>';
+        let t = allTourneys[currentTid];
+        let currentPlayers = _arr(t.players).map(p => p.id);
+        
+        Object.values(globalUsers).sort((a,b)=>a.name.localeCompare(b.name)).forEach(u => {
+            if(u && u.name && !currentPlayers.includes(u.id)) {
+                let dStats = derivedGlobalStats[u.id] || {};
+                let dynTier = dStats.dynamicTier || u.tier;
+                select.innerHTML += `<option value="${u.id}">${u.name} (${dynTier})</option>`;
+            }
+        });
+        document.getElementById('substituteModal').style.display = 'flex';
+    }
+    
+    function closeSubstituteModal() { document.getElementById('substituteModal').style.display = 'none'; }
+    
+    function executeSubstitution() {
+        let outUid = document.getElementById('subOutName').getAttribute('data-uid');
+        let inUid = document.getElementById('subInSelect').value;
+        if(!inUid) return showToast("Lütfen yeni oyuncuyu seçin.", "warning");
+        
+        showCustomConfirm("OYUNCU TRANSFERİ", "Bu oyuncuyu transfer etmek istediğinize emin misiniz? Puanlar ve fikstür yeni oyuncuya devredilecektir.", () => {
+            let t = allTourneys[currentTid];
+            let inUser = globalUsers[inUid];
+            
+            // Tablodaki bilgileri değiştir
+            let pIndex = _arr(t.players).findIndex(p => p.id === outUid);
+            if(pIndex > -1) { t.players[pIndex].id = inUser.id; t.players[pIndex].name = inUser.name; t.players[pIndex].sysScore = inUser.sysScore; }
+            
+            // Maç geçmişini ve fikstürü değiştir
+            _arr(t.matches).forEach(m => {
+                if(m.p1 === outUid) { m.p1 = inUser.id; m.p1Name = inUser.name; }
+                if(m.p2 === outUid) { m.p2 = inUser.id; m.p2Name = inUser.name; }
+                if(m.woWinner === outUid) { m.woWinner = inUser.id; }
+                if(m.winnerId === outUid) { m.winnerId = inUser.id; }
+            });
+            
+            // Kayıt listesini değiştir
+            let rIndex = _arr(t.registeredPlayers).indexOf(outUid);
+            if(rIndex > -1) { t.registeredPlayers[rIndex] = inUser.id; }
+            
+            closeSubstituteModal();
+            saveToDb("Transfer başarıyla gerçekleştirildi!");
+        });
+    }
+
+        
 </script>
 </body>
 </html>
