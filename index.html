@@ -338,41 +338,48 @@ const database = firebase.database();
     }
 
 
+    // --- KİMLİK DOĞRULAMA (GİRİŞ/ÇIKIŞ) DİNLEYİCİSİ ---
+    function checkAuthState() {
+        let user = firebase.auth().currentUser;
+        if(user && Object.keys(globalUsers).length > 0) {
+            if(user.email === "admin@kortenisligi.com") { 
+                isAdmin = true; 
+                loggedInUser = {id:'ADMIN',name:'YÖNETİCİ'}; 
+                if(document.getElementById('authWrapper').style.display !== 'none') enterApp(); 
+            } 
+            else if (globalUsers[user.uid]) { 
+                isAdmin = false; 
+                loggedInUser = globalUsers[user.uid]; 
+                if(document.getElementById('authWrapper').style.display !== 'none') enterApp(); 
+                
+                // Hoş geldin ekranı kontrolü
+                if(loggedInUser.welcomed === false || loggedInUser.welcomed === undefined) {
+                    setTimeout(() => { document.getElementById('welcomeModal').style.display = 'flex'; }, 500);
+                }
+            }
+        }
+    }
+
+    // Firebase Auth anlık değişiklikleri dinler (Giriş/Çıkış anında ekranı anında içeri alır)
+    firebase.auth().onAuthStateChanged((user) => {
+        checkAuthState();
+    });
 
     function listenToCloud() {
         const errHandler = (error) => { console.error("Firebase Hatası:", error); document.getElementById('loginGlobalUserSelect').innerHTML = '<option value="">BAĞLANTI HATASI!</option>'; };
         
-          database.ref('the_35_gold_league/users').on('value', (s) => {
+        database.ref('the_35_gold_league/users').on('value', (s) => {
             try {
                 globalUsers = s.val() || {}; 
                 buildGlobalStats(); 
                 
-                // Sisteme giriş yapmış biri var mı anında kontrol et
-                let currentUser = firebase.auth().currentUser;
-                
-                if(currentUser) {
-                    if(currentUser.email === "admin@kortenisligi.com") { 
-                        isAdmin = true; 
-                        loggedInUser = {id:'ADMIN',name:'YÖNETİCİ'}; 
-                        if(document.getElementById('authWrapper').style.display !== 'none') enterApp(); 
-                    } 
-                    else if (globalUsers[currentUser.uid]) { 
-                        isAdmin = false; 
-                        loggedInUser = globalUsers[currentUser.uid]; 
-                        if(document.getElementById('authWrapper').style.display !== 'none') enterApp(); 
-                        
-                        // Hoş geldin ekranı kontrolü
-                        if(loggedInUser.welcomed === false || loggedInUser.welcomed === undefined) {
-                            setTimeout(() => { document.getElementById('welcomeModal').style.display = 'flex'; }, 500);
-                        }
-                    }
-                }
+                // Kullanıcılar yüklendiğinde Auth durumunu tekrar kontrol et (Hızlı açılış için)
+                checkAuthState();
                 
                 let activePanel = document.querySelector('.panel.active'); 
                 if(activePanel && activePanel.id) switchTab(activePanel.id);
             } catch(e) { console.error("Kullanıcı okuma hatası:", e); }
         }, errHandler);
-
 
         database.ref('the_35_gold_league/multi_v1').on('value', (s) => {
             try {
@@ -384,8 +391,10 @@ const database = firebase.database();
                 if(activePanelId) switchTab(activePanelId); 
             } catch(e) { console.error("Turnuva okuma hatası:", e); }
         }, errHandler);
+        
         database.ref('the_35_gold_league/password_resets').on('value', (s) => { try { passwordResets = s.val() || {}; let activePanel = document.querySelector('.panel.active'); if(isAdmin && activePanel && activePanel.id === 'admin_notifs') renderAdminNotifs(); } catch(e){} }, errHandler);
     }
+
 
     function toggleAuth(id) { document.querySelectorAll('.auth-card').forEach(c=>c.style.display='none'); document.getElementById(id).style.display='block'; }
 function forgotPassword() { 
