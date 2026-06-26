@@ -646,6 +646,10 @@ btnHtml = `<button class="action-sm" style="background:#1e293b; color:white; bor
             } else if (status === 'active') {
                 activeCount++; let badge = ''; let btnHtml = ''; let subHtml = ''; 
                 if(isAdmin) { btnHtml = `<button class="action-sm" style="background:var(--warning); color:black; padding:8px 12px;" onclick="document.getElementById('adminLeagueSelect').value='${tid}'; adminSwitchLeague();">⚙️ Yönet</button>`; } 
+              // Araya Eklenecek (Aktif Turnuvalar İçin):
+btnHtml = `<button class="action-sm" style="background:#1e293b; color:white; border:1px solid var(--accent-color); padding:8px 12px; margin-right:5px;" onclick="openParticipantsModal('${tid}')">👥 Katılımcılar</button>` + btnHtml;
+
+                
                 else {
                     let participants = _arr(t.players); let amIPlaying = participants.some(p => p.id === loggedInUser.id);
                     if(amIPlaying) { badge = `<span class="tournament-badge" style="background:var(--success); color:black;">BU LİGDE OYNUYORSUNUZ</span>`; } 
