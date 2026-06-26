@@ -115,7 +115,8 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;} th,td
     <div id="authWrapper">
         <h1 id="mainTitle">✨ İZMİR 35 KORTENİS LİGİ ✨</h1><p style="text-align:center; margin:0 0 15px 0; font-size:12px; color:var(--sub-text);" id="subTitleText">Kariyer ve Lig Yönetim Sistemi</p>
         <div class="auth-card" id="loginPanel" style="display: block;">
-            <h3 style="margin-top:0;">Oyuncu Girişi</h3><select id="loginGlobalUserSelect" class="auth-select force-upper"><option value="">KULLANICI YÜKLENİYOR...</option></select>
+            <h3 style="margin-top:0;">Oyuncu Girişi</h3><input type="email" id="loginEmail" class="auth-input" placeholder="Kayıtlı E-posta Adresiniz">
+
             <input type="password" id="loginGlobalPassword" class="auth-input" placeholder="Şifreniz"><button class="auth-btn" onclick="loginGlobalUser()">🎾 GİRİŞ YAP</button>
             <div style="margin-top:15px; border-top:1px dashed var(--divider); padding-top:15px;"><button class="auth-btn" style="background:var(--success); color:black; font-size:15px; padding:15px; margin-bottom:15px; width:100%; border-radius:8px; box-shadow: 0 4px 15px rgba(0, 255, 170, 0.3);" onclick="toggleAuth('registerPanel')">📝 SİSTEME YENİ KAYIT OL</button><div style="display:flex; justify-content:center;"><span class="switch-link" style="margin:0; color:var(--warning);" onclick="forgotPassword()">Şifremi Unuttum</span></div></div>
             <p class="switch-link" style="color:var(--danger); margin-top:25px; display:block;" onclick="toggleAuth('adminLoginPanel')">Yönetici Paneli</p>
@@ -341,17 +342,37 @@ const database = firebase.database();
     function listenToCloud() {
         const errHandler = (error) => { console.error("Firebase Hatası:", error); document.getElementById('loginGlobalUserSelect').innerHTML = '<option value="">BAĞLANTI HATASI!</option>'; };
         
-        database.ref('the_35_gold_league/users').on('value', (s) => {
+          database.ref('the_35_gold_league/users').on('value', (s) => {
             try {
-                globalUsers = s.val() || {}; updateLoginDropdown(); buildGlobalStats(); 
-                let savedUserId = localStorage.getItem('korTennisUserId');
-                if(!loggedInUser && savedUserId) {
-                    if(savedUserId === 'ADMIN') { isAdmin = true; loggedInUser = {id:'ADMIN',name:'YÖNETİCİ'}; if(document.getElementById('authWrapper').style.display !== 'none') enterApp(); } 
-                    else if (globalUsers[savedUserId]) { isAdmin = false; loggedInUser = globalUsers[savedUserId]; if(document.getElementById('authWrapper').style.display !== 'none') enterApp(); }
-                } else if (!isAdmin && loggedInUser && globalUsers[loggedInUser.id]) { loggedInUser = globalUsers[loggedInUser.id]; }
-                let activePanel = document.querySelector('.panel.active'); if(activePanel && activePanel.id) switchTab(activePanel.id);
+                globalUsers = s.val() || {}; 
+                buildGlobalStats(); 
+                
+                // Sisteme giriş yapmış biri var mı anında kontrol et
+                let currentUser = firebase.auth().currentUser;
+                
+                if(currentUser) {
+                    if(currentUser.email === "admin@kortenisligi.com") { 
+                        isAdmin = true; 
+                        loggedInUser = {id:'ADMIN',name:'YÖNETİCİ'}; 
+                        if(document.getElementById('authWrapper').style.display !== 'none') enterApp(); 
+                    } 
+                    else if (globalUsers[currentUser.uid]) { 
+                        isAdmin = false; 
+                        loggedInUser = globalUsers[currentUser.uid]; 
+                        if(document.getElementById('authWrapper').style.display !== 'none') enterApp(); 
+                        
+                        // Hoş geldin ekranı kontrolü
+                        if(loggedInUser.welcomed === false || loggedInUser.welcomed === undefined) {
+                            setTimeout(() => { document.getElementById('welcomeModal').style.display = 'flex'; }, 500);
+                        }
+                    }
+                }
+                
+                let activePanel = document.querySelector('.panel.active'); 
+                if(activePanel && activePanel.id) switchTab(activePanel.id);
             } catch(e) { console.error("Kullanıcı okuma hatası:", e); }
         }, errHandler);
+
 
         database.ref('the_35_gold_league/multi_v1').on('value', (s) => {
             try {
@@ -381,7 +402,7 @@ function forgotPassword() {
         });
     });
 }
-    function updateLoginDropdown() { let sel = document.getElementById('loginGlobalUserSelect'); if(!sel) return; let p = sel.value; sel.innerHTML = '<option value="">İSMİNİZİ SEÇİN...</option>'; Object.values(globalUsers).filter(u => u && u.name).sort((a,b)=>String(a.name).localeCompare(String(b.name))).forEach(u => sel.innerHTML += `<option value="${u.id}">${u.name}</option>`); if(p) sel.value = p; }
+   
 
 function registerNewUser() {
     let nameRaw = document.getElementById('regName').value.trim(); 
@@ -468,35 +489,31 @@ function registerNewUser() {
     });
 }
 function loginGlobalUser() { 
-    let uid = document.getElementById('loginGlobalUserSelect').value; 
+    let email = document.getElementById('loginEmail').value.trim(); 
     let pass = document.getElementById('loginGlobalPassword').value; 
-    if(!uid) return alert("Lütfen isminizi seçin."); 
     
-    let u = globalUsers[uid]; 
-    if(!u || !u.email) {
-        return alert("Kullanıcı bilgisi veya e-posta adresi bulunamadı.");
-    }
+    if(!email || !pass) return showToast("Lütfen e-posta adresinizi ve şifrenizi girin.", "warning"); 
 
-    // BURA DEĞİŞTİ: Firebase Auth ile giriş kontrolü
-    firebase.auth().signInWithEmailAndPassword(u.email, pass)
+    let btn = document.querySelector('#loginPanel .auth-btn');
+    let originalText = btn.innerHTML;
+    btn.innerHTML = "⏳ GİRİŞ YAPILIYOR...";
+    btn.disabled = true;
+
+    firebase.auth().signInWithEmailAndPassword(email, pass)
     .then((userCredential) => {
-        // Giriş başarılı
-        isAdmin = false; 
-        loggedInUser = u; 
-        localStorage.setItem('korTennisUserId', u.id); 
-        enterApp(); 
-        
-        setTimeout(() => { 
-            if(u.welcomed === false || u.welcomed === undefined) {
-                document.getElementById('welcomeModal').style.display = 'flex'; 
-            }
-        }, 500); 
+        // Giriş başarılı, sayfa dinleyicisi otomatik olarak içeri alacak
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        document.getElementById('loginGlobalPassword').value = ''; // Şifre kutusunu temizle
     })
     .catch((error) => {
         console.error(error);
-        showToast("Hatalı Şifre Girdiniz veya Hesap Doğrulanamadı!", "error"); 
+        showToast("Hatalı E-posta veya Şifre!", "error"); 
+        btn.innerHTML = originalText;
+        btn.disabled = false;
     });
 }
+
 
     function closeWelcomeModal() { document.getElementById('welcomeModal').style.display = 'none'; database.ref('the_35_gold_league/users/' + loggedInUser.id + '/welcomed').set(true); loggedInUser.welcomed = true; switchTab('rules'); }
     function openPublicProfile(uid) { let u = globalUsers[uid]; if (!u) return alert("Oyuncu verisi bulunamadı."); let dStats = derivedGlobalStats[uid] || { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0, fame: 0, dynamicNTRP: u.sysScore };let founderHtml = u.isFounder ? '<div style="font-size:10px; color:black; background:var(--warning); display:inline-block; padding:2px 8px; border-radius:4px; margin-bottom:5px;">👑 KURUCU OYUNCU</div><br>' : '';
@@ -1454,18 +1471,17 @@ function grantFounderStatus() {
     }
 function logoutSession() {
     firebase.auth().signOut().then(() => {
-        localStorage.removeItem('korTennisUserId');
         loggedInUser = null;
         isAdmin = false;
-        showToast("Başarıyla çıkış yapıldı.", "info");
-        // Sayfayı ilk auth ekranına döndür
+        currentTid = null;
         document.getElementById('mainApp').style.display = "none";
         document.getElementById('appNavBar').style.display = "none";
         document.getElementById('authWrapper').style.display = "flex";
         toggleAuth('loginPanel');
+        showToast("Başarıyla çıkış yapıldı.", "success");
     }).catch(err => showToast("Çıkış yapılırken hata oluştu.", "error"));
 }
-        
+
 </script>
 </body>
 </html>
