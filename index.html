@@ -616,7 +616,7 @@ document.getElementById('profName').innerHTML = fBadge + loggedInUser.name;
     function renderTournamentsList() {
         let pList = document.getElementById('pendingTournamentsList'); let aList = document.getElementById('activeTournamentsList'); if(!pList || !aList) return;
         
-        let pListHtml = ""; // PERFORMANS DEĞİŞKENLERİ
+        let pListHtml = ""; 
         let aListHtml = "";
         let pendingCount = 0; let activeCount = 0;
         
@@ -639,11 +639,12 @@ document.getElementById('profName').innerHTML = fBadge + loggedInUser.name;
                 if(isAdmin) { btnHtml = `<button class="action-sm" style="background:var(--warning); color:black; padding:8px 12px;" onclick="document.getElementById('adminLeagueSelect').value='${tid}'; adminSwitchLeague();">⚙️ Yönet</button>`; } 
                 else if (amIIn) { btnHtml = `<button class="action-sm" style="background:var(--danger); padding:8px 12px;" onclick="leaveTournament('${tid}')">Çıkış Yap / Ayrıl</button>`; } 
                 else { if(isRegistrationExpired) { btnHtml = `<button class="action-sm" style="background:#334155; color:#94a3b8; padding:8px 12px; cursor:not-allowed;" disabled>Katılım Süresi Bitti</button>`; } else { btnHtml = `<button class="action-sm" style="background:var(--accent-color); color:black; padding:8px 12px;" onclick="joinTournament('${tid}')">Turnuvaya Katıl</button>`; } }
-                // Araya Eklenecek:
-btnHtml = `<button class="action-sm" style="background:#1e293b; color:white; border:1px solid var(--accent-color); padding:8px 12px; margin-right:5px;" onclick="openParticipantsModal('${tid}')">👥 Katılımcılar</button>` + btnHtml;
+                
+                // KATILIMCILAR BUTONU - DOĞRU YERDE
+                btnHtml = `<button class="action-sm" style="background:#1e293b; color:white; border:1px solid var(--accent-color); padding:8px 12px; margin-right:5px;" onclick="openParticipantsModal('${tid}')">👥 Katılımcılar</button>` + btnHtml;
 
                 pListHtml += `<div class="tournament-card"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><strong style="color:var(--accent-color); font-size:14px;">🏆 ${tName}</strong>${statusHtml}</div><div style="font-size:11px; color:#cbd5e1; margin-top:5px; background:#0f172a; padding:10px; border-radius:6px; border-left:3px solid var(--accent-color); line-height:1.4;">${pInfo}</div><div style="font-size:11px; color:#94a3b8; display:flex; gap:10px; margin-top:10px;"><span>Kapasite: ${N} / ${cap}</span><span>Seviye: ${s.tier}</span><span>Kategori: ${s.gender}</span></div><div style="display:flex; justify-content:flex-end; align-items:center; margin-top:5px;">${btnHtml}</div></div>`;
-           
+            
             } else if (status === 'active') {
                 activeCount++; let badge = ''; let btnHtml = ''; let subHtml = ''; 
                 
@@ -655,16 +656,17 @@ btnHtml = `<button class="action-sm" style="background:#1e293b; color:white; bor
                     else { badge = `<span class="tournament-badge" style="background:#334155;">MAÇLAR DEVAM EDİYOR</span>`; let subPool = _arr(t.substitutePool); let amISub = subPool.includes(loggedInUser.id); subHtml = `<div style="margin-top:10px; background:rgba(0, 229, 255, 0.05); border:1px dashed #00e5ff; padding:10px; border-radius:6px; font-size:11px;"><div style="color:#00e5ff; font-weight:bold; margin-bottom:5px;">🔄 Yedek Oyuncu Havuzu</div><div style="color:#cbd5e1; margin-bottom:8px;">Sakatlık vb. nedenlerle ayrılan oyuncuların yerine geçmek için yedek listesine girebilirsiniz.</div>${amISub ? `<button class="action-sm" style="background:var(--danger); padding:6px 10px;" onclick="leaveSubstitutePool('${tid}')">Listeden Çık</button> <span style="color:var(--success); font-weight:bold; margin-left:10px;">✅ Listedesiniz</span>` : `<button class="action-sm" style="background:#00e5ff; color:black; padding:6px 10px;" onclick="joinSubstitutePool('${tid}')">Ben Katılabilirim (Yedek Ol)</button>`}</div>`; }
                 }
 
-                // Butonu if-else bloğu tamamen bittikten sonra ekliyoruz
+                // KATILIMCILAR BUTONU - DOĞRU YERDE
                 btnHtml = `<button class="action-sm" style="background:#1e293b; color:white; border:1px solid var(--accent-color); padding:8px 12px; margin-right:5px;" onclick="openParticipantsModal('${tid}')">👥 Katılımcılar</button>` + btnHtml;
 
                 aListHtml += `<div class="tournament-card"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><strong style="color:var(--accent-color); font-size:14px;">🏆 ${tName}</strong>${badge}</div><div style="font-size:11px; color:#cbd5e1; margin-top:5px; background:#0f172a; padding:10px; border-radius:6px; border-left:3px solid var(--warning); line-height:1.4;">${pInfo}</div><div style="font-size:11px; color:#94a3b8; display:flex; justify-content:space-between; align-items:center; margin-top:10px;"><span>Kategori: ${s.gender} | ${s.tier} | Kapasite: ${N}</span>${btnHtml}</div>${subHtml}</div>`;
             }
-
+        });
         
         pList.innerHTML = (pendingCount === 0) ? `<div style="font-size:12px; color:var(--sub-text);">Şu an kayda açık yeni bir turnuva bulunmuyor.</div>` : pListHtml;
         aList.innerHTML = (activeCount === 0) ? `<div style="font-size:12px; color:var(--sub-text);">Şu an oynanan aktif bir turnuva bulunmuyor.</div>` : aListHtml;
     }
+
     function joinSubstitutePool(tid) { let t = allTourneys[tid]; let pool = _arr(t.substitutePool); if(!pool.includes(loggedInUser.id)) { pool.push(loggedInUser.id); allTourneys[tid].substitutePool = pool; renderTournamentsList(); database.ref(`the_35_gold_league/multi_v1/${tid}/substitutePool`).set(pool).then(() => { alert("Yedek listesine başarıyla eklendiniz!"); }); } }
     function leaveSubstitutePool(tid) { if(!confirm("Yedek listesinden çıkmak istediğinize emin misiniz?")) return; let t = allTourneys[tid]; let pool = _arr(t.substitutePool); let index = pool.indexOf(loggedInUser.id); if(index > -1) { pool.splice(index, 1); allTourneys[tid].substitutePool = pool; renderTournamentsList(); database.ref(`the_35_gold_league/multi_v1/${tid}/substitutePool`).set(pool).then(() => { alert("Yedek listesinden ayrıldınız."); }); } }
       function joinTournament(tid) {
