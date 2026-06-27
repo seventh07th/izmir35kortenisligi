@@ -2,6 +2,12 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>İzmir 35 KorTenis Ligi</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#040814">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+ 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script><script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <style>
@@ -1808,6 +1814,16 @@ function grantFounderStatus() {
     }).catch(err => showToast("Çıkış yapılırken hata oluştu.", "error"));
 }
 
+// ==========================================
+    // 🚀 PWA (MOBİL UYGULAMA) KAYIT MOTORU
+    // ==========================================
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./service-worker.js')
+            .then((reg) => console.log('PWA Service Worker başarıyla kaydedildi! Kapsam:', reg.scope))
+            .catch((err) => console.log('PWA Service Worker kayıt hatası:', err));
+        });
+    } 
 </script>
 </body>
 </html>
