@@ -194,13 +194,17 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;} th,td
  
 <script>
 
-    function getTierBadgeHtml(tier, ntrp) {
-    let bg = "#1e293b", color = "white", border = "var(--border-color)";
-    if(tier === 'PLATIN') { bg = "linear-gradient(135deg, #00e5ff, #007bb5)"; color = "black"; border = "#00e5ff"; }
-    else if(tier === 'GOLD') { bg = "linear-gradient(135deg, #ffd700, #ff8c00)"; color = "black"; border = "#ffd700"; }
-    else if(tier === 'SILVER') { bg = "linear-gradient(135deg, #e2e8f0, #94a3b8)"; color = "black"; border = "#e2e8f0"; }
-    return `<span style="background:${bg}; color:${color}; padding:3px 8px; border-radius:4px; font-size:10px; font-weight:bold; border:1px solid ${border}; white-space:nowrap; display:inline-block; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">${tier} (${ntrp})</span>`;
-}
+function getTierBadgeHtml(tier, ntrp) {
+        let color = "white", border = "var(--border-color)", icon = "🎾";
+        
+        if (tier === 'PLATIN') { color = "#00e5ff"; border = "#00e5ff"; icon = "💎"; }
+        else if (tier === 'GOLD') { color = "#ffd700"; border = "#ffd700"; icon = "🥇"; }
+        else if (tier === 'SILVER') { color = "#cbd5e1"; border = "#94a3b8"; icon = "🥈"; }
+        else if (tier === 'OPEN') { color = "#00ffaa"; border = "#00ffaa"; icon = "🌍"; }
+        
+        let ntrpText = ntrp ? ` (${ntrp})` : '';
+        return `<span style="background:#0f172a; color:${color}; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:bold; border:1px solid ${border}; white-space:nowrap; display:inline-block; box-shadow: 0 2px 5px rgba(0,0,0,0.3); text-shadow: 1px 1px 1px rgba(0,0,0,0.5);">${icon} ${tier}${ntrpText}</span>`;
+    }
   
     
     /* =========================================
@@ -558,9 +562,29 @@ function loginGlobalUser() {
 
 
     function closeWelcomeModal() { document.getElementById('welcomeModal').style.display = 'none'; database.ref('the_35_gold_league/users/' + loggedInUser.id + '/welcomed').set(true); loggedInUser.welcomed = true; switchTab('rules'); }
-    function openPublicProfile(uid) { let u = globalUsers[uid]; if (!u) return alert("Oyuncu verisi bulunamadı."); let dStats = derivedGlobalStats[uid] || { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0, fame: 0, dynamicNTRP: u.sysScore };let founderHtml = u.isFounder ? '<div style="font-size:10px; color:black; background:var(--warning); display:inline-block; padding:2px 8px; border-radius:4px; margin-bottom:5px;">👑 KURUCU OYUNCU</div><br>' : '';
-document.getElementById('pubName').innerHTML = founderHtml + (u.name || 'BİLİNMİYOR'); ; document.getElementById('pubTier').innerText = `${u.tier || 'BELİRSİZ'} (${dStats.dynamicNTRP})`; document.getElementById('pubGender').innerText = u.gender || '-'; document.getElementById('pubStyle').innerText = (u.hand && u.backhand) ? (u.hand + " / " + u.backhand + " BH") : "BELİRTİLMEDİ"; document.getElementById('pubKKor').innerText = (dStats.k_kor || 0).toFixed(1); document.getElementById('pubFame').innerText = (dStats.fame || 0); document.getElementById('pubWinLoss').innerText = `${dStats.gWins || 0}G - ${dStats.gLoss || 0}M`; document.getElementById('pubAvail').innerText = (u.availability && u.availability.length) ? u.availability.map(a=>a.toLocaleUpperCase('tr-TR')).join(", ") : "BELİRTİLMEDİ"; document.getElementById('publicProfileModal').style.display = 'flex'; }
-    function closePublicProfile() { document.getElementById('publicProfileModal').style.display = 'none'; }
+   
+function openPublicProfile(uid) { 
+        let u = globalUsers[uid]; if (!u) return alert("Oyuncu verisi bulunamadı."); 
+        let dStats = derivedGlobalStats[uid] || { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0, fame: 0, dynamicNTRP: u.sysScore };
+        let founderHtml = u.isFounder ? '<div style="font-size:10px; color:black; background:var(--warning); display:inline-block; padding:2px 8px; border-radius:4px; margin-bottom:5px;">👑 KURUCU OYUNCU</div><br>' : '';
+        document.getElementById('pubName').innerHTML = founderHtml + (u.name || 'BİLİNMİYOR'); 
+        
+        // YENİ: Rozetin düzgün görünmesi için HTML'deki eski arkaplanı şeffaf yapıyoruz
+        let pbEl = document.getElementById('pubTier');
+        pbEl.style.background = 'transparent'; pbEl.style.padding = '0'; pbEl.style.border = 'none';
+        let dynTier = dStats.dynamicTier || u.tier || 'BELİRSİZ';
+        pbEl.innerHTML = getTierBadgeHtml(dynTier, dStats.dynamicNTRP); 
+        
+        document.getElementById('pubGender').innerText = u.gender || '-'; 
+        document.getElementById('pubStyle').innerText = (u.hand && u.backhand) ? (u.hand + " / " + u.backhand + " BH") : "BELİRTİLMEDİ"; 
+        document.getElementById('pubKKor').innerText = (dStats.k_kor || 0).toFixed(1); 
+        document.getElementById('pubFame').innerText = (dStats.fame || 0); 
+        document.getElementById('pubWinLoss').innerText = `${dStats.gWins || 0}G - ${dStats.gLoss || 0}M`; 
+        document.getElementById('pubAvail').innerText = (u.availability && u.availability.length) ? u.availability.map(a=>a.toLocaleUpperCase('tr-TR')).join(", ") : "BELİRTİLMEDİ"; 
+        document.getElementById('publicProfileModal').style.display = 'flex'; 
+    }
+ 
+ function closePublicProfile() { document.getElementById('publicProfileModal').style.display = 'none'; }
    function loginAdmin() { 
     // Sabit admin e-postanız (Firebase'de oluşturduğunuz adres)
     const ADMIN_EMAIL = "admin@kortenisligi.com"; 
@@ -640,14 +664,17 @@ function changeAdminPassword() {
  
     function openAdminGlobalNotifs() { document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tabsContainer').style.display = 'none'; document.getElementById('deleteLeagueBtn').style.display = 'none'; document.getElementById('adminLeagueSelect').value = 'notifs'; document.getElementById('admin_notifs').classList.add('active'); renderAdminNotifs(); }
     function openAdminGlobalTournaments() { document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tabsContainer').style.display = 'none'; document.getElementById('deleteLeagueBtn').style.display = 'none'; document.getElementById('adminLeagueSelect').value = 'tournaments'; document.getElementById('tournaments').classList.add('active'); renderTournamentsList(); }
-    function renderProfile() {
+    
+function renderProfile() {
         if(!loggedInUser || isAdmin) return; let dStats = derivedGlobalStats[loggedInUser.id] || { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0, fame: loggedInUser.fame, dynamicNTRP: loggedInUser.sysScore };
-       let fBadge = loggedInUser.isFounder ? '<div style="font-size:10px; color:black; background:var(--warning); display:inline-block; padding:2px 8px; border-radius:4px; margin-bottom:5px;">👑 KURUCU OYUNCU</div><br>' : '';
-document.getElementById('profName').innerHTML = fBadge + loggedInUser.name; 
+        let fBadge = loggedInUser.isFounder ? '<div style="font-size:10px; color:black; background:var(--warning); display:inline-block; padding:2px 8px; border-radius:4px; margin-bottom:5px;">👑 KURUCU OYUNCU</div><br>' : '';
+        document.getElementById('profName').innerHTML = fBadge + loggedInUser.name; 
         
-        // PROFIL EKRANINA DA RENKLI ROZET EKLENDI
+        // YENİ: Rozetin düzgün görünmesi için HTML'deki eski arkaplanı şeffaf yapıyoruz
+        let ptEl = document.getElementById('profTier');
+        ptEl.style.background = 'transparent'; ptEl.style.padding = '0'; ptEl.style.border = 'none';
         let dynTier = dStats.dynamicTier || loggedInUser.tier || 'BELİRSİZ';
-        document.getElementById('profTier').innerHTML = getTierBadgeHtml(dynTier, dStats.dynamicNTRP); 
+        ptEl.innerHTML = getTierBadgeHtml(dynTier, dStats.dynamicNTRP); 
         
         document.getElementById('profStyle').innerText = (loggedInUser.hand && loggedInUser.backhand) ? (loggedInUser.hand + " / " + loggedInUser.backhand + " BH") : "STİL BELİRTİLMEDİ";
         document.getElementById('profKKor').innerText = (dStats.k_kor || 0).toFixed(1); document.getElementById('profFame').innerText = (dStats.fame || 0); document.getElementById('profWinLoss').innerText = `${dStats.gWins || 0}G - ${dStats.gLoss || 0}M`; document.getElementById('profTournaments').innerText = `Oynadığı Toplam Maç: ${dStats.gMatch || 0}`; document.getElementById('profAvail').innerText = loggedInUser.availability ? loggedInUser.availability.map(a=>a.toLocaleUpperCase('tr-TR')).join(', ') : "Belirtilmedi";
@@ -663,8 +690,8 @@ document.getElementById('profName').innerHTML = fBadge + loggedInUser.name;
                 if (m.played && m.pending && m.enteredBy !== loggedInUser.id) { 
                     myPendingScore.push(`<span class="player-link" onclick="switchTab('matches')" style="display:block; padding-top:4px;"><strong>[${t.settings.customName || "Turnuva"}]</strong> ${m.p1Name} vs ${m.p2Name} maçınızın skor onayı için buraya tıklayın.</span>`); 
                 }
-            }); // KAZA SONUCU SİLİNEN KAPANIŞ PARANTEZİ EKLENDİ
-        }); // KAZA SONUCU SİLİNEN KAPANIŞ PARANTEZİ EKLENDİ
+            }); 
+        }); 
 
         if (myPendingScore.length > 0) { 
             myPendingScore.forEach(n => notifHtml += `<div class="notification-card" style="margin-bottom:10px;">🚨 <strong>SKOR ONAYI BEKLİYOR:</strong> ${n} Lütfen 'Skor Gir' sekmesinden işlemi tamamlayın.</div>`); 
@@ -673,7 +700,6 @@ document.getElementById('profName').innerHTML = fBadge + loggedInUser.name;
         }
         document.getElementById('profNotificationsContainer').innerHTML = notifHtml;
     }
-
 
     function renderAdminNotifs() {
         if(!isAdmin) return;
@@ -1599,30 +1625,36 @@ function submitScore(mId, isP2, btn) {
     function closeSubstituteModal() { document.getElementById('substituteModal').style.display = 'none'; }
     // --- KATILIMCILARI GÖRME ÖZELLİĞİ ---
 function openParticipantsModal(tid) {
-    let t = allTourneys[tid];
-    if (!t) return;
-    let status = t.settings.status || 'active';
-    let uids = status === 'pending' ? _arr(t.registeredPlayers) : _arr(t.players).map(p => p.id);
+        let t = allTourneys[tid];
+        if (!t) return;
+        let status = t.settings.status || 'active';
+        let uids = status === 'pending' ? _arr(t.registeredPlayers) : _arr(t.players).map(p => p.id);
 
-    let html = '';
-    let plist = uids.map(uid => globalUsers[uid]).filter(u => u);
-    
-    // İsme göre alfabetik sırala
-    plist.sort((a, b) => a.name.localeCompare(b.name));
+        let html = '';
+        let plist = uids.map(uid => globalUsers[uid]).filter(u => u);
+        
+        // İsme göre alfabetik sırala
+        plist.sort((a, b) => a.name.localeCompare(b.name));
 
-    plist.forEach((u, i) => {
-        let isFnd = u.isFounder ? '<span style="color:var(--warning); font-size:12px; margin-left:5px;" title="Kurucu Oyuncu">👑</span>' : '';
-        html += `<div style="padding:10px 8px; border-bottom:1px solid var(--divider); display:flex; justify-content:space-between; align-items:center;">
-            <span class="player-link" style="font-weight:bold; font-size:13px;" onclick="closeParticipantsModal(); openPublicProfile('${u.id}')">${i+1}. ${u.name} ${isFnd}</span>
-            <span style="font-size:10px; color:black; background:var(--accent-color); padding:2px 6px; border-radius:4px; font-weight:bold;">${u.tier}</span>
-        </div>`;
-    });
+        plist.forEach((u, i) => {
+            let isFnd = u.isFounder ? '<span style="color:var(--warning); font-size:12px; margin-left:5px;" title="Kurucu Oyuncu">👑</span>' : '';
+            
+            // YENİ ROZET SİSTEMİNİ LİSTEYE ENTEGRE ETME
+            let dStats = derivedGlobalStats[u.id] || {};
+            let dynTier = dStats.dynamicTier || u.tier || 'BELİRSİZ';
+            let badgeHtml = getTierBadgeHtml(dynTier, dStats.dynamicNTRP || u.sysScore);
 
-    if(html === '') html = '<div style="font-size:12px; color:var(--sub-text); text-align:center;">Henüz kayıtlı oyuncu yok.</div>';
+            html += `<div style="padding:10px 8px; border-bottom:1px solid var(--divider); display:flex; justify-content:space-between; align-items:center;">
+                <span class="player-link" style="font-weight:bold; font-size:13px;" onclick="closeParticipantsModal(); openPublicProfile('${u.id}')">${i+1}. ${u.name} ${isFnd}</span>
+                ${badgeHtml}
+            </div>`;
+        });
 
-    document.getElementById('participantsListContainer').innerHTML = html;
-    document.getElementById('participantsModal').style.display = 'flex';
-}
+        if(html === '') html = '<div style="font-size:12px; color:var(--sub-text); text-align:center;">Henüz kayıtlı oyuncu yok.</div>';
+
+        document.getElementById('participantsListContainer').innerHTML = html;
+        document.getElementById('participantsModal').style.display = 'flex';
+    }
 function closeParticipantsModal() { document.getElementById('participantsModal').style.display = 'none'; }
 
 // --- ADMİN İÇİN KURUCU (FOUNDER) YAPMA BUTONU ---
