@@ -102,7 +102,8 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;} th,td
 
 <div class="container">
     <div class="nav-bar" id="appNavBar">
-        <div style="display:flex; gap:10px; align-items:center;">
+    <div style="display:flex; gap:10px; align-items:center;">
+            <button class="nav-btn" onclick="goBackTab()" id="backBtn" style="background:#475569; color:white;">🔙 Geri</button>
             <button class="nav-btn" onclick="goHome()" id="homeBtn" style="display:none;">🏠 Ana Sayfa</button>
             <button class="nav-btn" id="navAdminNotifBtn" onclick="openAdminGlobalNotifs()" style="display:none; background:var(--danger); color:white; border-color:var(--danger);">🔔 BİLDİRİMLER</button>
             <button class="nav-btn" id="navAdminTournamentsBtn" onclick="openAdminGlobalTournaments()" style="display:none; background:var(--success); color:black; border-color:var(--success);">🎾 TURNUVALAR</button>
@@ -110,7 +111,6 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;} th,td
         </div>
         <div style="text-align:center;"><div style="font-size: 13px; font-weight: bold; color: var(--accent-color);" id="navLeagueTitle">İZMİR 35 KORTENİS LİGİ</div><div style="font-size: 9px; color: var(--sub-text);" id="navLeagueSub">KARİYER VE LİG YÖNETİM SİSTEMİ</div></div>
         <button class="nav-btn" style="background: var(--danger); border-color: var(--danger);" onclick="logoutSession()">🚪 Çıkış</button>
-    </div>
 
     <div id="authWrapper">
         <h1 id="mainTitle">✨ İZMİR 35 KORTENİS LİGİ ✨</h1><p style="text-align:center; margin:0 0 15px 0; font-size:12px; color:var(--sub-text);" id="subTitleText">Kariyer ve Lig Yönetim Sistemi</p>
@@ -160,6 +160,39 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;} th,td
     </div>
 </div>
 
+<div id="adminEditPlayerModal" class="modal">
+    <div class="modal-content" style="max-width:400px; text-align:left;">
+        <button style="position:absolute; top:10px; right:15px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer;" onclick="closeAdminEditModal()">✖</button>
+        <h3 style="color:var(--accent-color); margin-top:0; text-align:center;">⚙️ OYUNCU YÖNETİM PANELİ</h3>
+        
+        <input type="hidden" id="editPlayerUid">
+        
+        <label style="font-size:11px; color:var(--sub-text); font-weight:bold;">OYUNCU ADI SOYADI</label>
+        <input type="text" id="editPlayerName" class="auth-input force-upper" style="text-align:left; margin-top:4px;">
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div>
+                <label style="font-size:11px; color:var(--sub-text); font-weight:bold;">NTRP SEVİYESİ (1.0 - 7.0)</label>
+                <input type="text" id="editPlayerScore" class="auth-input" style="margin-top:4px;">
+            </div>
+            <div>
+                <label style="font-size:11px; color:var(--sub-text); font-weight:bold;">ŞÖHRET PUANI (FAME)</label>
+                <input type="number" id="editPlayerFame" class="auth-input" style="margin-top:4px;">
+            </div>
+        </div>
+
+        <div style="background:#1e293b; padding:12px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:15px; display:flex; align-items:center; justify-content:between;">
+            <div style="flex:1; padding-right:10px;">
+                <strong style="color:var(--danger); font-size:12px;">⛔ HESABI ASKIYA AL (BAN)</strong>
+                <p style="font-size:10px; color:var(--sub-text); margin:2px 0 0 0;">Oyuncu sisteme girer ama hiçbir lige katılamaz.</p>
+            </div>
+            <input type="checkbox" id="editPlayerIsBanned" style="width:20px; height:20px; cursor:pointer;">
+        </div>
+
+        <button class="modal-btn" style="background:var(--success); color:black; margin-top:5px;" onclick="saveAdminPlayerChanges()">Değişiklikleri Veritabanına İşle 💾</button>
+    </div>
+</div>
+ 
 <script>
 
     function getTierBadgeHtml(tier, ntrp) {
@@ -256,7 +289,7 @@ const database = firebase.database();
 
     let globalUsers = {}; let allTourneys = {}; let currentTid = null; let isAdmin = false; let loggedInUser = null; 
     let players = []; let matches = []; let currentSettings = null; let passwordResets = {}; 
-    let derivedGlobalStats = {}; let substituteOldUid = null;
+    let derivedGlobalStats = {}; let substituteOldUid = null;let previousTab = null;
 
     function _arr(obj) { if(!obj) return []; let arr = Array.isArray(obj) ? obj : Object.values(obj); return arr.filter(item => item !== null && item !== undefined); }
     window.onload = function() { listenToCloud(); };
@@ -312,15 +345,16 @@ const database = firebase.database();
             if(!u) return; let myMatches = [];
             Object.keys(allTourneys).forEach(tid => { let t = allTourneys[tid]; if(t && t.settings && t.settings.status === 'active' && t.matches) { _arr(t.matches).forEach(m => { if(m.played && !m.pending && !m.isWO && (m.p1 === u.id || m.p2 === u.id)) { myMatches.push(m); } }); } });
             myMatches.sort((a,b) => (a.savedAt||0) - (b.savedAt||0));
-            let ntrp = parseFloat(u.sysScore || 4.0); let chunks = Math.floor(myMatches.length / 10);
+           let ntrp = parseFloat(u.sysScore || 4.0); 
+            let chunks = Math.floor(myMatches.length / 6); // 10 Maçtan 6 Maça düşürüldü
             for(let c=0; c<chunks; c++) {
-                let chunkMatches = myMatches.slice(c*10, (c+1)*10); let tWon = 0, tTot = 0, oppSum = 0;
+                let chunkMatches = myMatches.slice(c*6, (c+1)*6); let tWon = 0, tTot = 0, oppSum = 0;
                 chunkMatches.forEach(m => {
                     let isP1 = m.p1 === u.id; let oppId = isP1 ? m.p2 : m.p1; let oppU = globalUsers[oppId]; oppSum += parseFloat(oppU ? (oppU.sysScore||4.0) : 4.0);
                     let mGames = (parseInt(isP1 ? m.p1S1 : m.p2S1)||0) + (parseInt(isP1 ? m.p1S2 : m.p2S2)||0); let oGames = (parseInt(isP1 ? m.p2S1 : m.p1S1)||0) + (parseInt(isP1 ? m.p2S2 : m.p1S2)||0);
                     tWon += mGames; tTot += (mGames + oGames);
                 });
-                let avgOpp = oppSum / 10; let gf = ntrp - avgOpp; let exp = 50 + (gf * 25); if(exp > 95) exp = 95; if(exp < 5) exp = 5;
+                let avgOpp = oppSum / 6; let gf = ntrp - avgOpp; let exp = 50 + (gf * 25); if(exp > 95) exp = 95; if(exp < 5) exp = 5;
                 let act = tTot > 0 ? (tWon/tTot)*100 : 0; ntrp = ntrp + ((act - exp) * 0.015);
             }
             
@@ -698,7 +732,13 @@ document.getElementById('profName').innerHTML = fBadge + loggedInUser.name;
     function joinSubstitutePool(tid) { let t = allTourneys[tid]; let pool = _arr(t.substitutePool); if(!pool.includes(loggedInUser.id)) { pool.push(loggedInUser.id); allTourneys[tid].substitutePool = pool; renderTournamentsList(); database.ref(`the_35_gold_league/multi_v1/${tid}/substitutePool`).set(pool).then(() => { alert("Yedek listesine başarıyla eklendiniz!"); }); } }
     function leaveSubstitutePool(tid) { if(!confirm("Yedek listesinden çıkmak istediğinize emin misiniz?")) return; let t = allTourneys[tid]; let pool = _arr(t.substitutePool); let index = pool.indexOf(loggedInUser.id); if(index > -1) { pool.splice(index, 1); allTourneys[tid].substitutePool = pool; renderTournamentsList(); database.ref(`the_35_gold_league/multi_v1/${tid}/substitutePool`).set(pool).then(() => { alert("Yedek listesinden ayrıldınız."); }); } }
       function joinTournament(tid) {
-        let t = allTourneys[tid]; let s = t.settings;
+    
+        // BAN KONTROLÜ
+        if (loggedInUser && loggedInUser.isBanned) {
+            return showToast("İŞLEM ENGELLENDİ: Hesabınız lig kuralları gereği askıya alınmıştır!", "error");
+        }
+       
+       let t = allTourneys[tid]; let s = t.settings;
         if(s.gender !== 'KARMA' && s.gender !== 'OPEN' && s.gender !== loggedInUser.gender) { return showToast(`HATA: Bu turnuva sadece ${s.gender} kategorisi içindir.`, "error"); }
         
         // Dinamik Seviye (Tier) Haritası
@@ -779,23 +819,56 @@ function renderAdminChecklist() {
         adminFilterPlayers();
     }
 
-    // Yöneticinin manuel seviye belirleme fonksiyonu
+  // Modalı Aç ve Oyuncunun Güncel Verilerini Doldur
     window.editUserNTRP = function(uid) {
         let u = globalUsers[uid];
-        showCustomPrompt("SEVİYE (NTRP) GÜNCELLE", `${u.name} adlı oyuncunun güncel puanını girin (Örn: 4.5):`, false, (val) => {
-            if(!val) return;
-            let ntrp = parseFloat(val.replace(',', '.')); // Virgül girilirse noktaya çevir
-            if(isNaN(ntrp) || ntrp < 1.0 || ntrp > 7.0) return showToast("HATA: 1.0 ile 7.0 arasında geçerli bir değer girin.", "error");
-            
-            let tier = "SILVER"; 
-            if (ntrp >= 6.0) tier = "PLATIN"; 
-            else if (ntrp >= 4.0) tier = "GOLD"; 
-            
-            database.ref(`the_35_gold_league/users/${uid}`).update({
-                sysScore: ntrp.toFixed(1),
-                tier: tier
-            }).then(() => showToast(`${u.name} oyuncusunun seviyesi ${tier} (${ntrp}) olarak güncellendi!`, "success"));
-        });
+        if(!u) return showToast("Oyuncu bulunamadı!", "error");
+        
+        document.getElementById('editPlayerUid').value = uid;
+        document.getElementById('editPlayerName').value = u.name || '';
+        document.getElementById('editPlayerScore').value = u.sysScore || '4.0';
+        document.getElementById('editPlayerFame').value = u.fame || 0;
+        document.getElementById('editPlayerIsBanned').checked = u.isBanned || false;
+        
+        document.getElementById('adminEditPlayerModal').style.display = 'flex';
+    }
+
+    window.closeAdminEditModal = function() {
+        document.getElementById('adminEditPlayerModal').style.display = 'none';
+    }
+
+    // Değişiklikleri Firebase Realtime Database'e Kaydet
+    window.saveAdminPlayerChanges = function() {
+        let uid = document.getElementById('editPlayerUid').value;
+        let newName = document.getElementById('editPlayerName').value.trim().toUpperCase();
+        let scoreRaw = document.getElementById('editPlayerScore').value.trim();
+        let newFame = parseInt(document.getElementById('editPlayerFame').value) || 0;
+        let isBanned = document.getElementById('editPlayerIsBanned').checked;
+        
+        if(!newName || !scoreRaw) return showToast("Ad ve seviye boş bırakılamaz!", "warning");
+        
+        let ntrp = parseFloat(scoreRaw.replace(',', '.'));
+        if(isNaN(ntrp) || ntrp < 1.0 || ntrp > 7.0) return showToast("HATA: Geçerli bir NTRP girin (1.0 - 7.0)", "error");
+        
+        let tier = "SILVER"; 
+        if (ntrp >= 6.0) tier = "PLATIN"; 
+        else if (ntrp >= 4.0) tier = "GOLD";
+
+        // Veritabanı paketini hazırla
+        let updateData = {
+            name: newName,
+            sysScore: ntrp.toFixed(1),
+            tier: tier,
+            fame: newFame,
+            isBanned: isBanned
+        };
+
+        database.ref(`the_35_gold_league/users/${uid}`).update(updateData)
+        .then(() => {
+            showToast(`${newName} profil güncellemeleri başarıyla kaydedildi!`, "success");
+            closeAdminEditModal();
+        })
+        .catch(err => showToast("Hata: " + err.message, "error"));
     }
  
     function updateSelectedCount() { document.getElementById('playerCountDisplay').innerText = document.querySelectorAll('.admin-chk:checked').length + " SEÇİLDİ"; }
@@ -903,10 +976,26 @@ window.viewPendingTournament = function(tid, tab) {
     function goHome() { if(isAdmin) { openAdminGlobalNotifs(); document.getElementById('adminLeagueSelect').value="notifs"; } else { switchTab('profile'); } }
     function deleteCurrentTournament() { if(!currentTid || !confirm("Bu ligi kalıcı olarak silmek istiyor musunuz?")) return; let tid = currentTid; currentTid = null; delete allTourneys[tid]; goHome(); database.ref('the_35_gold_league/multi_v1/' + tid).remove().then(() => alert("Lig silindi.")); }
 
+// Geri butonunun işleyiş fonksiyonu
+    window.goBackTab = function() {
+        if (previousTab) {
+            let target = previousTab;
+            previousTab = null; // Sonsuz döngüyü önlemek için sıfırla
+            switchTab(target);
+        } else {
+            goHome(); // Eğer hafızada geçmiş yoksa ana sayfaya at
+        }
+    }
+ 
     function switchTab(t) {
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        let targetPanel = document.getElementById(t); if(targetPanel) targetPanel.classList.add('active');
-        document.querySelectorAll('.tab-btn').forEach(b => { let attr = b.getAttribute('onclick'); if(attr && (attr.includes(`'${t}'`) || attr.includes(`"${t}"`))) { b.classList.add('active'); } });
+       
+        // GEÇMİŞ HAFIZASI SİSTEMİ: Aktif olan eski paneli kaydet
+        let currentActivePanel = document.querySelector('.panel.active');
+        if (currentActivePanel && currentActivePanel.id !== t) {
+            previousTab = currentActivePanel.id;
+        }
+
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
 
         let isGeneralMode = currentTid === null;
         let tp = document.getElementById('tabProfileBtn'); if(tp) tp.style.display = isGeneralMode ? 'block' : 'none';
@@ -1051,11 +1140,11 @@ window.viewPendingTournament = function(tid, tab) {
         </ul>
 
         <h3>7. DİNAMİK NTRP (SEVİYE) GÜNCELLEME ALGORİTMASI</h3>
-        <p style="font-size:12px;">Sistem her 10 maçlık periyotta performansınızı ölçer ve seviyenizi (+) veya (-) olarak günceller. Her oyunun, her maçın seviyenize doğrudan etkisi vardır! <em>(Not: Hükmen/WO biten maçlar tenis becerisi içermediği için bu hesaplamaya dahil edilmez).</em></p>
+        <p style="font-size:12px;">Sistem her 6 maçlık periyotta performansınızı ölçer ve seviyenizi (+) veya (-) olarak günceller. Her oyunun, her maçın seviyenize doğrudan etkisi vardır! <em>(Not: Hükmen/WO biten maçlar tenis becerisi içermediği için bu hesaplamaya dahil edilmez).</em></p>
         <ul style="font-size:12px;">
-            <li><strong>1. Güç Farkı (GF):</strong> Kendi seviyeniz ile son 10 maçtaki rakiplerinizin ortalama seviyesi arasındaki farktır.</li>
+            <li><strong>1. Güç Farkı (GF):</strong> Kendi seviyeniz ile son 6 maçtaki rakiplerinizin ortalama seviyesi arasındaki farktır.</li>
             <li><strong>2. Beklenen MİP:</strong> <code>50 + (GF × 25)</code><br> <em>(<strong>50: Nötr Noktasıdır.</strong> Denk oyuncuların maçı %50 paylaşacağı varsayılır. <strong>25: Etki Katsayısıdır.</strong> 1.0 NTRP farkın korta %25 avantaj yansıtacağı beklenir).</em></li>
-            <li><strong>3. Gerçek MİP:</strong> Son 10 maçta korta yansıttığınız gerçek oyun oranıdır.</li>
+            <li><strong>3. Gerçek MİP:</strong> Son 6 maçta korta yansıttığınız gerçek oyun oranıdır.</li>
             <li><strong>4. Yeni Seviye:</strong> <code>Eski NTRP + ((Gerçek MİP - Beklenen MİP) × 0.015)</code><br> <em>(<strong>0.015: Kalibrasyon Hızıdır.</strong> Seviyenizin mantıksızca zıplamasını engeller, istikrarlı bir değişim sağlar).</em></li>
         </ul>
         `;
