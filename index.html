@@ -194,6 +194,105 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;} th,td
  
 <script>
 
+// ==========================================
+    // 🔔 YENİ: OTOMATİK BİLDİRİM VE ANALİZ MOTORU
+    // ==========================================
+
+    window.processRGCNotifications = function(m) {
+        let t = allTourneys[currentTid];
+        let tName = t.settings.customName || "Turnuva";
+        
+        let winnerId = m.isWO ? m.woWinner : m.winnerId;
+        let loserId = (winnerId === m.p1) ? m.p2 : m.p1;
+        
+        if (winnerId && loserId) {
+            let winnerName = (winnerId === m.p1) ? m.p1Name : m.p2Name;
+            let loserName = (loserId === m.p1) ? m.p1Name : m.p2Name;
+            
+            let winnerOldOpps = new Set();
+            let loserOldOpps = new Set();
+            
+            _arr(t.matches).forEach(mx => {
+                if (mx.id !== m.id && mx.played && !mx.pending) {
+                    if (mx.p1 === winnerId) winnerOldOpps.add(mx.p2);
+                    if (mx.p2 === winnerId) winnerOldOpps.add(mx.p1);
+                    if (mx.p1 === loserId) loserOldOpps.add(mx.p2);
+                    if (mx.p2 === loserId) loserOldOpps.add(mx.p1);
+                }
+            });
+            
+            winnerOldOpps.forEach(oppUid => {
+                if(oppUid !== loserId) {
+                    addAlertToUser(oppUid, `🎾 <strong>LİGDE HAREKETLİLİK VAR!</strong> Korta çıktığınız eski rakibiniz <strong>${winnerName}</strong> korttan galip ayrıldı! Onun bu başarısı sizin Turnuva KOR puanınıza pozitif yansıdı. Puan durumuna göz atın!`);
+                }
+            });
+            
+            loserOldOpps.forEach(oppUid => {
+                if(oppUid !== winnerId) {
+                    addAlertToUser(oppUid, `📉 <strong>LİGDE HAREKETLİLİK VAR:</strong> Eski rakibiniz <strong>${loserName}</strong> son maçını kaybetti. RGÇ oranındaki bu düşüş nedeniyle KOR puanınızda ufak bir dalgalanma yaşandı. Sıralamanı korumak için sıradaki maçına odaklan!`);
+                }
+            });
+        }
+    }
+
+    window.checkNTRPAlert = function(uid, globalUsersData) {
+        let u = globalUsersData[uid]; if(!u) return;
+        let myMatches = [];
+        Object.keys(allTourneys).forEach(tid => { 
+            let t = allTourneys[tid]; 
+            if(t && t.settings && t.settings.status === 'active' && t.matches) { 
+                _arr(t.matches).forEach(m => { 
+                    if(m.played && !m.pending && !m.isWO && (m.p1 === uid || m.p2 === uid)) { myMatches.push(m); } 
+                }); 
+            } 
+        });
+        
+        let count = myMatches.length;
+        if (count > 0 && count % 6 === 0) {
+            myMatches.sort((a,b) => (a.savedAt||0) - (b.savedAt||0));
+            let ntrp = parseFloat(u.sysScore || 4.0); 
+            let chunks = Math.floor(count / 6);
+            
+            // Son bloğa kadarki Puan (Eski Puan)
+            let oldNtrp = ntrp;
+            for(let c=0; c<chunks-1; c++) {
+                let chunkMatches = myMatches.slice(c*6, (c+1)*6); let tWon = 0, tTot = 0, oppSum = 0;
+                chunkMatches.forEach(mx => {
+                    let isP1 = mx.p1 === u.id; let oppId = isP1 ? mx.p2 : mx.p1; let oppU = globalUsersData[oppId]; oppSum += parseFloat(oppU ? (oppU.sysScore||4.0) : 4.0);
+                    let mGames = (parseInt(isP1 ? mx.p1S1 : mx.p2S1)||0) + (parseInt(isP1 ? mx.p1S2 : mx.p2S2)||0); let oGames = (parseInt(isP1 ? mx.p2S1 : mx.p1S1)||0) + (parseInt(isP1 ? mx.p2S2 : mx.p1S2)||0);
+                    tWon += mGames; tTot += (mGames + oGames);
+                });
+                let avgOpp = oppSum / 6; let gf = oldNtrp - avgOpp; let exp = 50 + (gf * 25); if(exp > 95) exp = 95; if(exp < 5) exp = 5;
+                let act = tTot > 0 ? (tWon/tTot)*100 : 0; oldNtrp = oldNtrp + ((act - exp) * 0.015);
+            }
+            
+            // Tüm maçlar dahil Güncel Puan (Yeni Puan)
+            let newNtrp = ntrp;
+            for(let c=0; c<chunks; c++) {
+                let chunkMatches = myMatches.slice(c*6, (c+1)*6); let tWon = 0, tTot = 0, oppSum = 0;
+                chunkMatches.forEach(mx => {
+                    let isP1 = mx.p1 === u.id; let oppId = isP1 ? mx.p2 : mx.p1; let oppU = globalUsersData[oppId]; oppSum += parseFloat(oppU ? (oppU.sysScore||4.0) : 4.0);
+                    let mGames = (parseInt(isP1 ? mx.p1S1 : mx.p2S1)||0) + (parseInt(isP1 ? mx.p1S2 : mx.p2S2)||0); let oGames = (parseInt(isP1 ? mx.p2S1 : mx.p1S1)||0) + (parseInt(isP1 ? mx.p2S2 : mx.p1S2)||0);
+                    tWon += mGames; tTot += (mGames + oGames);
+                });
+                let avgOpp = oppSum / 6; let gf = newNtrp - avgOpp; let exp = 50 + (gf * 25); if(exp > 95) exp = 95; if(exp < 5) exp = 5;
+                let act = tTot > 0 ? (tWon/tTot)*100 : 0; newNtrp = newNtrp + ((act - exp) * 0.015);
+            }
+            
+            let oldVal = parseFloat(oldNtrp.toFixed(2)); let newVal = parseFloat(newNtrp.toFixed(2));
+            
+            if (newVal > oldVal) {
+                addAlertToUser(uid, `🚀 <strong>PERFORMANS ANALİZİ: SEVİYE ATLIYORSUN!</strong> Son 6 maçlık periyodun tamamlandı. Sahada harika iş çıkardın ve Dinamik NTRP seviyen <strong>[${newVal}]</strong> puana yükseldi!`);
+            } else if (newVal < oldVal) {
+                addAlertToUser(uid, `⚖️ <strong>PERFORMANS ANALİZİ: SEVİYE KALİBRASYONU.</strong> Son 6 maçlık periyodun tamamlandı. Zorlu maçlar geçirdin ve sistem NTRP seviyeni <strong>[${newVal}]</strong> olarak güncelledi. Yükselmek için antrenmanlara devam!`);
+            } else {
+                addAlertToUser(uid, `📊 <strong>PERFORMANS ANALİZİ: İSTİKRARLI GİDİYORSUN!</strong> Son 6 maçlık periyodun tamamlandı. Dinamik NTRP seviyen <strong>[${newVal}]</strong> olarak korundu.`);
+            }
+        }
+    }
+
+
+ 
 function getTierBadgeHtml(tier, ntrp) {
         let color = "white", border = "var(--border-color)", icon = "🎾";
         
@@ -752,8 +851,9 @@ function renderProfile() {
             } else if (status === 'active') {
                 activeCount++; let badge = ''; let btnHtml = ''; let subHtml = ''; 
                 
-                if(isAdmin) { 
-                    btnHtml = `<button class="action-sm" style="background:var(--warning); color:black; padding:8px 12px;" onclick="document.getElementById('adminLeagueSelect').value='${tid}'; adminSwitchLeague();">⚙️ Yönet</button>`; 
+            if(isAdmin) { 
+                    btnHtml = `<button class="action-sm" style="background:var(--warning); color:black; padding:8px 12px;" onclick="document.getElementById('adminLeagueSelect').value='${tid}'; adminSwitchLeague();">⚙️ Yönet</button>
+                               <button class="action-sm" style="background:var(--danger); color:white; padding:8px 12px; border:1px solid #ef4444;" onclick="finishTournament('${tid}')">🏁 Bitir & Ödül Dağıt</button>`; 
                 } else {
                     let participants = _arr(t.players); let amIPlaying = participants.some(p => p.id === loggedInUser.id);
                     if(amIPlaying) { badge = `<span class="tournament-badge" style="background:var(--success); color:black;">BU LİGDE OYNUYORSUNUZ</span>`; } 
@@ -1419,156 +1519,83 @@ function renderRivalsGrid() {
             checkStatus(m.id, isRev);
         });
     }
+
 function submitScore(mId, isP2, btn) {
-    let m = matches.find(x => String(x.id) === String(mId));
-    if (!m) return;
+        let m = matches.find(x => String(x.id) === String(mId));
+        if (!m) return;
 
-    if (!isAdmin && (!loggedInUser || (m.p1 !== loggedInUser.id && m.p2 !== loggedInUser.id))) {
-        showToast("HATA: Sadece kendi oynadığınız maçların skorunu girebilirsiniz!", "error");
-        return;
+        if (!isAdmin && (!loggedInUser || (m.p1 !== loggedInUser.id && m.p2 !== loggedInUser.id))) {
+            return showToast("HATA: Sadece kendi oynadığınız maçların skorunu girebilirsiniz!", "error");
+        }
+
+        let type = document.getElementById(`type_${mId}`).value;
+        if (!m.played) { 
+            let dVal = document.getElementById(`p_date_${mId}`).value; 
+            if(!dVal) return showToast("HATA: Maçın oynandığı tarihi seçmelisiniz!", "error"); 
+            m.matchDate = dVal; 
+        }
+
+        if(type === 'wo') {
+            m.isWO = true; m.woWinner = document.getElementById(`wo_winner_${mId}`).value; 
+            m.matchFormat = '6_GAME'; m.p1S1 = ''; m.p2S1 = ''; m.p1S2 = ''; m.p2S2 = ''; 
+            m.p1S1TB = ''; m.p2S1TB = ''; m.p1S2TB = ''; m.p2S2TB = ''; m.p1MT = ''; m.p2MT = '';
+        } else {
+            m.isWO = false; let fmt = document.getElementById(`m_${mId}_fmt`).value; m.matchFormat = fmt;
+            let t1 = document.getElementById(`m_${mId}_t_s1`).value; let b1 = document.getElementById(`m_${mId}_b_s1`).value; 
+            let t2 = document.getElementById(`m_${mId}_t_s2`).value; let b2 = document.getElementById(`m_${mId}_b_s2`).value;
+            
+            if (t1 === '' || b1 === '' || t2 === '' || b2 === '') return alert("HATA: Lütfen 1. ve 2. Set skorlarını eksiksiz giriniz!");
+            if((fmt === '6_GAME' && t1 === '6' && b1 === '6') || (fmt === '4_GAME' && t1 === '4' && b1 === '4')) return alert("HATA: Setler berabere bitemez. Tie-Break skorunu girin (Örn: 7-6)."); 
+            if((fmt === '6_GAME' && t2 === '6' && b2 === '6') || (fmt === '4_GAME' && t2 === '4' && b2 === '4')) return alert("HATA: 2. Set skoru berabere bitemez."); 
+            
+            let checkSet = (t, b) => { if(t==='' || b==='') return null; let nt = parseInt(t), nb = parseInt(b); if(fmt === '4_GAME') { if ((nt===4 && nb<=2)||(nb===4 && nt<=2)) return nt>nb?'T':'B'; if ((nt===5 && nb===3)||(nb===5 && nt===3)) return nt>nb?'T':'B'; if ((nt===5 && nb===4)||(nb===5 && nt===4)) return nt>nb?'T':'B'; } else { if ((nt===6 && nb<=4)||(nb===6 && nt<=4)) return nt>nb?'T':'B'; if ((nt===7 && nb===5)||(nb===7 && nt===5)) return nt>nb?'T':'B'; if ((nt===7 && nb===6)||(nb===7 && nt===6)) return nt>nb?'T':'B'; } return null; };
+            
+            let w1 = checkSet(t1, b1); if(!w1) return alert(`HATA: 1. Set skoru format kurallarına uygun değil!`);
+            let w2 = checkSet(t2, b2); if(!w2) return alert(`HATA: 2. Set skoru tenisin kurallarına uygun değil!`);
+            
+            let tbCheck = (t, b) => { if(t==='' || b==='') return "boş"; let nt = parseInt(t), nb = parseInt(b); let max = Math.max(nt, nb), min = Math.min(nt, nb); if(max < 7) return "hata"; if(max === 7 && min <= 5) return "ok"; if(max > 7 && (max - min) === 2) return "ok"; return "hata"; };
+            
+            if((fmt==='6_GAME' && ((t1==='7'&&b1==='6')||(b1==='7'&&t1==='6'))) || (fmt==='4_GAME' && ((t1==='5'&&b1==='4')||(b1==='5'&&t1==='4')))) { let tbT = document.getElementById(`m_${mId}_t_s1tb`).value; let tbB = document.getElementById(`m_${mId}_b_s1tb`).value; let res = tbCheck(tbT, tbB); if(res==='boş') return alert("HATA: 1. Set Tie-Break skorunu girmediniz!"); if(res==='hata') return alert(`HATA: 1. Set Tie-Break skoru kuraldışı.`); let winSet = parseInt(t1) > parseInt(b1) ? 'T' : 'B'; let winTb = parseInt(tbT) > parseInt(tbB) ? 'T' : 'B'; if (winSet !== winTb) return alert("HATA: 1. Set kazananı ile Tie-Break kazananı eşleşmiyor!"); }
+            if((fmt==='6_GAME' && ((t2==='7'&&b2==='6')||(b2==='7'&&t2==='6'))) || (fmt==='4_GAME' && ((t2==='5'&&b2==='4')||(b2==='5'&&t2==='4')))) { let tbT = document.getElementById(`m_${mId}_t_s2tb`).value; let tbB = document.getElementById(`m_${mId}_b_s2tb`).value; let res = tbCheck(tbT, tbB); if(res==='boş') return alert("HATA: 2. Set Tie-Break skorunu girmediniz!"); if(res==='hata') return alert(`HATA: 2. Set Tie-Break skoru kuraldışı.`); let winSet = parseInt(t2) > parseInt(b2) ? 'T' : 'B'; let winTb = parseInt(tbT) > parseInt(tbB) ? 'T' : 'B'; if (winSet !== winTb) return alert("HATA: 2. Set kazananı ile Tie-Break kazananı eşleşmiyor!"); }
+            
+            if(w1 !== w2) { let mtT = document.getElementById(`m_${mId}_t_mt`).value; let mtB = document.getElementById(`m_${mId}_b_mt`).value; if(mtT==='' || mtB==='') return alert("HATA: Setler 1-1 olduğu için 10'luk Maç Tie-Break skoru girmelisiniz!"); let nt = parseInt(mtT), nb = parseInt(mtB); let max = Math.max(nt, nb), min = Math.min(nt, nb); if(max < 10) return alert("HATA: Maç Tie-Break skoru kuraldışı (En az 10'da biter)."); if(max === 10 && min <= 8) {} else if(max > 10 && (max - min) === 2) {} else return alert("HATA: Maç Tie-Break skoru kuraldışı."); }
+
+            let getStr = (s) => { let el = document.getElementById(`m_${mId}_${s}`); return el ? el.value : ''; }; 
+            m.p1S1 = isP2 ? getStr('b_s1') : getStr('t_s1'); m.p2S1 = isP2 ? getStr('t_s1') : getStr('b_s1'); m.p1S2 = isP2 ? getStr('b_s2') : getStr('t_s2'); m.p2S2 = isP2 ? getStr('t_s2') : getStr('b_s2'); m.p1MT = isP2 ? getStr('b_mt') : getStr('t_mt'); m.p2MT = isP2 ? getStr('t_mt') : getStr('b_mt'); m.p1S1TB = isP2 ? getStr('b_s1tb') : getStr('t_s1tb'); m.p2S1TB = isP2 ? getStr('t_s1tb') : getStr('b_s1tb'); m.p1S2TB = isP2 ? getStr('b_s2tb') : getStr('t_s2tb'); m.p2S2TB = isP2 ? getStr('t_s2tb') : getStr('b_s2tb');
+        }
+        
+        btn.innerHTML = "⏳ İŞLENİYOR..."; btn.disabled = true; m.played = true; m.savedAt = Date.now();
+        
+        if (isAdmin) { 
+            m.pending = false; m.enteredBy = 'ADMIN'; 
+            // YENİ BİLDİRİM TETİKLEYİCİSİ
+            calculateStats();
+            processRGCNotifications(m);
+            if(!m.isWO) { checkNTRPAlert(m.p1, globalUsers); checkNTRPAlert(m.p2, globalUsers); }
+        } else { 
+            m.pending = true; m.enteredBy = loggedInUser.id; 
+        }
+        saveToDb(isAdmin ? "Skor Kaydedildi!" : "Skor Rakibin Onayına Gönderildi!");
     }
 
-    let type = document.getElementById(`type_${mId}`).value;
-    if (!m.played) { 
-        let dVal = document.getElementById(`p_date_${mId}`).value; 
-        if(!dVal) return showToast("HATA: Maçın oynandığı tarihi seçmelisiniz!", "error"); 
-        m.matchDate = dVal; 
-    }
-
-    if(type === 'wo') {
-        m.isWO = true; 
-        m.woWinner = document.getElementById(`wo_winner_${mId}`).value; 
-        m.matchFormat = '6_GAME';
-        m.p1S1 = ''; m.p2S1 = ''; m.p1S2 = ''; m.p2S2 = ''; 
-        m.p1S1TB = ''; m.p2S1TB = ''; m.p1S2TB = ''; m.p2S2TB = ''; 
-        m.p1MT = ''; m.p2MT = '';
-    } 
-   else {
-        m.isWO = false; 
-        let fmt = document.getElementById(`m_${mId}_fmt`).value; 
-        m.matchFormat = fmt;
-        
-        let t1 = document.getElementById(`m_${mId}_t_s1`).value; 
-        let b1 = document.getElementById(`m_${mId}_b_s1`).value; 
-        let t2 = document.getElementById(`m_${mId}_t_s2`).value; 
-        let b2 = document.getElementById(`m_${mId}_b_s2`).value;
-        
-        if (t1 === '' || b1 === '' || t2 === '' || b2 === '') {
-            return alert("HATA: Lütfen 1. ve 2. Set skorlarını eksiksiz giriniz!");
-        }
-
-        if((fmt === '6_GAME' && t1 === '6' && b1 === '6') || (fmt === '4_GAME' && t1 === '4' && b1 === '4')) { 
-            return alert("HATA: Setler berabere bitemez. Lütfen skoru düzeltin veya Tie-Break sonucunu işleyin (Örn: 7-6)."); 
-        }
-        if((fmt === '6_GAME' && t2 === '6' && b2 === '6') || (fmt === '4_GAME' && t2 === '4' && b2 === '4')) { 
-            return alert("HATA: Setler berabere bitemez. Lütfen 2. set skorunu düzeltin."); 
-        }
-        
-        let checkSet = (t, b) => { 
-            if(t==='' || b==='') return null; 
-            let nt = parseInt(t), nb = parseInt(b); 
-            if(fmt === '4_GAME') { 
-                if ((nt===4 && nb<=2)||(nb===4 && nt<=2)) return nt>nb?'T':'B'; 
-                if ((nt===5 && nb===3)||(nb===5 && nt===3)) return nt>nb?'T':'B'; 
-                if ((nt===5 && nb===4)||(nb===5 && nt===4)) return nt>nb?'T':'B'; 
-            } else { 
-                if ((nt===6 && nb<=4)||(nb===6 && nt<=4)) return nt>nb?'T':'B'; 
-                if ((nt===7 && nb===5)||(nb===7 && nt===5)) return nt>nb?'T':'B'; 
-                if ((nt===7 && nb===6)||(nb===7 && nt===6)) return nt>nb?'T':'B'; 
-            } 
-            return null; 
-        };
-        
-        let w1 = checkSet(t1, b1); if(!w1) return alert(`HATA: 1. Set skoru format kurallarına uygun değil!`);
-        let w2 = checkSet(t2, b2); if(!w2) return alert(`HATA: 2. Set skoru tenisin kurallarına uygun değil!`);
-        
-        let tbCheck = (t, b) => { 
-            if(t==='' || b==='') return "boş"; 
-            let nt = parseInt(t), nb = parseInt(b); 
-            let max = Math.max(nt, nb), min = Math.min(nt, nb); 
-            if(max < 7) return "hata"; 
-            if(max === 7 && min <= 5) return "ok"; 
-            if(max > 7 && (max - min) === 2) return "ok"; 
-            return "hata"; 
-        };
-        
-        if((fmt==='6_GAME' && ((t1==='7'&&b1==='6')||(b1==='7'&&t1==='6'))) || (fmt==='4_GAME' && ((t1==='5'&&b1==='4')||(b1==='5'&&t1==='4')))) { 
-            let tbT = document.getElementById(`m_${mId}_t_s1tb`).value; let tbB = document.getElementById(`m_${mId}_b_s1tb`).value; 
-            let res = tbCheck(tbT, tbB); 
-            if(res==='boş') return alert("HATA: 1. Set Tie-Break skorunu girmediniz!"); 
-            if(res==='hata') return alert(`HATA: 1. Set Tie-Break skoru kuraldışı.`); 
-            let winSet = parseInt(t1) > parseInt(b1) ? 'T' : 'B'; let winTb = parseInt(tbT) > parseInt(tbB) ? 'T' : 'B'; 
-            if (winSet !== winTb) return alert("HATA: 1. Set kazananı ile Tie-Break kazananı eşleşmiyor!"); 
-        }
-        
-        if((fmt==='6_GAME' && ((t2==='7'&&b2==='6')||(b2==='7'&&t2==='6'))) || (fmt==='4_GAME' && ((t2==='5'&&b2==='4')||(b2==='5'&&t2==='4')))) { 
-            let tbT = document.getElementById(`m_${mId}_t_s2tb`).value; let tbB = document.getElementById(`m_${mId}_b_s2tb`).value; 
-            let res = tbCheck(tbT, tbB); 
-            if(res==='boş') return alert("HATA: 2. Set Tie-Break skorunu girmediniz!"); 
-            if(res==='hata') return alert(`HATA: 2. Set Tie-Break skoru kuraldışı.`); 
-            let winSet = parseInt(t2) > parseInt(b2) ? 'T' : 'B'; let winTb = parseInt(tbT) > parseInt(tbB) ? 'T' : 'B'; 
-            if (winSet !== winTb) return alert("HATA: 2. Set kazananı ile Tie-Break kazananı eşleşmiyor!"); 
-        }
-        
-        if(w1 !== w2) { 
-            let mtT = document.getElementById(`m_${mId}_t_mt`).value; let mtB = document.getElementById(`m_${mId}_b_mt`).value; 
-            if(mtT==='' || mtB==='') return alert("HATA: Setler 1-1 olduğu için 10'luk Maç Tie-Break skoru girmelisiniz!"); 
-            let nt = parseInt(mtT), nb = parseInt(mtB); let max = Math.max(nt, nb), min = Math.min(nt, nb); 
-            if(max < 10) return alert("HATA: Maç Tie-Break skoru kuraldışı (En az 10'da biter)."); 
-            if(max === 10 && min <= 8) {} else if(max > 10 && (max - min) === 2) {} else return alert("HATA: Maç Tie-Break skoru kuraldışı."); 
-        }
-
-        let getStr = (s) => { let el = document.getElementById(`m_${mId}_${s}`); return el ? el.value : ''; }; 
-        m.p1S1 = isP2 ? getStr('b_s1') : getStr('t_s1'); 
-        m.p2S1 = isP2 ? getStr('t_s1') : getStr('b_s1'); 
-        m.p1S2 = isP2 ? getStr('b_s2') : getStr('t_s2'); 
-        m.p2S2 = isP2 ? getStr('t_s2') : getStr('b_s2'); 
-        m.p1MT = isP2 ? getStr('b_mt') : getStr('t_mt'); 
-        m.p2MT = isP2 ? getStr('t_mt') : getStr('b_mt'); 
-        m.p1S1TB = isP2 ? getStr('b_s1tb') : getStr('t_s1tb'); 
-        m.p2S1TB = isP2 ? getStr('t_s1tb') : getStr('b_s1tb'); 
-        m.p1S2TB = isP2 ? getStr('b_s2tb') : getStr('t_s2tb'); 
-        m.p2S2TB = isP2 ? getStr('t_s2tb') : getStr('b_s2tb');
-    }
-    
-    // DOĞRU YER: Tüm doğrulamalar bittikten sonra işlem başlatılır
-    btn.innerHTML = "⏳ İŞLENİYOR..."; 
-    btn.disabled = true; 
-    m.played = true; 
-    m.savedAt = Date.now();
-    
-    if (isAdmin) { 
-        m.pending = false; 
-        m.enteredBy = 'ADMIN'; 
-    } else { 
-        m.pending = true; 
-        m.enteredBy = loggedInUser.id; 
-    }
-    saveToDb(isAdmin ? "Skor Kaydedildi!" : "Skor Rakibin Onayına Gönderildi!");
-}
     function approveScore(mId, btn) { 
-    let m = matches.find(x => String(x.id) === String(mId)); 
-    if (!m) return;
-
-    // GÜVENLİK KONTROLÜ
-    if (!isAdmin) {
-        if (!loggedInUser || (m.p1 !== loggedInUser.id && m.p2 !== loggedInUser.id)) {
-            showToast("HATA: Bu maçı onaylama yetkiniz yok!", "error");
-            return;
+        let m = matches.find(x => String(x.id) === String(mId)); if (!m) return;
+        if (!isAdmin) {
+            if (!loggedInUser || (m.p1 !== loggedInUser.id && m.p2 !== loggedInUser.id)) return showToast("HATA: Bu maçı onaylama yetkiniz yok!", "error");
+            if (m.enteredBy === loggedInUser.id) return showToast("HATA: Kendi girdiğiniz skoru kendiniz onaylayamazsınız! Rakibin onayı bekleniyor.", "warning");
         }
-        if (m.enteredBy === loggedInUser.id) {
-            showToast("HATA: Kendi girdiğiniz skoru kendiniz onaylayamazsınız! Rakibin onayı bekleniyor.", "warning");
-            return;
-        }
+        btn.innerHTML = "⏳ İŞLENİYOR..."; btn.disabled = true; m.pending = false; 
+        
+        // YENİ BİLDİRİM TETİKLEYİCİSİ
+        calculateStats();
+        processRGCNotifications(m);
+        if(!m.isWO) { checkNTRPAlert(m.p1, globalUsers); checkNTRPAlert(m.p2, globalUsers); }
+        
+        let tName = currentSettings.customName || "Turnuva"; 
+        addAlertToUser(m.enteredBy, `✅ <strong>[${tName}]</strong> ${m.p1Name} vs ${m.p2Name} maçınızın skoru rakibiniz tarafından onaylandı! Puanlar işlendi.`); 
+        saveToDb("Skor Onaylandı ve Tablolara İşlendi!"); 
     }
-
-    btn.innerHTML = "⏳ İŞLENİYOR..."; 
-    btn.disabled = true; 
-    m.pending = false; 
-    let tName = currentSettings.customName || "Turnuva"; 
-    addAlertToUser(m.enteredBy, `✅ <strong>[${tName}]</strong> ${m.p1Name} vs ${m.p2Name} maçınızın skoru rakibiniz tarafından onaylandı! Puanlar işlendi.`); 
-    saveToDb("Skor Onaylandı ve Tablolara İşlendi!"); 
-}
+ 
     function giveFairPlay(mId, opponentId, btn) { btn.innerHTML = "⏳..."; btn.disabled = true; let m = matches.find(x => String(x.id) === String(mId)); if(!m) return; if (m.p1 === loggedInUser.id) m.p1Fair = true; else if (m.p2 === loggedInUser.id) m.p2Fair = true; let uRef = database.ref(`the_35_gold_league/users/${opponentId}/fame`); uRef.once('value').then((s) => { let currentFame = s.val() || 0; uRef.set(currentFame + 5).then(() => { saveToDb("Rakibinizi kutladınız! +5 Şöhret Puanı eklendi. 👏"); }); }); }
     function clearScoreCloud(id, btn) { 
     let m = matches.find(x => String(x.id) === String(id)); 
@@ -1701,7 +1728,74 @@ function grantFounderStatus() {
             saveToDb("Transfer başarıyla gerçekleştirildi!");
         });
     }
-function logoutSession() {
+
+ // ==========================================
+    // 🏁 TURNUVAYI BİTİRME VE ÖDÜL DAĞITMA MOTORU
+    // ==========================================
+    window.finishTournament = function(tid) {
+        if(!confirm("DİKKAT: Turnuvayı bitirip K-KOR kariyer ödüllerini dağıtmak istediğinize emin misiniz? Bu işlem geri alınamaz! (Turnuva arşive kaldırılacaktır)")) return;
+        
+        let t = allTourneys[tid];
+        let s = t.settings;
+        let tName = s.customName || "Turnuva";
+        
+        // Son sıralamaları garantilemek için statları güncelleyelim
+        currentTid = tid;
+        players = _arr(t.players); matches = _arr(t.matches); currentSettings = s;
+        calculateStats(); 
+        
+        // Lig Seviyesine Göre Başarı K-KOR Bonusları
+        let bonusMap = {
+            'PLATIN': [500, 250, 125, 125],
+            'OPEN': [400, 200, 100, 100],
+            'GOLD': [300, 150, 75, 75],
+            'SILVER': [150, 75, 40, 40]
+        };
+        let tierKey = s.tier || 'GOLD';
+        let b = bonusMap[tierKey] || [0, 0, 0, 0];
+        
+        // Puan Sıralamasına Göre İlk 4'ü Çek
+        let sortedPlayers = [...players].sort((a,b) => a.korRank - b.korRank);
+        let updates = {};
+        
+        if(sortedPlayers[0]) {
+            let u = sortedPlayers[0];
+            let cur = parseFloat(globalUsers[u.id]?.k_kor_base || 0);
+            updates[`the_35_gold_league/users/${u.id}/k_kor_base`] = cur + b[0];
+            addAlertToUser(u.id, `🏆 <strong>ŞAMPİYON SENSİN!</strong> <em>[${tName}]</em> turnuvasını zirvede tamamladın! K-KOR Kariyer hanene tam <strong>[+${b[0]}]</strong> Bonus Puan eklendi. Tebrikler efsane!`);
+        }
+        if(sortedPlayers[1]) {
+            let u = sortedPlayers[1];
+            let cur = parseFloat(globalUsers[u.id]?.k_kor_base || 0);
+            updates[`the_35_gold_league/users/${u.id}/k_kor_base`] = cur + b[1];
+            addAlertToUser(u.id, `🥈 <strong>BÜYÜK FİNALİST!</strong> <em>[${tName}]</em> turnuvasında harika bir performans sergiledin. K-KOR Kariyer hanene <strong>[+${b[1]}]</strong> Bonus Puan eklendi!`);
+        }
+        if(sortedPlayers[2]) {
+            let u = sortedPlayers[2];
+            let cur = parseFloat(globalUsers[u.id]?.k_kor_base || 0);
+            updates[`the_35_gold_league/users/${u.id}/k_kor_base`] = cur + b[2];
+            addAlertToUser(u.id, `🌟 <strong>YARI FİNAL GURURU!</strong> <em>[${tName}]</em> turnuvasında son 4'e kalmayı başardın! K-KOR Kariyer hanene <strong>[+${b[2]}]</strong> Bonus Puan eklendi!`);
+        }
+        if(sortedPlayers[3]) {
+            let u = sortedPlayers[3];
+            let cur = parseFloat(globalUsers[u.id]?.k_kor_base || 0);
+            updates[`the_35_gold_league/users/${u.id}/k_kor_base`] = cur + b[3];
+            addAlertToUser(u.id, `🌟 <strong>YARI FİNAL GURURU!</strong> <em>[${tName}]</em> turnuvasında son 4'e kalmayı başardın! K-KOR Kariyer hanene <strong>[+${b[3]}]</strong> Bonus Puan eklendi!`);
+        }
+        
+        // Turnuvayı tamamlandı (completed) olarak işaretle
+        updates[`the_35_gold_league/multi_v1/${tid}/settings/status`] = 'completed';
+        
+        // Tek hamlede Firebase'e yaz
+        database.ref().update(updates).then(() => {
+            showToast("Turnuva başarıyla arşive kaldırıldı ve tüm ödüller dağıtıldı!", "success");
+            goHome();
+        }).catch(err => {
+            showToast("Hata oluştu: " + err.message, "error");
+        });
+    }
+ 
+ function logoutSession() {
     firebase.auth().signOut().then(() => {
         loggedInUser = null;
         isAdmin = false;
