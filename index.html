@@ -101,8 +101,8 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;} th,td
 </div>
 
 <div class="container">
-    <div class="nav-bar" id="appNavBar">
-    <div style="display:flex; gap:10px; align-items:center;">
+<div class="nav-bar" id="appNavBar">
+        <div style="display:flex; gap:10px; align-items:center;">
             <button class="nav-btn" onclick="goBackTab()" id="backBtn" style="background:#475569; color:white;">🔙 Geri</button>
             <button class="nav-btn" onclick="goHome()" id="homeBtn" style="display:none;">🏠 Ana Sayfa</button>
             <button class="nav-btn" id="navAdminNotifBtn" onclick="openAdminGlobalNotifs()" style="display:none; background:var(--danger); color:white; border-color:var(--danger);">🔔 BİLDİRİMLER</button>
@@ -111,8 +111,7 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;} th,td
         </div>
         <div style="text-align:center;"><div style="font-size: 13px; font-weight: bold; color: var(--accent-color);" id="navLeagueTitle">İZMİR 35 KORTENİS LİGİ</div><div style="font-size: 9px; color: var(--sub-text);" id="navLeagueSub">KARİYER VE LİG YÖNETİM SİSTEMİ</div></div>
         <button class="nav-btn" style="background: var(--danger); border-color: var(--danger);" onclick="logoutSession()">🚪 Çıkış</button>
-
-    <div id="authWrapper">
+    </div> <div id="authWrapper">
         <h1 id="mainTitle">✨ İZMİR 35 KORTENİS LİGİ ✨</h1><p style="text-align:center; margin:0 0 15px 0; font-size:12px; color:var(--sub-text);" id="subTitleText">Kariyer ve Lig Yönetim Sistemi</p>
         <div class="auth-card" id="loginPanel" style="display: block;">
             <h3 style="margin-top:0;">Oyuncu Girişi</h3><input type="email" id="loginEmail" class="auth-input" placeholder="Kayıtlı E-posta Adresiniz">
