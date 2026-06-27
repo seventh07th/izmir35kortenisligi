@@ -846,11 +846,15 @@ function renderAdminChecklist() {
         let list = document.getElementById('adminChecklist'); list.innerHTML = "";
         Object.values(globalUsers).filter(u => u && u.name).sort((a,b)=>String(a.name).localeCompare(String(b.name))).forEach(u => { 
             let gIcon = u.gender === 'KADIN' ? '👩' : '👨'; 
+            
+            // ADMIN PANELİNDEKİ PARANTEZ İÇİ DEĞERLER İÇİN YENİ EMOLİJİ ROZET YAPISI
+            let badgeHtml = getTierBadgeHtml(u.tier, u.sysScore || '-');
+
             list.innerHTML += `<div class="admin-player-item" data-name="${u.name}" data-tier="${u.tier}" data-score="${u.sysScore || 0}" data-gender="${u.gender || 'ERKEK'}">
-                <label style="cursor:pointer; flex:1; display:flex; align-items:center;">
-                    <input type="checkbox" class="admin-chk" value="${u.id}" onchange="updateSelectedCount()" style="margin-right:8px;"> 
+                <label style="cursor:pointer; flex:1; display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" class="admin-chk" value="${u.id}" onchange="updateSelectedCount()"> 
                     <strong style="color:white; text-decoration:underline;" class="player-link" onclick="event.preventDefault(); openPublicProfile('${u.id}')">${gIcon} ${u.name}</strong> 
-                    <span style="font-size:10px; color:var(--accent-color); margin-left:5px;">(${u.tier} ${u.sysScore || '-'})</span>
+                    ${badgeHtml}
                 </label>
                 <div style="display:flex; gap:4px; flex-wrap:wrap; justify-content:flex-end;">
                     <button class="action-sm" style="background:#00e5ff; color:black;" onclick="editUserNTRP('${u.id}')">✏️ Düzenle</button>
