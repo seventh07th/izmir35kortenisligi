@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>İzmir 35 KorTenis Ligi</title>
@@ -666,11 +666,10 @@ document.getElementById('profName').innerHTML = fBadge + loggedInUser.name;
                 else if (amIIn) { btnHtml = `<button class="action-sm" style="background:var(--danger); padding:8px 12px;" onclick="leaveTournament('${tid}')">Çıkış Yap / Ayrıl</button>`; } 
                 else { if(isRegistrationExpired) { btnHtml = `<button class="action-sm" style="background:#334155; color:#94a3b8; padding:8px 12px; cursor:not-allowed;" disabled>Katılım Süresi Bitti</button>`; } else { btnHtml = `<button class="action-sm" style="background:var(--accent-color); color:black; padding:8px 12px;" onclick="joinTournament('${tid}')">Turnuvaya Katıl</button>`; } }
                 
-                // KATILIMCILAR BUTONU - DOĞRU YERDE
-                btnHtml = `<button class="action-sm" style="background:#1e293b; color:white; border:1px solid var(--accent-color); padding:8px 12px; margin-right:5px;" onclick="openParticipantsModal('${tid}')">👥 Katılımcılar</button>` + btnHtml;
-
-                pListHtml += `<div class="tournament-card"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><strong style="color:var(--accent-color); font-size:14px;">🏆 ${tName}</strong>${statusHtml}</div><div style="font-size:11px; color:#cbd5e1; margin-top:5px; background:#0f172a; padding:10px; border-radius:6px; border-left:3px solid var(--accent-color); line-height:1.4;">${pInfo}</div><div style="font-size:11px; color:#94a3b8; display:flex; gap:10px; margin-top:10px;"><span>Kapasite: ${N} / ${cap}</span><span>Seviye: ${s.tier}</span><span>Kategori: ${s.gender}</span></div><div style="display:flex; justify-content:flex-end; align-items:center; margin-top:5px;">${btnHtml}</div></div>`;
-            
+               // YENİ EKLENEN BUTONLAR (Kurallar, Ağaç ve Katılımcılar)
+                btnHtml = `<button class="action-sm" style="background:#1e293b; color:var(--accent-color); border:1px solid var(--accent-color); padding:8px 12px; margin-right:5px;" onclick="viewPendingTournament('${tid}', 'rules')">📜 Kurallar</button>` + 
+                          `<button class="action-sm" style="background:#1e293b; color:var(--success); border:1px solid var(--success); padding:8px 12px; margin-right:5px;" onclick="viewPendingTournament('${tid}', 'tree')">🌳 Ağaç</button>` + 
+                          `<button class="action-sm" style="background:#1e293b; color:white; border:1px solid var(--accent-color); padding:8px 12px; margin-right:5px;" onclick="openParticipantsModal('${tid}')">👥 Katılımcılar</button>` + btnHtml;
             } else if (status === 'active') {
                 activeCount++; let badge = ''; let btnHtml = ''; let subHtml = ''; 
                 
@@ -839,13 +838,21 @@ document.getElementById('profName').innerHTML = fBadge + loggedInUser.name;
 
     function populateLeagueDropdowns() {
         let aSel = document.getElementById('adminLeagueSelect'); let uSel = document.getElementById('userActiveLeagueSelect'); if(!aSel || !uSel) return;
-        let aOpt = '<option value="new_pending">➕ YENİ TURNUVA (KAYDA AÇ)</option><option value="new_manual">⚙️ YENİ TURNUVA (MANUEL KUR)</option><option value="notifs" style="display:none;">BİLDİRİMLER</option><option value="tournaments" style="display:none;">TURNUVALAR</option>'; 
+        // DEĞİŞEN KISIM: aOpt içindeki "new_manual" seçeneğinin metni güncellendi
+        let aOpt = '<option value="new_pending">➕ YENİ TURNUVA (KAYDA AÇ)</option><option value="new_manual">⚙️ OYUNCU YÖNETİMİ - KURA MOTORU</option><option value="notifs" style="display:none;">BİLDİRİMLER</option><option value="tournaments" style="display:none;">TURNUVALAR</option>'; 
         let uOpt = '<option value="none">GENEL MOD (TÜM ZAMANLAR)</option>';
         Object.keys(allTourneys).forEach(tid => { let t = allTourneys[tid]; if(!t || !t.settings) return; let n = t.settings.customName || `İZMİR 35 LİGİ`; let status = t.settings.status || 'active'; if (status === 'pending') { aOpt += `<option value="${tid}">YÖNET (Kayıt): ${n}</option>`; } else { aOpt += `<option value="${tid}">YÖNET: ${n}</option>`; if(!isAdmin && loggedInUser && _arr(t.players).some(p => p.id === loggedInUser.id)) uOpt += `<option value="${tid}">${n}</option>`; } });
         let aPrev = aSel.value, uPrev = uSel.value; aSel.innerHTML = aOpt; uSel.innerHTML = uOpt;
         if(aPrev !== 'new_pending' && aPrev !== 'new_manual' && aPrev !== 'notifs' && aPrev !== 'tournaments' && allTourneys[aPrev]) aSel.value = aPrev; if(aPrev === 'notifs') aSel.value = 'notifs'; if(aPrev === 'tournaments') aSel.value = 'tournaments'; if(uPrev !== 'none' && allTourneys[uPrev]) uSel.value = uPrev;
     }
 
+window.viewPendingTournament = function(tid, tab) {
+        currentTid = tid;
+        loadTournamentData(tid);
+        document.getElementById('tabsContainer').style.display = 'flex';
+        switchTab(tab);
+    }
+    
     function adminSwitchLeague() {
         let val = document.getElementById('adminLeagueSelect').value;
         if(val === 'new_pending') { currentTid = null; document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tabsContainer').style.display = 'none'; document.getElementById('deleteLeagueBtn').style.display = 'none'; document.getElementById('setup_pending').classList.add('active'); } 
@@ -1019,7 +1026,7 @@ document.getElementById('profName').innerHTML = fBadge + loggedInUser.name;
 
     function generateDynamicRules(s) {
         let titleEl = document.getElementById('rulesHeaderTitle'); if(titleEl) titleEl.innerText = "📜 TURNUVA KURALLARI VE LİG FORMATI";
-        let n = s.playerCount || 12; let mLimit = s.matchLimit || 6;
+        let n = s.playerCount || s.maxCapacity || 23; let mLimit = s.matchLimit || (n >= 48 ? 10 : (n >= 24 ? 8 : 6));
         let sDateStr = "Belirlenmedi", eDateStr = "Belirlenmedi", poDateStr = "Belirlenmedi", finalStr = "Belirlenmedi";
         if(s.startDate) { let st = new Date(s.startDate); if(!isNaN(st.getTime())) { let en = new Date(st); en.setDate(en.getDate() + (mLimit * 7)); let poS = new Date(en); poS.setDate(poS.getDate() + 1); let poE = new Date(poS); poE.setDate(poS.getDate() + 14); let fSat = new Date(poE); let ds = (6 - fSat.getDay() + 7) % 7; if (ds === 0) ds = 7; fSat.setDate(fSat.getDate() + ds); let fSun = new Date(fSat); fSun.setDate(fSat.getDate() + 1); const opt = { day: 'numeric', month: 'long', year: 'numeric' }; sDateStr = st.toLocaleDateString('tr-TR', opt); eDateStr = en.toLocaleDateString('tr-TR', opt); poDateStr = `${poS.toLocaleDateString('tr-TR', opt)} - ${poE.toLocaleDateString('tr-TR', opt)}`; finalStr = `${fSat.toLocaleDateString('tr-TR', opt)} - ${fSun.toLocaleDateString('tr-TR', opt)} (İlk Hafta Sonu)`; } }
         
@@ -1108,14 +1115,22 @@ function renderLocalStandings() {
 
     function renderVisualBracket() {
         const mainWrapper = document.getElementById('bracketView'); if(!mainWrapper) return;
-        let played = matches.filter(m => m.played && !m.pending).length; let N = players.length;
+       
+        // PENDING (KAYIT) AŞAMASI KONTROLÜ
+        let isPending = currentSettings && currentSettings.status === 'pending';
+        let played = matches ? matches.filter(m => m.played && !m.pending).length : 0; 
+        let N = isPending ? (currentSettings.maxCapacity || 23) : players.length;
+        
         if(N < 12) { mainWrapper.innerHTML = `<p style="text-align:center; color:var(--warning);">Ligde yeterli oyuncu yok (Min 12).</p>`; return; }
+        
         let dCount = N >= 48 ? 8 : (N >= 24 ? 4 : (N >= 12 ? 2 : 2)); let poCount = dCount; let piCount = dCount * 2;
-        let titleEl = document.getElementById('treeDynamicTitle'); if(titleEl) titleEl.innerText = `CANLI ŞAMPİYONLUK HARİTASI (${N} KİŞİLİK LİG)`;
-        let p = (rank) => players[rank - 1] ? players[rank - 1].name : 'BELİRLENMEDİ';
+        let titleEl = document.getElementById('treeDynamicTitle'); if(titleEl) titleEl.innerText = isPending ? `ÖRNEK ŞAMPİYONLUK HARİTASI (${N} KİŞİLİK)` : `CANLI ŞAMPİYONLUK HARİTASI (${N} KİŞİLİK LİG)`;
+        
+        // EĞER HENÜZ OYUNCU YOKSA ŞABLON İSİM YAZ ("Torba 1" gibi)
+        let p = (rank) => (players && players[rank - 1]) ? players[rank - 1].name : (isPending ? `Torba S${rank}` : 'BELİRLENMEDİ');
         let bracketHtml = "";
         if (dCount === 2) { bracketHtml = `<div class="cl-bracket" style="min-width: 600px; display:flex; justify-content:space-between;"><div class="bracket-col"><div class="bracket-match"><div class="seed">S1</div>${p(1)}<div class="vs">VS</div><div class="seed">PO1</div>Play-Off Galibi</div></div><div class="bracket-center"><div class="trophy">🏆</div><div class="bracket-match final-match" style="border:1px solid var(--accent-color);"><div style="color:var(--accent-color);font-weight:bold;margin-bottom:5px;">BÜYÜK FİNAL</div>Sol Galibi <br><span class="vs">VS</span><br> Sağ Galibi</div></div><div class="bracket-col"><div class="bracket-match"><div class="seed">S2</div>${p(2)}<div class="vs">VS</div><div class="seed">PO2</div>Play-Off Galibi</div></div></div>`; } else if (dCount === 4) { bracketHtml = `<div class="cl-bracket" style="min-width: 800px; display:flex; justify-content:space-between;"><div class="bracket-col"><div class="bracket-match"><div class="seed">S1</div>${p(1)}<div class="vs">VS</div><div class="seed">PO1</div>Play-Off Galibi</div><div class="bracket-match"><div class="seed">S4</div>${p(4)}<div class="vs">VS</div><div class="seed">PO4</div>Play-Off Galibi</div></div><div class="bracket-col"><div class="bracket-match empty-match" style="border-style:dashed; color:#64748b;">Yarı Final 1</div></div><div class="bracket-center"><div class="trophy">🏆</div><div class="bracket-match final-match" style="border:1px solid var(--accent-color);"><div style="color:var(--accent-color);font-weight:bold;margin-bottom:5px;">BÜYÜK FİNAL</div>Sol Galibi <br><span class="vs">VS</span><br> Sağ Galibi</div></div><div class="bracket-col"><div class="bracket-match empty-match" style="border-style:dashed; color:#64748b;">Yarı Final 2</div></div><div class="bracket-col"><div class="bracket-match"><div class="seed">S2</div>${p(2)}<div class="vs">VS</div><div class="seed">PO3</div>Play-Off Galibi</div><div class="bracket-match"><div class="seed">S3</div>${p(3)}<div class="vs">VS</div><div class="seed">PO2</div>Play-Off Galibi</div></div></div>`; } else { bracketHtml = `<div class="cl-bracket" style="min-width: 1100px; display:flex; justify-content:space-between;"><div class="bracket-col"><div class="bracket-match"><div class="seed">S1</div>${p(1)}<div class="vs">VS</div><div class="seed">PO8</div>Play-Off Galibi</div><div class="bracket-match"><div class="seed">S8</div>${p(8)}<div class="vs">VS</div><div class="seed">PO1</div>Play-Off Galibi</div><div class="bracket-match"><div class="seed">S4</div>${p(4)}<div class="vs">VS</div><div class="seed">PO5</div>Play-Off Galibi</div><div class="bracket-match"><div class="seed">S5</div>${p(5)}<div class="vs">VS</div><div class="seed">PO4</div>Play-Off Galibi</div></div><div class="bracket-col"><div class="bracket-match empty-match" style="border-style:dashed; color:#64748b;">Çeyrek Final 1</div><div class="bracket-match empty-match" style="border-style:dashed; color:#64748b;">Çeyrek Final 2</div></div><div class="bracket-col"><div class="bracket-match empty-match" style="border-style:dashed; color:#64748b;">Yarı Final 1</div></div><div class="bracket-center"><div class="trophy">🏆</div><div class="bracket-match final-match" style="border:1px solid var(--accent-color);"><div style="color:var(--accent-color);font-weight:bold;margin-bottom:5px;">BÜYÜK FİNAL</div>Sol Galibi <br><span class="vs">VS</span><br> Sağ Galibi</div></div><div class="bracket-col"><div class="bracket-match empty-match" style="border-style:dashed; color:#64748b;">Yarı Final 2</div></div><div class="bracket-col"><div class="bracket-match empty-match" style="border-style:dashed; color:#64748b;">Çeyrek Final 3</div><div class="bracket-match empty-match" style="border-style:dashed; color:#64748b;">Çeyrek Final 4</div></div><div class="bracket-col"><div class="bracket-match"><div class="seed">S2</div>${p(2)}<div class="vs">VS</div><div class="seed">PO7</div>Play-Off Galibi</div><div class="bracket-match"><div class="seed">S7</div>${p(7)}<div class="vs">VS</div><div class="seed">PO2</div>Play-Off Galibi</div><div class="bracket-match"><div class="seed">S3</div>${p(3)}<div class="vs">VS</div><div class="seed">PO6</div>Play-Off Galibi</div><div class="bracket-match"><div class="seed">S6</div>${p(6)}<div class="vs">VS</div><div class="seed">PO3</div>Play-Off Galibi</div></div></div>`; }
-        let eloPool = [...players.slice(dCount + poCount)].sort((a,b) => b.kor - a.kor); // Play-In tablosu sadece KOR ile
+        let eloPool = isPending ? [] : [...players.slice(dCount + poCount)].sort((a,b) => b.kor - a.kor);
         let piHtml = ""; for(let i=0; i < piCount/2; i++) { let pA = eloPool[i] || { name: `Belirlenmedi` }; let pB = eloPool[piCount - 1 - i] || { name: `Belirlenmedi` }; piHtml += `<div class="bracket-match" style="border:1px dashed var(--success);"><div style="color:var(--success);font-weight:bold;margin-bottom:3px;">Pİ${i+1} Eşleşmesi</div>${pA.name}<br><span class="vs">VS</span><br>${pB.name}</div>`; }
         let poHtml = ""; for(let i=0; i < poCount; i++) { let pA = players[dCount + i] || { name: `Belirlenmedi` }; let piTarget = poCount - i; let pB = { name: `Pİ${piTarget} Galibi` }; poHtml += `<div class="bracket-match" style="border:1px dashed var(--warning);"><div style="color:var(--warning);font-weight:bold;margin-bottom:3px;">Play-Off ${i+1}</div>${pA.name}<br><span class="vs">VS</span><br>${pB.name}</div>`; }
         mainWrapper.innerHTML = `<p style="font-size:11px; color:#64748b; text-align:center; margin-bottom:15px;">🏆 Onaylanan Maç: ${played} / ${matches.length}</p><div class="bracket-scroll-container">${bracketHtml}</div><div style="margin-top:20px; padding-top:20px; border-top:1px dashed #334155;"><h3 style="font-size:13px; color:var(--warning); text-align:left;">⚔️ PLAY-OFF EŞLEŞMELERİ</h3><div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">${poHtml}</div></div><div style="margin-top:20px; padding-top:20px; border-top:1px dashed #334155;"><h3 style="font-size:13px; color:var(--success); text-align:left;">🎯 PLAY-IN EŞLEŞMELERİ</h3><div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">${piHtml}</div></div>`;
