@@ -616,11 +616,28 @@ function changeAdminPassword() {
     window.dismissAlert = function(key) { if(loggedInUser && loggedInUser.id) { database.ref(`the_35_gold_league/users/${loggedInUser.id}/alerts/${key}`).remove(); } };
     window.deletePwReset = function(key) { database.ref('the_35_gold_league/password_resets/' + key).remove(); };
 
-    function enterApp() {
-        document.getElementById('authWrapper').style.display = "none"; document.getElementById('mainApp').style.display = "block"; document.getElementById('appNavBar').style.display = "flex";
-        if(isAdmin) { document.getElementById('adminTopBar').style.display = "block"; document.getElementById('homeBtn').style.display = "inline-block"; document.getElementById('navAdminNotifBtn').style.display = "inline-block"; document.getElementById('navAdminTournamentsBtn').style.display = "inline-block"; populateLeagueDropdowns(); openAdminGlobalNotifs(); } 
-        else { document.getElementById('tabsContainer').style.display = "flex"; document.getElementById('userActiveLeagueSelect').style.display = "inline-block"; populateLeagueDropdowns(); switchTab('profile'); }
+   function enterApp() {
+        document.getElementById('authWrapper').style.display = "none"; 
+        document.getElementById('mainApp').style.display = "block"; 
+        document.getElementById('appNavBar').style.display = "flex";
+        
+        // ANA SAYFA BUTONUNU HERKESE GÖRÜNÜR YAPIYORUZ
+        document.getElementById('homeBtn').style.display = "inline-block"; 
+
+        if(isAdmin) { 
+            document.getElementById('adminTopBar').style.display = "block"; 
+            document.getElementById('navAdminNotifBtn').style.display = "inline-block"; 
+            document.getElementById('navAdminTournamentsBtn').style.display = "inline-block"; 
+            populateLeagueDropdowns(); 
+            openAdminGlobalNotifs(); 
+        } else { 
+            document.getElementById('tabsContainer').style.display = "flex"; 
+            document.getElementById('userActiveLeagueSelect').style.display = "inline-block"; 
+            populateLeagueDropdowns(); 
+            switchTab('profile'); 
+        }
     }
+ 
     function openAdminGlobalNotifs() { document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tabsContainer').style.display = 'none'; document.getElementById('deleteLeagueBtn').style.display = 'none'; document.getElementById('adminLeagueSelect').value = 'notifs'; document.getElementById('admin_notifs').classList.add('active'); renderAdminNotifs(); }
     function openAdminGlobalTournaments() { document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tabsContainer').style.display = 'none'; document.getElementById('deleteLeagueBtn').style.display = 'none'; document.getElementById('adminLeagueSelect').value = 'tournaments'; document.getElementById('tournaments').classList.add('active'); renderTournamentsList(); }
     function renderProfile() {
@@ -972,9 +989,24 @@ window.viewPendingTournament = function(tid, tab) {
         else { currentTid = val; let t = allTourneys[val]; if(!t) return; let status = t.settings.status || 'active'; document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); if (status === 'pending') { document.getElementById('tabsContainer').style.display = 'none'; document.getElementById('deleteLeagueBtn').style.display = 'inline-block'; document.getElementById('admin_pending').classList.add('active'); renderAdminPendingPanel(); } else { document.getElementById('tabsContainer').style.display = 'flex'; document.getElementById('deleteLeagueBtn').style.display = 'inline-block'; loadTournamentData(val); switchTab('standings'); } }
     }
 
-    function userSwitchLeague() { let val = document.getElementById('userActiveLeagueSelect').value; if(val === 'none') { currentTid = null; document.getElementById('navLeagueTitle').innerText = "İZMİR 35 KORTENİS LİGİ"; document.getElementById('navLeagueSub').innerText = "KARİYER VE LİG YÖNETİM SİSTEMİ"; switchTab('standings'); return; } currentTid = val; loadTournamentData(val); switchTab('standings'); }
-    function goHome() { if(isAdmin) { openAdminGlobalNotifs(); document.getElementById('adminLeagueSelect').value="notifs"; } else { switchTab('profile'); } }
-    function deleteCurrentTournament() { if(!currentTid || !confirm("Bu ligi kalıcı olarak silmek istiyor musunuz?")) return; let tid = currentTid; currentTid = null; delete allTourneys[tid]; goHome(); database.ref('the_35_gold_league/multi_v1/' + tid).remove().then(() => alert("Lig silindi.")); }
+    
+ function userSwitchLeague() { let val = document.getElementById('userActiveLeagueSelect').value; if(val === 'none') { currentTid = null; document.getElementById('navLeagueTitle').innerText = "İZMİR 35 KORTENİS LİGİ"; document.getElementById('navLeagueSub').innerText = "KARİYER VE LİG YÖNETİM SİSTEMİ"; switchTab('standings'); return; } currentTid = val; loadTournamentData(val); switchTab('standings'); }
+    
+ function goHome() { 
+        if(isAdmin) { 
+            openAdminGlobalNotifs(); 
+            document.getElementById('adminLeagueSelect').value="notifs"; 
+        } else { 
+            // Oyuncuyu turnuvadan çıkarıp, Genel Mod'a (Tüm Zamanlar) geri döndürür
+            document.getElementById('userActiveLeagueSelect').value = "none";
+            currentTid = null;
+            document.getElementById('navLeagueTitle').innerText = "İZMİR 35 KORTENİS LİGİ"; 
+            document.getElementById('navLeagueSub').innerText = "KARİYER VE LİG YÖNETİM SİSTEMİ";
+            switchTab('profile'); 
+        } 
+    }
+    
+ function deleteCurrentTournament() { if(!currentTid || !confirm("Bu ligi kalıcı olarak silmek istiyor musunuz?")) return; let tid = currentTid; currentTid = null; delete allTourneys[tid]; goHome(); database.ref('the_35_gold_league/multi_v1/' + tid).remove().then(() => alert("Lig silindi.")); }
 
 // Geri butonunun işleyiş fonksiyonu
     window.goBackTab = function() {
