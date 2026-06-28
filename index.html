@@ -35,8 +35,8 @@ body{font-family:'Segoe UI',sans-serif;background-color:var(--bg-color);color:va
 .admin-player-list{max-height:350px;overflow-y:auto;background:#020617;padding:10px;border-radius:8px;border:1px solid var(--border-color);text-align:left;margin-bottom:10px;} .admin-player-item{display:flex;flex-direction:column;align-items:flex-start;padding:10px 0;border-bottom:1px dashed var(--divider);gap:8px;}
 .action-sm{background:#334155;color:white;border:none;padding:5px 8px;border-radius:4px;font-size:10px;cursor:pointer;font-weight:bold;}
 #mainApp{display:none;} #adminTopBar{display:none;background:#1e293b;padding:12px;border-radius:8px;text-align:center;margin-bottom:15px;border:1px dashed var(--accent-color);}
-.panel{display:none;background-color:var(--card-bg);padding:15px;border-radius:12px;border:1px solid var(--border-color);} .panel.active{display:block;} button.action-btn{background-color:var(--accent-color);color:#000;border:none;padding:12px;font-size:13px;font-weight:bold;cursor:pointer;border-radius:8px;width:100%;margin-top:8px;transition:0.3s;}
-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:11px;} th,td{padding:8px 4px;text-align:center;border-bottom:1px solid var(--border-color);} th{background-color:#1e293b;color:var(--accent-color);}
+.panel{display:none;background-color:var(--card-bg);padding:12px;border-radius:12px;border:1px solid var(--border-color);} .panel.active{display:block;} button.action-btn{background-color:var(--accent-color);color:#000;border:none;padding:12px;font-size:13px;font-weight:bold;cursor:pointer;border-radius:8px;width:100%;margin-top:8px;transition:0.3s;}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:11px;} th,td{padding:6px 2px;text-align:center;border-bottom:1px solid var(--border-color);} th{background-color:#1e293b;color:var(--accent-color);}
 .zone-direct{background-color:rgba(0,255,170,0.08);border-left:3px solid var(--success);} .zone-playoff{background-color:rgba(255,189,0,0.08);border-left:3px solid var(--warning);} .zone-eliminated{background-color:rgba(239,68,68,0.05);border-left:3px solid var(--danger);} .zone-global{background-color:rgba(0,229,255,0.05);border-left:3px solid #00e5ff;}
 .rivals-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;} .player-rivals-card{background:#020617;border:1px solid var(--border-color);border-radius:8px;padding:10px;} .player-main-title{background:#1e293b;padding:6px;text-align:center;font-weight:bold;border-radius:4px;color:var(--accent-color);font-size:12px;} .rival-line{display:flex;justify-content:space-between;padding:8px 2px;border-bottom:1px solid #1e293b;font-size:11px;align-items:center;flex-wrap:wrap;}
 .match-card{background:#020617;border-radius:12px;border:1px solid var(--border-color);box-shadow:0 4px 15px rgba(0,0,0,0.5);overflow:hidden;margin-bottom:15px;} .match-card-header{display:flex;justify-content:space-between;align-items:center;background:#0f172a;padding:8px 12px;border-bottom:1px solid var(--divider);}
@@ -113,31 +113,30 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:11px;} th,td
 <div class="container">
 
 <div class="nav-bar" id="appNavBar">
-        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-            <div style="display:flex; gap:8px;">
-                <button class="nav-btn" onclick="goBackTab()" id="backBtn" style="background:#475569; color:white;">🔙 Geri</button>
-                <button class="nav-btn" onclick="goHome()" id="homeBtn" style="display:none;">🏠 Ana Sayfa</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; width:100%; gap:10px;">
+            <div style="display:flex; gap:6px;">
+                <button class="nav-btn" onclick="goBackTab()" id="backBtn" style="background:#334155; color:white; border-radius:50%; width:34px; height:34px; padding:0; display:flex; align-items:center; justify-content:center; font-size:14px; border:none;" title="Geri">🔙</button>
+                <button class="nav-btn" onclick="goHome()" id="homeBtn" style="display:none; background:#1e293b; color:white; border-radius:50%; width:34px; height:34px; padding:0; display:flex; align-items:center; justify-content:center; font-size:14px;" title="Ana Sayfa">🏠</button>
             </div>
             
-            <div style="text-align:center; flex:1; padding:0 5px;">
-                <div style="font-size: 13px; font-weight: 900; color: var(--accent-color); letter-spacing:1px;" id="navLeagueTitle">İZMİR 35 LİGİ</div>
-                <div style="font-size: 9px; color: var(--sub-text); margin-top:3px;" id="navLeagueSub">KONTROL PANELİ</div>
+            <div style="text-align:center; flex:1;">
+                <div style="font-size: 12px; font-weight: 900; color: var(--accent-color); letter-spacing:0.5px; text-transform:uppercase;" id="navLeagueTitle">İZMİR 35 LİGİ</div>
+                <div style="font-size: 9px; color: var(--sub-text); margin-top:2px; font-weight:bold;" id="navLeagueSub">KONTROL PANELİ</div>
             </div>
             
-            <button class="nav-btn" style="background:var(--danger); border-color:var(--danger);" onclick="logoutSession()">🚪 Çıkış</button>
+            <button class="nav-btn" style="background:rgba(239,68,68,0.15); border:1px solid var(--danger); color:var(--danger); border-radius:50%; width:34px; height:34px; padding:0; display:flex; align-items:center; justify-content:center; font-size:14px;" onclick="logoutSession()" title="Çıkış">🚪</button>
         </div>
 
-        <div style="display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:8px; width:100%;">
-            <button class="nav-btn" id="navAdminNotifBtn" onclick="openAdminGlobalNotifs()" style="display:none; background:var(--danger); color:white; border-color:var(--danger);">🔔 Bildirimler</button>
-            <button class="nav-btn" id="navAdminTournamentsBtn" onclick="openAdminGlobalTournaments()" style="display:none; background:var(--success); color:black; border-color:var(--success);">🎾 Turnuvalar</button>
-            <button class="nav-btn" id="navAdminManualBtn" onclick="openAdminManual()" style="display:none; background:#00e5ff; color:black; border-color:#00e5ff;">⚙️ Kura Motoru</button>
+        <div style="display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:6px; width:100%;">
+            <button class="nav-btn" id="navAdminNotifBtn" onclick="openAdminGlobalNotifs()" style="display:none; background:var(--danger); color:white; border-color:var(--danger); border-radius:12px; padding:6px 10px;">🔔 Bildirimler</button>
+            <button class="nav-btn" id="navAdminTournamentsBtn" onclick="openAdminGlobalTournaments()" style="display:none; background:var(--success); color:black; border-color:var(--success); border-radius:12px; padding:6px 10px;">🎾 Turnuvalar</button>
+            <button class="nav-btn" id="navAdminManualBtn" onclick="openAdminManual()" style="display:none; background:#00e5ff; color:black; border-color:#00e5ff; border-radius:12px; padding:6px 10px;">⚙️ Kura Motoru</button>
             
-            <select id="userActiveLeagueSelect" class="auth-input force-upper" style="width:100%; max-width:320px; margin:0; padding:8px; font-size:11px; font-weight:bold; display:none; border-radius:20px;" onchange="userSwitchLeague()">
+            <select id="userActiveLeagueSelect" class="auth-input force-upper" style="width:100%; max-width:280px; margin:0; padding:6px; font-size:10px; font-weight:bold; display:none; border-radius:12px; height:32px;">
                 <option value="none">GENEL MOD (TÜM ZAMANLAR)</option>
             </select>
         </div>
     </div>
- 
  
  <div id="authWrapper">
         <h1 id="mainTitle">✨ İZMİR 35 KORTENİS LİGİ ✨</h1><p style="text-align:center; margin:0 0 15px 0; font-size:12px; color:var(--sub-text);" id="subTitleText">Kariyer ve Lig Yönetim Sistemi</p>
@@ -993,22 +992,24 @@ function renderAdminChecklist() {
             let gIcon = u.gender === 'KADIN' ? '👩' : '👨'; 
             let badgeHtml = getTierBadgeHtml(u.tier, u.sysScore || '-');
 
-            list.innerHTML += `<div class="admin-player-item" data-name="${u.name}" data-tier="${u.tier}" data-score="${u.sysScore || 0}" data-gender="${u.gender || 'ERKEK'}">
-                <label style="cursor:pointer; width:100%; display:flex; align-items:center; gap:8px;">
-                    <input type="checkbox" class="admin-chk" value="${u.id}" onchange="updateSelectedCount()"> 
-                    <strong style="color:white; text-decoration:underline; font-size:12px;" class="player-link" onclick="event.preventDefault(); openPublicProfile('${u.id}')">${gIcon} ${u.name}</strong> 
-                    ${badgeHtml}
-                </label>
-                <div style="display:flex; gap:6px; flex-wrap:wrap; width:100%; padding-left:22px;">
-                    <button class="action-sm" style="background:#00e5ff; color:black; flex:1;" onclick="editUserNTRP('${u.id}')">✏️ Düzenle</button>
-                    <button class="action-sm" style="flex:1;" onclick="resetUserPass('${u.id}')">🔑 Şifre</button>
-                    <button class="action-sm" style="background:var(--danger); flex:1;" onclick="deleteUser('${u.id}')">🗑️ Sil</button>
+            list.innerHTML += `<div class="admin-player-item" data-name="${u.name}" data-tier="${u.tier}" data-score="${u.sysScore || 0}" data-gender="${u.gender || 'ERKEK'}" style="padding:10px 0; border-bottom:1px dashed var(--divider);">
+                <div style="width:100%; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:nowrap;">
+                    <label style="cursor:pointer; display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
+                        <input type="checkbox" class="admin-chk" value="${u.id}" onchange="updateSelectedCount()" style="flex-shrink:0;"> 
+                        <span style="color:white; text-decoration:underline; font-size:11px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" class="player-link" onclick="event.preventDefault(); openPublicProfile('${u.id}')">${gIcon} ${u.name}</span>
+                    </label>
+                    <div style="flex-shrink:0;">${badgeHtml}</div>
+                </div>
+                <div style="display:flex; gap:6px; width:100%; padding-left:22px; margin-top:4px;">
+                    <button class="action-sm" style="background:#00e5ff; color:black; flex:1; font-size:10px; padding:4px 0;" onclick="editUserNTRP('${u.id}')">✏️ Düzenle</button>
+                    <button class="action-sm" style="flex:1; font-size:10px; padding:4px 0;" onclick="resetUserPass('${u.id}')">🔑 Şifre</button>
+                    <button class="action-sm" style="background:var(--danger); flex:1; font-size:10px; padding:4px 0;" onclick="deleteUser('${u.id}')">🗑️ Sil</button>
                 </div>
             </div>`; 
         });
         adminFilterPlayers();
     }
-
+ 
   // Modalı Aç ve Oyuncunun Güncel Verilerini Doldur
     window.editUserNTRP = function(uid) {
         let u = globalUsers[uid];
