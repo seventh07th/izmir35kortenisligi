@@ -119,6 +119,13 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;} th,td
         <button class="nav-btn" style="background: var(--danger); border-color: var(--danger);" onclick="logoutSession()">🚪 Çıkış</button>
     </div> <div id="authWrapper">
         <h1 id="mainTitle">✨ İZMİR 35 KORTENİS LİGİ ✨</h1><p style="text-align:center; margin:0 0 15px 0; font-size:12px; color:var(--sub-text);" id="subTitleText">Kariyer ve Lig Yönetim Sistemi</p>
+        
+        <div id="pwaInstallContainer" style="display:none; text-align:center; margin-bottom:20px; width:100%; max-width:550px;">
+            <button id="pwaInstallBtn" class="auth-btn" style="background: linear-gradient(135deg, #00e5ff, #007bb5); color: black; font-size: 14px; box-shadow: 0 4px 15px rgba(0, 229, 255, 0.4); border: 1px solid #00e5ff; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; font-weight:900;" onclick="handleInstallClick()">
+                📲 UYGULAMAYI TELEFONA YÜKLE
+            </button>
+        </div>
+
         <div class="auth-card" id="loginPanel" style="display: block;">
             <h3 style="margin-top:0;">Oyuncu Girişi</h3><input type="email" id="loginEmail" class="auth-input" placeholder="Kayıtlı E-posta Adresiniz">
 
@@ -1824,6 +1831,64 @@ function grantFounderStatus() {
             .catch((err) => console.log('PWA Service Worker kayıt hatası:', err));
         });
     } 
+
+// ==========================================
+    // 🚀 PWA AKILLI YÜKLEME (INSTALL) MOTORU
+    // ==========================================
+    let deferredPrompt;
+
+    // 1. Android/Chrome için kurulum tetikleyicisini yakala
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        // Butonu görünür yap
+        let installContainer = document.getElementById('pwaInstallContainer');
+        if(installContainer) installContainer.style.display = 'block';
+    });
+
+    // 2. iPhone (iOS) ve Tarayıcı Kontrolü
+    const isIos = () => {
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        return /iphone|ipad|ipod/.test(userAgent);
+    };
+    const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+
+    // Sayfa yüklendiğinde eğer iPhone ise ve uygulama henüz kurulmamışsa butonu göster
+    window.addEventListener('load', () => {
+        if (isIos() && !isInStandaloneMode()) {
+            let installContainer = document.getElementById('pwaInstallContainer');
+            if(installContainer) installContainer.style.display = 'block';
+        }
+    });
+
+    // 3. Butona Tıklama Olayı (Yönlendirme veya Kurulum)
+    window.handleInstallClick = async function() {
+        if (isIos()) {
+            // iPhone için özel uyarı
+            showCustomConfirm("🍎 iPhone İçin Kurulum", "Uygulamamızı tam ekran kullanmak için tarayıcınızın alt menüsündeki <b>Paylaş (📤)</b> ikonuna dokunun ve açılan menüden <br><br><strong style='color:var(--accent-color)'>'Ana Ekrana Ekle' (Add to Home Screen)</strong><br><br> seçeneğini seçin.", () => {}, false);
+            return;
+        }
+        
+        if (deferredPrompt) {
+            // Android için otomatik kurulumu başlat
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                document.getElementById('pwaInstallContainer').style.display = 'none';
+            }
+            deferredPrompt = null;
+        } else {
+            showToast("Uygulama zaten yüklü veya tarayıcınız otomatik kurulumu desteklemiyor.", "info");
+        }
+    }
+
+    // Uygulama başarıyla kurulduğunda butonu sonsuza dek gizle
+    window.addEventListener('appinstalled', () => {
+        let installContainer = document.getElementById('pwaInstallContainer');
+        if(installContainer) installContainer.style.display = 'none';
+        deferredPrompt = null;
+    });
+ 
 </script>
 </body>
 </html>
