@@ -1,11 +1,12 @@
-const CACHE_NAME = "kortenis-v1";
+// VERSİYONU GÜNCELLEDİK (v1'den v2'ye çıktı)
+const CACHE_NAME = "kortenis-v2"; 
 const ASSETS_TO_CACHE = [
   "./index.html",
-  // İleride buraya başka görseller veya CSS dosyaları eklerseniz yazabilirsiniz
 ];
 
-// Kurulum Aşaması (Önbelleğe Alma)
+// Kurulum Aşaması
 self.addEventListener("install", (event) => {
+  self.skipWaiting(); // YENİ: Beklemeyi reddet, güncellemeyi anında kur!
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log("Önbellek (Cache) başarıyla açıldı.");
@@ -14,11 +15,27 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// Veri Çekme Aşaması (Hızlı Yükleme)
+// YENİ: Eski Sürüm (v1) Temizleme Motoru
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            console.log("Eski sürüm silindi, yeni sürüme geçiliyor:", cache);
+            return caches.delete(cache); // Eski dosyaları telefondan zorla sil
+          }
+        })
+      );
+    })
+  );
+  self.clients.claim(); // Yeni uygulamanın kontrolü hemen devralmasını sağla
+});
+
+// Veri Çekme Aşaması
 self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
-      // Önbellekte varsa onu ver, yoksa internetten (ağdan) çek
       return response || fetch(event.request);
     })
   );
