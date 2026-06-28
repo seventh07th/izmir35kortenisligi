@@ -1975,6 +1975,30 @@ function grantFounderStatus() {
         });
     }
  
+// ==========================================
+    // 🔑 OYUNCU ŞİFRE DEĞİŞTİRME MOTORU
+    // ==========================================
+    window.changeOwnPassword = function() {
+        // Zaten hazırda olan şık Prompt (Girdi) modalımızı kullanıyoruz
+        showCustomPrompt("🔑 ŞİFRE DEĞİŞTİR", "Lütfen yeni şifrenizi belirleyin (En az 6 karakter):", true, (newPass) => {
+            if(!newPass || newPass.length < 6) return showToast("HATA: Şifreniz en az 6 karakter olmalıdır!", "warning");
+            
+            let user = firebase.auth().currentUser;
+            if(user) {
+                user.updatePassword(newPass).then(() => {
+                    showToast("Şifreniz başarıyla güncellendi!", "success");
+                }).catch((error) => {
+                    // Firebase güvenlik gereği çok eski girişlerde şifre değişimine izin vermez
+                    if(error.code === 'auth/requires-recent-login') {
+                        showToast("Güvenlik gereği çıkış yapıp tekrar giriş yaptıktan sonra şifrenizi değiştirebilirsiniz.", "error");
+                    } else {
+                        showToast("Hata: " + error.message, "error");
+                    }
+                });
+            }
+        });
+    }
+
 </script>
 </body>
 </html>
