@@ -1931,8 +1931,8 @@ function grantFounderStatus() {
         
         // Kullanıcıdan bildirim izni iste
         messaging.requestPermission().then(() => {
-            // İzin verilirse, telefona özel bir kimlik (Token) oluştur
-            return messaging.getToken({ vapidKey:BFO6cJm-78RyPvVB5-qEeekFzZDkNgQBCz6fkC6HF2-blWRKnOIvPIHAYeKqiANBzx3xGdhCx7E5bzcmSo_YHE0 });
+            // İzin verilirse, telefona özel bir kimlik (Token) oluştur (TIRNAK İŞARETLERİ EKLENDİ)
+            return messaging.getToken({ vapidKey: 'BFO6cJm-78RyPvVB5-qEeekFzZDkNgQBCz6fkC6HF2-blWRKnOIvPIHAYeKqiANBzx3xGdhCx7E5bzcmSo_YHE0' });
         }).then((token) => {
             if(loggedInUser) {
                 // Oluşan Token'ı Firebase veritabanına, oyuncunun profiline kaydet
