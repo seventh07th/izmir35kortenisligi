@@ -1,5 +1,5 @@
-// VERSİYONU GÜNCELLEDİK (v8'den v9'a çıktı)
-const CACHE_NAME = "kortenis-v9"; 
+// VERSİYONU GÜNCELLEDİK (v9'dan v1'a çıktı)
+const CACHE_NAME = "kortenis-v10"; 
 const ASSETS_TO_CACHE = [
   "./index.html",
 ];
