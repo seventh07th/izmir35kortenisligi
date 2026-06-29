@@ -32,11 +32,24 @@ self.addEventListener("activate", (event) => {
   self.clients.claim(); // Yeni uygulamanın kontrolü hemen devralmasını sağla
 });
 
-// Veri Çekme Aşaması
-self.addEventListener("fetch", (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
-  );
+// ==========================================
+// AKILLI GETİRME MOTORU (NETWORK-FIRST)
+// ==========================================
+self.addEventListener('fetch', (event) => {
+    event.respondWith(
+        fetch(event.request)
+            .then((networkResponse) => {
+                // 1. ADIM: İnternet varsa en güncel dosyayı Vercel'den çeker.
+                // Çektiği bu en yeni dosyayı hemen telefonun hafızasına da (önbellek) kopyalar.
+                return caches.open(CACHE_NAME).then((cache) => {
+                    cache.put(event.request, networkResponse.clone());
+                    return networkResponse;
+                });
+            })
+            .catch(() => {
+                // 2. ADIM: Eğer oyuncunun interneti çekmiyorsa veya uçak modundaysa,
+                // çökme ekranı yerine telefonun hafızasına kaydettiği en son versiyonu gösterir.
+                return caches.match(event.request);
+            })
+    );
 });
