@@ -133,7 +133,7 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:11px;} th,td
             <button class="nav-btn" id="navAdminTournamentsBtn" onclick="openAdminGlobalTournaments()" style="display:none; background:var(--success); color:black; border-color:var(--success); border-radius:12px; padding:6px 10px;">🎾 Turnuvalar</button>
             <button class="nav-btn" id="navAdminManualBtn" onclick="openAdminManual()" style="display:none; background:#00e5ff; color:black; border-color:#00e5ff; border-radius:12px; padding:6px 10px;">⚙️ Kura Motoru</button>
             
-            <select id="userActiveLeagueSelect" class="auth-input force-upper" style="width:100%; max-width:280px; margin:0; padding:6px; font-size:10px; font-weight:bold; display:none; border-radius:12px; height:32px;">
+<select id="userActiveLeagueSelect" class="auth-input force-upper" style="width:100%; max-width:280px; margin:0; padding:6px; font-size:10px; font-weight:bold; display:none; border-radius:12px; height:32px;" onchange="userSwitchLeague()"></select>
                 <option value="none">GENEL MOD (TÜM ZAMANLAR)</option>
             </select>
         </div>
