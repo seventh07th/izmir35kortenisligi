@@ -920,7 +920,12 @@ function renderProfile() {
                                <button class="action-sm" style="background:var(--danger); color:white; padding:8px 12px; border:1px solid #ef4444;" onclick="finishTournament('${tid}')">🏁 Bitir & Ödül Dağıt</button>`; 
                 } else {
                     let participants = _arr(t.players); let amIPlaying = participants.some(p => p.id === loggedInUser.id);
-                    if(amIPlaying) { badge = `<span class="tournament-badge" style="background:var(--success); color:black;">BU LİGDE OYNUYORSUNUZ</span>`; } 
+                  if(amIPlaying) { 
+                    badge = `<span class="tournament-badge" style="background:var(--success); color:black;">BU LİGDE OYNUYORSUNUZ</span>`; 
+                    
+                    // YENİ EKLENEN ŞIK GİRİŞ BUTONU
+                    btnHtml = `<button class="action-sm" style="background:var(--accent-color); color:black; font-weight:bold; border:1px solid #000; padding:8px 12px; margin-right:5px; box-shadow: 0 2px 5px rgba(255,215,0,0.3);" onclick="document.getElementById('userActiveLeagueSelect').value='${tid}'; userSwitchLeague();">🎾 LİGE GİRİŞ YAP</button>` + btnHtml;
+                }
                     else { badge = `<span class="tournament-badge" style="background:#334155;">MAÇLAR DEVAM EDİYOR</span>`; let subPool = _arr(t.substitutePool); let amISub = subPool.includes(loggedInUser.id); subHtml = `<div style="margin-top:10px; background:rgba(0, 229, 255, 0.05); border:1px dashed #00e5ff; padding:10px; border-radius:6px; font-size:11px;"><div style="color:#00e5ff; font-weight:bold; margin-bottom:5px;">🔄 Yedek Oyuncu Havuzu</div><div style="color:#cbd5e1; margin-bottom:8px;">Sakatlık vb. nedenlerle ayrılan oyuncuların yerine geçmek için yedek listesine girebilirsiniz.</div>${amISub ? `<button class="action-sm" style="background:var(--danger); padding:6px 10px;" onclick="leaveSubstitutePool('${tid}')">Listeden Çık</button> <span style="color:var(--success); font-weight:bold; margin-left:10px;">✅ Listedesiniz</span>` : `<button class="action-sm" style="background:#00e5ff; color:black; padding:6px 10px;" onclick="joinSubstitutePool('${tid}')">Ben Katılabilirim (Yedek Ol)</button>`}</div>`; }
                 }
 
@@ -1181,9 +1186,27 @@ window.viewPendingTournament = function(tid, tab) {
         else { currentTid = val; let t = allTourneys[val]; if(!t) return; let status = t.settings.status || 'active'; document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); if (status === 'pending') { document.getElementById('tabsContainer').style.display = 'none'; document.getElementById('deleteLeagueBtn').style.display = 'inline-block'; document.getElementById('admin_pending').classList.add('active'); renderAdminPendingPanel(); } else { document.getElementById('tabsContainer').style.display = 'flex'; document.getElementById('deleteLeagueBtn').style.display = 'inline-block'; loadTournamentData(val); switchTab('standings'); } }
     }
 
-    
- function userSwitchLeague() { let val = document.getElementById('userActiveLeagueSelect').value; if(val === 'none') { currentTid = null; document.getElementById('navLeagueTitle').innerText = "İZMİR 35 KORTENİS LİGİ"; document.getElementById('navLeagueSub').innerText = "KARİYER VE LİG YÖNETİM SİSTEMİ"; switchTab('standings'); return; } currentTid = val; loadTournamentData(val); switchTab('standings'); }
-    
+    window.userSwitchLeague = function() { 
+        let selectBox = document.getElementById('userActiveLeagueSelect');
+        if(!selectBox) return;
+        let val = selectBox.value; 
+        
+        if(val === 'none') { 
+            currentTid = null; 
+            document.getElementById('navLeagueTitle').innerText = "İZMİR 35 KORTENİS LİGİ"; 
+            document.getElementById('navLeagueSub').innerText = "KARİYER VE LİG YÖNETİM SİSTEMİ"; 
+            switchTab('profile'); // Ana menüye dönüşte profil ekranına atmak daha şıktır
+            return; 
+        } 
+        
+        if (allTourneys[val]) {
+            currentTid = val; 
+            document.getElementById('tabsContainer').style.display = "flex"; // Sekmelerin görünürlüğünü garanti eder
+            loadTournamentData(val); 
+            switchTab('standings'); 
+        }
+    }
+
  function goHome() { 
         if(isAdmin) { 
             openAdminGlobalNotifs(); 
@@ -1211,22 +1234,18 @@ window.viewPendingTournament = function(tid, tab) {
         }
     }
  
-function switchTab(t) {
-        // GEÇMİŞ HAFIZASI SİSTEMİ: Aktif olan eski paneli kaydet
+window.switchTab = function(t) {
         let currentActivePanel = document.querySelector('.panel.active');
         if (currentActivePanel && currentActivePanel.id !== t) {
             previousTab = currentActivePanel.id;
         }
 
-        // Tüm sekmeleri gizle ve aktif butonları sıfırla
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); 
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         
-        // İŞTE SİLİNEN KRİTİK KISIM: Seçilen sekmeyi tekrar görünür yap!
         let targetPanel = document.getElementById(t); 
         if(targetPanel) targetPanel.classList.add('active');
         
-        // İlgili tab butonunu aktif renk yap
         document.querySelectorAll('.tab-btn').forEach(b => { 
             let attr = b.getAttribute('onclick'); 
             if(attr && (attr.includes(`'${t}'`) || attr.includes(`"${t}"`))) { 
@@ -1235,15 +1254,22 @@ function switchTab(t) {
         });
 
         let isGeneralMode = currentTid === null;
-        let tp = document.getElementById('tabProfileBtn'); if(tp) tp.style.display = isGeneralMode ? 'block' : 'none';
-        let tt = document.getElementById('tabTournamentsBtn'); if(tt) tt.style.display = isGeneralMode ? 'block' : 'none';
-        let tr = document.getElementById('tabRivalsBtn'); if(tr) tr.style.display = !isGeneralMode ? 'block' : 'none';
-        let tm = document.getElementById('tabMatchesBtn'); if(tm) tm.style.display = !isGeneralMode ? 'block' : 'none';
-        let ttree = document.getElementById('tabTreeBtn'); if(ttree) ttree.style.display = !isGeneralMode ? 'block' : 'none';
+        
+        // SEKME GÖRÜNÜRLÜĞÜ GARANTİ SİSTEMİ
+        let tp = document.getElementById('tabProfileBtn'); if(tp) tp.style.display = isGeneralMode ? 'inline-block' : 'none';
+        let tt = document.getElementById('tabTournamentsBtn'); if(tt) tt.style.display = isGeneralMode ? 'inline-block' : 'none';
+        let tr = document.getElementById('tabRivalsBtn'); if(tr) tr.style.display = !isGeneralMode ? 'inline-block' : 'none';
+        let tm = document.getElementById('tabMatchesBtn'); if(tm) tm.style.display = !isGeneralMode ? 'inline-block' : 'none';
+        let ttree = document.getElementById('tabTreeBtn'); if(ttree) ttree.style.display = !isGeneralMode ? 'inline-block' : 'none';
 
         let rulesBtn = document.getElementById('tabRulesBtn'); let stdBtn = document.getElementById('tabStandingsBtn');
-        if(!isGeneralMode) { if(rulesBtn) rulesBtn.innerHTML = "📜 Turnuva Kuralları"; if(stdBtn) stdBtn.innerHTML = "📊 Puan Durumu"; } 
-        else { if(rulesBtn) rulesBtn.innerHTML = "📜 Sistem Rehberi"; if(stdBtn) stdBtn.innerHTML = "🏆 Genel Sıralama"; }
+        if(!isGeneralMode) { 
+            if(rulesBtn) rulesBtn.innerHTML = "📜 Turnuva Kuralları"; 
+            if(stdBtn) stdBtn.innerHTML = "📊 Puan Durumu"; 
+        } else { 
+            if(rulesBtn) rulesBtn.innerHTML = "📜 Sistem Rehberi"; 
+            if(stdBtn) stdBtn.innerHTML = "🏆 Genel Sıralama"; 
+        }
 
         if(t === 'profile') renderProfile();
         if(t === 'tournaments') renderTournamentsList();
