@@ -54,9 +54,8 @@ exports.onNewUserRegistration = myRegion.database.ref('/the_35_gold_league/users
     }
     return null;
   });
-
 // =================================================================
-// BİLDİRİM FIRLATICI YARDIMCI MOTOR
+// BİLDİRİM FIRLATICI YARDIMCI MOTOR (GÜNCEL V12 VERSİYONU)
 // =================================================================
 async function sendNotificationToUser(userId, title, body) {
     try {
@@ -64,16 +63,21 @@ async function sendNotificationToUser(userId, title, body) {
         const token = userSnap.val();
         
         if (token) {
-            const payload = {
+            // Yeni sistemde Token, payload'un direkt içine yazılır
+            const message = {
                 notification: { 
                     title: title, 
-                    body: body, 
-                    icon: '/icon-192.png' 
-                }
+                    body: body
+                },
+                token: token 
             };
-            await admin.messaging().sendToDevice(token, payload);
+            // sendToDevice yerine güncel send komutunu kullanıyoruz
+            await admin.messaging().send(message);
+            console.log(`✅ Bildirim başarıyla fırlatıldı -> Kullanıcı: ${userId}`);
+        } else {
+            console.log(`❌ HATA: Token bulunamadı -> Kullanıcı: ${userId}`);
         }
     } catch (error) {
-        console.error(`Bildirim hatası -> Kullanıcı: ${userId}`, error);
+        console.error(`🚨 Bildirim hatası -> Kullanıcı: ${userId}`, error);
     }
 }
