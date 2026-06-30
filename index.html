@@ -97,6 +97,70 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:11px;} th,td
         </div>
     </div>
 </div>
+
+<div id="participantsModal" class="modal">
+    <div class="modal-content" style="max-width: 420px; padding: 20px;">
+        <button style="position:absolute; top:10px; right:15px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer;" onclick="closeParticipantsModal()">✖</button>
+        <h3 style="color:var(--accent-color); margin-top:0;">👥 KATILIMCILAR <span id="participantsCountBadge" style="color:white; font-size:12px;">(0)</span></h3>
+        <p style="font-size:11px; color:var(--sub-text); margin-top:-5px;">Profilleri incelemek için oyuncu isimlerine tıklayabilirsiniz.</p>
+        
+        <div id="participantsListContainer" style="text-align:left; margin-top:15px; max-height: 45vh; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; background: #020617; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);">
+            </div>
+    </div>
+</div>
+
+<div id="adminEditTournamentModal" class="modal">
+    <div class="modal-content" style="max-width: 450px; text-align: left;">
+        <button style="position:absolute; top:10px; right:15px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer;" onclick="closeEditTournamentModal()">✖</button>
+        <h3 style="color:var(--warning); margin-top:0; text-align:center;">⚙️ TURNUVA AYARLARINI GÜNCELLE</h3>
+        
+        <label style="font-size:11px; color:var(--sub-text); font-weight:bold;">TURNUVA ÖZEL ADI</label>
+        <input type="text" id="editTourneyName" class="auth-input force-upper" style="margin-top:4px;" placeholder="ÖRN: İZMİR 35 LİGİ" oninput="this.value = this.value.toLocaleUpperCase('tr-TR')">
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div>
+                <label style="font-size:11px; color:var(--sub-text); font-weight:bold;">BAŞLANGIÇ TARİHİ</label>
+                <input type="date" id="editTourneyDate" class="auth-input" style="margin-top:4px;" onclick="try{this.showPicker();}catch(e){}">
+            </div>
+            <div>
+                <label style="font-size:11px; color:var(--sub-text); font-weight:bold;">KAPASİTE</label>
+                <select id="editTourneyCap" class="auth-select force-upper" style="margin-top:4px; margin-bottom:0;">
+                    <option value="23">BUTİK (12-23 KİŞİ)</option>
+                    <option value="47">STANDART (24-47 KİŞİ)</option>
+                    <option value="96">BÜYÜK (48-96 KİŞİ)</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px;">
+            <div>
+                <label style="font-size:11px; color:var(--sub-text); font-weight:bold;">KATEGORİ</label>
+                <select id="editTourneyGender" class="auth-select force-upper" style="margin-top:4px; margin-bottom:0;">
+                    <option value="ERKEK">ERKEK</option>
+                    <option value="KADIN">KADIN</option>
+                    <option value="KARMA">KARMA</option>
+                </select>
+            </div>
+            <div>
+                <label style="font-size:11px; color:var(--sub-text); font-weight:bold;">SEVİYE (TİER)</label>
+                <select id="editTourneyTier" class="auth-select force-upper" style="margin-top:4px; margin-bottom:0;">
+                    <option value="SILVER">SILVER</option>
+                    <option value="GOLD">GOLD</option>
+                    <option value="PLATIN">PLATIN</option>
+                    <option value="OPEN">OPEN (AÇIK)</option>
+                </select>
+            </div>
+        </div>
+
+        <label style="font-size:11px; color:var(--sub-text); font-weight:bold; margin-top:12px; display:block;">LOKASYON / İLÇE</label>
+        <input type="text" id="editTourneyRegion" class="auth-input force-upper" style="margin-top:4px;" placeholder="ÖRN: BOSTANLI" oninput="this.value = this.value.toLocaleUpperCase('tr-TR')">
+        
+        <button class="modal-btn" style="background:var(--success); color:black; margin-top:15px;" onclick="saveTournamentSettings()">Değişiklikleri Veritabanına İşle 💾</button>
+    </div>
+</div>
+
+
+
 <div id="publicProfileModal" class="modal"><div class="modal-content" style="max-width:350px;"><button style="position:absolute; top:10px; right:15px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer;" onclick="closePublicProfile()">✖</button><div style="font-size:35px; margin-bottom:10px;">👤</div><h2 id="pubName" style="margin:0; color:white; text-transform:uppercase;">İSİM</h2><div style="margin-top:5px; display:flex; justify-content:center; flex-wrap:wrap; gap:5px;"><span id="pubTier" style="background:var(--accent-color); color:black; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px;">SEVİYE</span><span id="pubGender" style="background:#1e293b; color:white; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px; border:1px solid var(--border-color);">CİNSİYET</span><span id="pubStyle" style="background:#1e293b; color:var(--warning); font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px; border:1px solid var(--border-color);">STİL</span></div><div style="display:flex; justify-content:space-around; margin-top:20px;"><div><div id="pubKKor" style="font-size:20px; font-weight:bold; color:var(--accent-color);">0</div><div style="font-size:9px; color:var(--sub-text);">K-KOR</div></div><div><div id="pubFame" style="font-size:20px; font-weight:bold; color:var(--success);">0</div><div style="font-size:9px; color:var(--sub-text);">Şöhret</div></div><div><div id="pubWinLoss" style="font-size:20px; font-weight:bold; color:white;">0G - 0M</div><div style="font-size:9px; color:var(--sub-text);">Maçlar</div></div></div><div style="background:#1e293b; padding:10px; border-radius:8px; margin-top:15px; font-size:11px; border-left:3px solid var(--success); text-align:left;"><h4 style="margin:0 0 5px 0; color:var(--success);">📅 Oyun Saatleri</h4><div id="pubAvail" style="color:var(--text-color);">Yükleniyor...</div></div></div></div>
 <div id="substituteModal" class="modal"><div class="modal-content" style="max-width:400px;"><button style="position:absolute; top:10px; right:15px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer;" onclick="closeSubstituteModal()">✖</button><h3 style="color:var(--warning); margin-top:0;">🔄 OYUNCU DEĞİŞTİR (TRANSFER)</h3><p style="font-size:11px; color:#cbd5e1; text-align:left;">Bu işlem, ligden ayrılan oyuncunun fikstürünü ve şu ana kadar olan yerini yeni oyuncuya devreder. K-KOR matematiği korunur.</p><div style="background:#1e293b; padding:10px; border-radius:6px; margin-bottom:15px; text-align:left;"><strong style="font-size:11px; color:var(--danger);">Çıkan Oyuncu:</strong><br><span id="subOutName" style="font-weight:bold; font-size:14px;">-</span></div><div style="text-align:left;"><strong style="font-size:11px; color:var(--success);">Yerine Girecek Yeni Oyuncu:</strong><br><select id="subInSelect" class="auth-select force-upper" style="margin-top:5px; margin-bottom:0;"><option value="">SEÇİNİZ...</option></select></div><button class="modal-btn" onclick="executeSubstitution()">Transferi Gerçekleştir</button></div></div>
 <!-- Katılımcılar Modalı -->
@@ -1099,14 +1163,26 @@ function renderAdminChecklist() {
     }
 }
     function deleteUser(uid) { if(confirm("DİKKAT: Oyuncuyu silmek istediğinize emin misiniz?")) database.ref(`the_35_gold_league/users/${uid}`).remove(); }
-
-    function renderAdminPendingPanel() {
+ function renderAdminPendingPanel() {
         let t = allTourneys[currentTid]; if(!t) return; let s = t.settings || {}; let cap = s.maxCapacity || 23; let regs = _arr(t.registeredPlayers);
-        document.getElementById('pendingAdminTitle').innerText = `KAYIT YÖNETİMİ: ${s.customName || 'TURNUVA'}`;
+        
+        // 🌟 GHOST PLAYER TEMİZLİĞİ: Silinmiş hesapları kayıt listesinden otomatik temizler
+        let validRegs = regs.filter(uid => globalUsers[uid] && globalUsers[uid].name);
+        if(validRegs.length !== regs.length) {
+            regs = validRegs;
+            allTourneys[currentTid].registeredPlayers = regs;
+            database.ref(`the_35_gold_league/multi_v1/${currentTid}/registeredPlayers`).set(regs);
+        }
+
+        // ⚙️ YENİ DÜZENLE BUTONU
+        document.getElementById('pendingAdminTitle').innerHTML = `KAYIT YÖNETİMİ: ${s.customName || 'TURNUVA'} <button class="action-sm" style="background:var(--warning); color:black; margin-left:10px; box-shadow: 0 2px 5px rgba(255,215,0,0.3);" onclick="openEditTournamentModal()">⚙️ Ayarları Düzenle</button>`;
+        
         let mList = document.getElementById('pendingMainList'); mList.innerHTML = ""; let wList = document.getElementById('pendingWaitlist'); wList.innerHTML = "";
         let manualSelect = document.getElementById('adminManualAddSelect'); manualSelect.innerHTML = `<option value="">SİSTEMDEN OYUNCU SEÇ...</option>`;
         Object.values(globalUsers).filter(u => u && u.name && !regs.includes(u.id)).sort((a,b)=>String(a.name).localeCompare(String(b.name))).forEach(u => { manualSelect.innerHTML += `<option value="${u.id}">${u.name} (${u.tier})</option>`; });
-        let mainCount = 0;
+        
+        // ... (Bu fonksiyonun geri kalanı aynen kalacak) ...
+    let mainCount = 0;
         regs.forEach((uid, index) => {
             let u = globalUsers[uid]; if(!u) return;
             let html = `<div class="admin-player-item" style="padding:6px 10px;"><div><strong style="color:white; font-size:12px;">${index+1}. ${u.name}</strong> <span style="font-size:10px; color:var(--accent-color);">(${u.tier} ${u.sysScore})</span></div><button class="action-sm" style="background:var(--danger);" onclick="adminRemovePendingPlayer('${uid}')">Çıkar</button></div>`;
@@ -1847,37 +1923,7 @@ function submitScore(mId, isP2, btn) {
     
     function closeSubstituteModal() { document.getElementById('substituteModal').style.display = 'none'; }
     // --- KATILIMCILARI GÖRME ÖZELLİĞİ ---
-function openParticipantsModal(tid) {
-        let t = allTourneys[tid];
-        if (!t) return;
-        let status = t.settings.status || 'active';
-        let uids = status === 'pending' ? _arr(t.registeredPlayers) : _arr(t.players).map(p => p.id);
 
-        let html = '';
-        let plist = uids.map(uid => globalUsers[uid]).filter(u => u);
-        
-        // İsme göre alfabetik sırala
-        plist.sort((a, b) => a.name.localeCompare(b.name));
-
-        plist.forEach((u, i) => {
-            let isFnd = u.isFounder ? '<span style="color:var(--warning); font-size:12px; margin-left:5px;" title="Kurucu Oyuncu">👑</span>' : '';
-            
-            // YENİ ROZET SİSTEMİNİ LİSTEYE ENTEGRE ETME
-            let dStats = derivedGlobalStats[u.id] || {};
-            let dynTier = dStats.dynamicTier || u.tier || 'BELİRSİZ';
-            let badgeHtml = getTierBadgeHtml(dynTier, dStats.dynamicNTRP || u.sysScore);
-
-            html += `<div style="padding:10px 8px; border-bottom:1px solid var(--divider); display:flex; justify-content:space-between; align-items:center;">
-                <span class="player-link" style="font-weight:bold; font-size:13px;" onclick="closeParticipantsModal(); openPublicProfile('${u.id}')">${i+1}. ${u.name} ${isFnd}</span>
-                ${badgeHtml}
-            </div>`;
-        });
-
-        if(html === '') html = '<div style="font-size:12px; color:var(--sub-text); text-align:center;">Henüz kayıtlı oyuncu yok.</div>';
-
-        document.getElementById('participantsListContainer').innerHTML = html;
-        document.getElementById('participantsModal').style.display = 'flex';
-    }
 function closeParticipantsModal() { document.getElementById('participantsModal').style.display = 'none'; }
 
 // --- ADMİN İÇİN KURUCU (FOUNDER) YAPMA BUTONU ---
@@ -2124,6 +2170,94 @@ function grantFounderStatus() {
             }
         });
     }
+
+// ==========================================
+// ⚙️ TURNUVA AYARLARI DÜZENLEME MOTORU
+// ==========================================
+window.openEditTournamentModal = function() {
+    if(!currentTid) return;
+    let t = allTourneys[currentTid];
+    if(!t || !t.settings) return;
+    
+    let s = t.settings;
+    document.getElementById('editTourneyName').value = s.customName || '';
+    document.getElementById('editTourneyDate').value = s.startDate || '';
+    document.getElementById('editTourneyCap').value = s.maxCapacity || 23;
+    document.getElementById('editTourneyGender').value = s.gender || 'ERKEK';
+    document.getElementById('editTourneyTier').value = s.tier || 'GOLD';
+    document.getElementById('editTourneyRegion').value = s.region || 'İZMİR';
+    
+    document.getElementById('adminEditTournamentModal').style.display = 'flex';
+}
+
+window.closeEditTournamentModal = function() { document.getElementById('adminEditTournamentModal').style.display = 'none'; }
+
+window.saveTournamentSettings = function() {
+    if(!currentTid) return;
+    let btn = document.activeElement;
+    let orig = btn.innerHTML;
+    btn.innerHTML = "⏳ KAYDEDİLİYOR..."; btn.disabled = true;
+    
+    let t = allTourneys[currentTid];
+    t.settings.customName = document.getElementById('editTourneyName').value.trim().toLocaleUpperCase('tr-TR') || 'İZMİR 35 KORTENİS LİGİ';
+    t.settings.startDate = document.getElementById('editTourneyDate').value;
+    t.settings.maxCapacity = parseInt(document.getElementById('editTourneyCap').value) || 23;
+    t.settings.gender = document.getElementById('editTourneyGender').value;
+    t.settings.tier = document.getElementById('editTourneyTier').value;
+    t.settings.region = document.getElementById('editTourneyRegion').value.trim().toLocaleUpperCase('tr-TR') || 'İZMİR';
+    
+    database.ref(`the_35_gold_league/multi_v1/${currentTid}/settings`).set(t.settings).then(() => {
+        showToast("Turnuva ayarları başarıyla güncellendi!", "success");
+        closeEditTournamentModal();
+        btn.innerHTML = orig; btn.disabled = false;
+        
+        // Ekranları yeni bilgilerle tazele
+        renderAdminPendingPanel(); 
+        populateLeagueDropdowns(); 
+    }).catch(e => {
+        showToast("Hata: " + e.message, "error");
+        btn.innerHTML = orig; btn.disabled = false;
+    });
+}
+
+// ==========================================
+// 👥 GÜNCELLENMİŞ KATILIMCILAR MOTORU
+// ==========================================
+window.openParticipantsModal = function(tid) {
+    let t = allTourneys[tid];
+    if (!t) return;
+    let status = t.settings.status || 'active';
+    let uids = status === 'pending' ? _arr(t.registeredPlayers) : _arr(t.players).map(p => p.id);
+
+    // GHOST PLAYER TEMİZLİĞİ (Sadece sistemde mevcut olanları listeler)
+    let plist = uids.map(uid => globalUsers[uid]).filter(u => u && u.name);
+    
+    let html = '';
+    plist.sort((a, b) => a.name.localeCompare(b.name)); // Alfabetik sırala
+
+    plist.forEach((u, i) => {
+        let isFnd = u.isFounder ? '<span style="color:var(--warning); font-size:12px; margin-left:5px;" title="Kurucu Oyuncu">👑</span>' : '';
+        let dStats = derivedGlobalStats[u.id] || {};
+        let dynTier = dStats.dynamicTier || u.tier || 'BELİRSİZ';
+        let badgeHtml = getTierBadgeHtml(dynTier, dStats.dynamicNTRP || u.sysScore);
+
+        html += `<div style="padding:10px 8px; border-bottom:1px solid var(--divider); display:flex; justify-content:space-between; align-items:center;">
+            <span class="player-link" style="font-weight:bold; font-size:13px;" onclick="closeParticipantsModal(); openPublicProfile('${u.id}')">${i+1}. ${u.name} ${isFnd}</span>
+            ${badgeHtml}
+        </div>`;
+    });
+
+    if(html === '') html = '<div style="font-size:12px; color:var(--sub-text); text-align:center;">Henüz kayıtlı oyuncu yok.</div>';
+
+    document.getElementById('participantsListContainer').innerHTML = html;
+    
+    // Ekranda (X Kişi) yazan bölümü gerçek sayıyla güncelle
+    let countBadge = document.getElementById('participantsCountBadge');
+    if(countBadge) countBadge.innerText = `(${plist.length} Kişi)`;
+    
+    document.getElementById('participantsModal').style.display = 'flex';
+}
+// Mevcut closeParticipantsModal fonksiyonun aynen kalabilir
 
 </script>
 </body>
