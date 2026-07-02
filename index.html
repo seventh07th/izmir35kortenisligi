@@ -164,6 +164,72 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:11px;} th,td
 .dialog-btn.cancel:hover { background: #475569; }
 .dialog-btn.confirm { background: var(--success); color: black; }
 .dialog-btn.danger { background: var(--danger); color: white; }
+
+/* =========================================
+   GÖRSELDEKİ PREMİUM TASARIMI ZORLA (OVERRIDE)
+========================================= */
+:root {
+    --bg-color: #0b1120 !important; /* Daha karanlık, derin bir lacivert/siyah */
+    --card-bg: rgba(15, 23, 42, 0.4) !important; /* Cam şeffaflığı */
+    --accent-color: #d4af37 !important; /* Gerçek logo altını */
+    --neon-cyan: #00e5ff !important;
+    --border-color: rgba(212, 175, 55, 0.3) !important;
+}
+
+body {
+    background-color: var(--bg-color) !important;
+    background-image: radial-gradient(circle at top, #162032 0%, #0b1120 100%) !important;
+}
+
+/* Giriş Kartı Cam Efekti (Görseldeki gibi) */
+.auth-card {
+    background: var(--card-bg) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
+    border-radius: 20px !important;
+    padding: 35px 25px !important;
+}
+
+/* Altın Çerçeveli ve Yuvarlak İnputlar */
+.auth-input, .auth-select {
+    background: rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 25px !important; /* Görseldeki gibi oval */
+    padding: 14px 20px !important;
+    color: #fff !important;
+    font-size: 13px !important;
+}
+.auth-input:focus, .auth-select:focus {
+    border-color: var(--neon-cyan) !important;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.2) !important;
+}
+
+/* Neon Turkuaz Aksiyon Butonu */
+.auth-card .auth-btn {
+    background: var(--neon-cyan) !important;
+    color: #000 !important;
+    border-radius: 30px !important; /* Tam oval buton */
+    font-weight: 900 !important;
+    font-size: 14px !important;
+    padding: 15px !important;
+    letter-spacing: 1px !important;
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.4) !important;
+    border: none !important;
+    margin-top: 15px !important;
+}
+
+/* Yeni Kayıt Ol Butonu Rengi (Neon Çerçeveli) */
+.auth-card .auth-btn[onclick="toggleAuth('registerPanel')"] {
+    background: rgba(0, 229, 255, 0.05) !important;
+    color: var(--neon-cyan) !important;
+    border: 1px solid var(--neon-cyan) !important;
+    box-shadow: none !important;
+}
+
+/* Yazı linkleri */
+.switch-link { color: var(--accent-color) !important; font-weight: bold; }
 </style>
 </head>
 <body>
@@ -291,8 +357,9 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:11px;} th,td
     </div>
  
  <div id="authWrapper">
-        <h1 id="mainTitle">✨ İZMİR 35 KORTENİS LİGİ ✨</h1><p style="text-align:center; margin:0 0 15px 0; font-size:12px; color:var(--sub-text);" id="subTitleText">Kariyer ve Lig Yönetim Sistemi</p>
-        
+        <img src="1782571561856.png" alt="KOR Logo" style="width: 140px; height: auto; margin-bottom: 15px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));">
+<h1 id="mainTitle" style="color: var(--accent-color); font-size: 20px; letter-spacing: 1px; margin:0 0 5px 0; text-transform: uppercase;">İzmir 35 Kor Tenis Ligi</h1>
+<p style="text-align:center; margin:0 0 20px 0; font-size:12px; color:var(--sub-text);" id="subTitleText">Yönetici & Oyuncu Girişi</p>
         <div id="pwaInstallContainer" style="display:none; text-align:center; margin-bottom:20px; width:100%; max-width:550px;">
             <button id="pwaInstallBtn" class="auth-btn" style="background: linear-gradient(135deg, #00e5ff, #007bb5); color: black; font-size: 14px; box-shadow: 0 4px 15px rgba(0, 229, 255, 0.4); border: 1px solid #00e5ff; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; font-weight:900;" onclick="handleInstallClick()">
                 📲 UYGULAMAYI TELEFONA YÜKLE
