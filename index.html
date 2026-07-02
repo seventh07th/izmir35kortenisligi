@@ -13,94 +13,122 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
     <style>
 
-h:root {
-    /* Ana Arka Plan - Gece Mavisi / Karbon Siyah */
-    --bg-color: #0f172a;
+:root {
+    /* Ana Arka Plan - Derin Karbon Lacivert */
+    --bg-color: #0b1120 !important;
     
     /* Cam Efekti (Glassmorphism) İçin Yarı Saydam Zemin */
-    --card-bg: rgba(15, 23, 42, 0.65); 
+    --card-bg: rgba(15, 23, 42, 0.45) !important; 
     
     /* Altın Detaylar (KOR Logosu Referanslı) */
-    --accent-color: #d4af37; /* Gold */
+    --accent-color: #d4af37 !important; 
     
     /* Neon Turkuaz (Aksiyon Butonları ve Yükseliş Çizgisi) */
-    --neon-cyan: #00f0ff;
+    --neon-cyan: #00e5ff !important;
     
     /* Diğer Sistem Renkleri */
-    --text-color: #f8fafc;
-    --sub-text: #94a3b8;
-    --border-color: rgba(212, 175, 55, 0.25); /* Altın yansımalı ince çerçeve */
-    --divider: rgba(212, 175, 55, 0.1);
-    --success: #00ffaa;
-    --warning: #ffbd00;
-    --danger: #ef4444;
+    --text-color: #f8fafc !important;
+    --sub-text: #94a3b8 !important;
+    --border-color: rgba(212, 175, 55, 0.3) !important; /* Altın yansımalı ince çerçeve */
+    --divider: rgba(212, 175, 55, 0.1) !important;
+    --success: #00ffaa !important;
+    --warning: #ffbd00 !important;
+    --danger: #ef4444 !important;
 }
 
 * { box-sizing: border-box; }
 
 body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background-color: var(--bg-color);
-    /* Zengine derinlik katmak için radyal (merkezden dışa) ışık efekti */
-    background: radial-gradient(circle at top, #1e293b 0%, #0f172a 80%);
-    color: var(--text-color);
-    margin: 0;
-    padding: 10px;
-    width: 100vw;
-    min-height: 100vh;
-    overflow-x: hidden;
-    font-size: 12px;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif !important;
+    background-color: var(--bg-color) !important;
+    /* Zemin derinliği için radyal ışık efekti */
+    background-image: radial-gradient(circle at top, #162032 0%, #0b1120 100%) !important;
+    color: var(--text-color) !important;
+    margin: 0 !important;
+    padding: 10px !important;
+    width: 100vw !important;
+    min-height: 100vh !important;
+    overflow-x: hidden !important;
+    font-size: 12px !important;
 }
 
-.container{max-width:1000px;margin:0 auto;padding-bottom:30px;} 
-h1,h2,h3{text-align:center;color:var(--accent-color);margin:10px 0;letter-spacing:1px;}
+.container { max-width: 1000px; margin: 0 auto; padding-bottom: 30px; } 
+h1, h2, h3 { text-align: center; color: var(--accent-color) !important; margin: 10px 0; letter-spacing: 1px; text-transform: uppercase; }
 
-/* === CAM EFEKTLİ GİRİŞ KARTLARI (GLASSMORPHISM) === */
-.auth-card {
-    background: var(--card-bg);
-    backdrop-filter: blur(12px); /* Arka planı buzlu cam yapar */
-    -webkit-backdrop-filter: blur(12px);
+/* === ÜST NAVİGASYON VE SEKME TASARIMLARI === */
+.nav-bar {
+    display: none;
+    flex-direction: column;
+    background: var(--card-bg) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    padding: 12px 15px;
+    border-radius: 16px !important;
+    border: 1px solid var(--border-color) !important;
+    margin-bottom: 15px;
+    gap: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+}
+.nav-btn {
+    background: rgba(0,0,0,0.5) !important;
+    color: var(--accent-color) !important;
+    border: 1px solid var(--border-color) !important;
+    padding: 8px 12px;
+    border-radius: 20px !important;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 11px;
+    transition: 0.3s;
+}
+.nav-btn:hover { background: rgba(212, 175, 55, 0.1) !important; }
+
+.tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 15px; padding-bottom: 5px; } 
+.tab-btn {
+    background-color: rgba(0,0,0,0.4) !important;
+    color: var(--sub-text) !important;
+    border: 1px solid rgba(255,255,255,0.05) !important;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 20px !important;
+    font-weight: bold;
+    flex: 1 1 auto;
+    min-width: 85px;
+    text-align: center;
+    font-size: 11px;
+    white-space: nowrap;
+    transition: 0.3s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+} 
+.tab-btn.active {
+    background-color: rgba(0, 229, 255, 0.1) !important;
+    color: var(--neon-cyan) !important;
+    border-color: var(--neon-cyan) !important;
+    transform: scale(1.03);
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.25) !important;
+}
+
+/* === GİRİŞ VE PANEL KARTLARI (CAM EFEKTİ) === */
+.auth-card, .panel, .tournament-card, .match-card, .player-rivals-card, .slider-container {
+    background: var(--card-bg) !important;
+    backdrop-filter: blur(15px) !important; /* Gerçek buzlu cam efekti */
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.7) !important;
+    border-radius: 20px !important;
     padding: 25px;
-    border-radius: 16px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 10px 40px rgba(0,0,0,0.6); /* Derin premium gölge */
-    width: 100%; 
-    max-width: 550px; 
-    text-align: center; 
-    display: none; 
     margin-bottom: 20px;
 }
+.auth-card { width: 100%; max-width: 550px; text-align: center; display: none; padding: 35px 25px !important; }
+#authWrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; margin-top: 20px; }
 
-/* === NEON TURKUAZ AKSİYON BUTONLARI === */
-.auth-btn {
-    background: var(--neon-cyan);
-    color: #000;
-    border: none;
-    padding: 14px;
-    border-radius: 8px;
-    font-weight: 900;
-    cursor: pointer;
-    margin: 5px 0;
-    font-size: 13px;
-    transition: 0.3s;
-    width: 100%;
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.3); /* Neon Parıltı */
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-.auth-btn:hover {
-    box-shadow: 0 0 25px rgba(0, 240, 255, 0.6); /* Tıklarken parlar */
-    transform: translateY(-2px);
-}
-
-/* === YARI SAYDAM GİRİŞ KUTULARI === */
+/* === OVAL VE YARI SAYDAM GİRİŞ KUTULARI === */
 .auth-input, .auth-select {
-    padding: 12px;
+    padding: 14px 20px !important;
     width: 100%;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(0, 0, 0, 0.4);
-    color: white;
+    border-radius: 25px !important; /* Görseldeki gibi oval */
+    border: 1px solid var(--border-color) !important;
+    background: rgba(0, 0, 0, 0.4) !important;
+    color: white !important;
     text-align: center;
     font-size: 12px;
     margin-bottom: 12px;
@@ -108,119 +136,35 @@ h1,h2,h3{text-align:center;color:var(--accent-color);margin:10px 0;letter-spacin
     transition: 0.3s;
 }
 .auth-input:focus, .auth-select:focus {
-    border-color: var(--neon-cyan);
-    outline: none;
-    box-shadow: inset 0 0 8px rgba(0, 240, 255, 0.2);
-}
-.force-upper{text-transform:uppercase;}1,h2,h3{text-align:center;color:var(--accent-color);margin:10px 0;letter-spacing:1px;}
-
-/* YENİ: Ferah Üst Menü ve İki Satırlı Sekmeler */
-.nav-bar{display:none;flex-direction:column;background:var(--card-bg);padding:12px 15px;border-radius:16px;border:1px solid var(--border-color);margin-bottom:15px;gap:12px;box-shadow:0 6px 20px rgba(0,0,0,0.4);}
-.nav-btn{background:#1e293b;color:white;border:1px solid var(--border-color);padding:8px 12px;border-radius:20px;font-weight:bold;cursor:pointer;font-size:11px;transition:0.3s;} .nav-btn:hover{background:#334155;}
-.tabs{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:15px;padding-bottom:5px;} 
-.tab-btn{background-color:var(--card-bg);color:var(--sub-text);border:1px solid var(--border-color);padding:10px;cursor:pointer;border-radius:20px;font-weight:bold;flex:1 1 auto;min-width:85px;text-align:center;font-size:11px;white-space:nowrap;transition:0.3s;box-shadow:0 2px 4px rgba(0,0,0,0.2);} 
-.tab-btn.active{background-color:var(--accent-color);color:#000;border-color:var(--accent-color);transform:scale(1.03);box-shadow:0 4px 10px rgba(255,215,0,0.25);}
-
-/* FONT KÜÇÜLTME (Giriş Kutuları, Butonlar ve Tablolar 1 Seviye Küçüldü) */
-.auth-input,.auth-select{padding:10px;width:100%;border-radius:6px;border:1px solid var(--border-color);background:#020617;color:white;text-align:center;font-size:11px;margin-bottom:12px;box-sizing:border-box;} .force-upper{text-transform:uppercase;}
-.auth-btn{background:var(--accent-color);color:#000;border:none;padding:12px;border-radius:6px;font-weight:bold;cursor:pointer;margin:5px 0;font-size:12px;transition:0.3s;width:100%;}
-.switch-link{color:var(--sub-text);font-size:11px;cursor:pointer;text-decoration:underline;margin-top:15px;display:inline-block;}
-.chk-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:left;font-size:10px;margin-bottom:15px;} .chk-label{background:#1e293b;padding:6px;border-radius:6px;border:1px solid var(--border-color);cursor:pointer;display:flex;align-items:center;gap:5px;}
-.slider-container{background:#1e293b;padding:12px;border-radius:8px;margin-bottom:15px;border:1px solid var(--border-color);text-align:left;box-shadow:inset 0 2px 5px rgba(0,0,0,0.3);}
-.slider-header{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:bold;color:white;margin-bottom:8px;} .slider-badge{background:#020617;color:var(--accent-color);padding:4px 10px;border-radius:6px;border:1px solid var(--accent-color);font-size:12px;font-weight:bold;}
-.range-slider{width:100%;cursor:pointer;accent-color:var(--accent-color);height:6px;border-radius:4px;outline:none;background:#0b1329;-webkit-appearance:none;} .range-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent-color);cursor:pointer;}
-.slider-desc{font-size:10px;color:#cbd5e1;margin-top:8px;min-height:28px;line-height:1.4;font-style:italic;}
-.admin-player-list{max-height:350px;overflow-y:auto;background:#020617;padding:10px;border-radius:8px;border:1px solid var(--border-color);text-align:left;margin-bottom:10px;} .admin-player-item{display:flex;flex-direction:column;align-items:flex-start;padding:10px 0;border-bottom:1px dashed var(--divider);gap:8px;}
-.action-sm{background:#334155;color:white;border:none;padding:5px 8px;border-radius:4px;font-size:10px;cursor:pointer;font-weight:bold;}
-#mainApp{display:none;} #adminTopBar{display:none;background:#1e293b;padding:12px;border-radius:8px;text-align:center;margin-bottom:15px;border:1px dashed var(--accent-color);}
-.panel{display:none;background-color:var(--card-bg);padding:12px;border-radius:12px;border:1px solid var(--border-color);} .panel.active{display:block;} button.action-btn{background-color:var(--accent-color);color:#000;border:none;padding:12px;font-size:13px;font-weight:bold;cursor:pointer;border-radius:8px;width:100%;margin-top:8px;transition:0.3s;}
-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:11px;} th,td{padding:6px 2px;text-align:center;border-bottom:1px solid var(--border-color);} th{background-color:#1e293b;color:var(--accent-color);}
-.zone-direct{background-color:rgba(0,255,170,0.08);border-left:3px solid var(--success);} .zone-playoff{background-color:rgba(255,189,0,0.08);border-left:3px solid var(--warning);} .zone-eliminated{background-color:rgba(239,68,68,0.05);border-left:3px solid var(--danger);} .zone-global{background-color:rgba(0,229,255,0.05);border-left:3px solid #00e5ff;}
-.rivals-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;} .player-rivals-card{background:#020617;border:1px solid var(--border-color);border-radius:8px;padding:10px;} .player-main-title{background:#1e293b;padding:6px;text-align:center;font-weight:bold;border-radius:4px;color:var(--accent-color);font-size:12px;} .rival-line{display:flex;justify-content:space-between;padding:8px 2px;border-bottom:1px solid #1e293b;font-size:11px;align-items:center;flex-wrap:wrap;}
-.match-card{background:#020617;border-radius:12px;border:1px solid var(--border-color);box-shadow:0 4px 15px rgba(0,0,0,0.5);overflow:hidden;margin-bottom:15px;} .match-card-header{display:flex;justify-content:space-between;align-items:center;background:#0f172a;padding:8px 12px;border-bottom:1px solid var(--divider);}
-.scoreboard{display:flex;flex-direction:column;background:#0f172a;border-radius:8px;border:1px solid var(--divider);overflow:hidden;margin-bottom:10px;} .sb-row{display:flex;border-bottom:1px solid var(--divider);} .sb-row:last-child{border-bottom:none;} .sb-header{background:#1e293b;color:var(--sub-text);font-size:10px;font-weight:bold;text-align:center;} .sb-cell{flex:1;display:flex;justify-content:center;align-items:center;padding:8px 4px;border-left:1px dashed var(--divider);position:relative;} .sb-name{flex:3;padding:8px 10px;font-size:11px;font-weight:bold;display:flex;align-items:center;text-transform:uppercase;} .sb-input{width:30px;background:#020617;color:white;border:1px solid #475569;padding:6px 0;text-align:center;font-weight:bold;border-radius:6px;font-size:12px;transition:0.2s;} .sb-input:focus{border-color:var(--accent-color);outline:none;} .sb-tb-input{width:22px;background:#241c00;color:var(--warning);border:1px solid #78350f;padding:5px 0;text-align:center;font-weight:bold;border-radius:4px;font-size:10px;margin-left:4px;display:none;} .mt-col{background:rgba(255,189,0,0.05);}
-.save-btn{background:var(--success);border:none;padding:10px;color:black;font-weight:bold;cursor:pointer;border-radius:6px;flex:1;font-size:11px;transition:0.3s;} .pending-btn{background:var(--warning);border:none;padding:10px;color:black;font-weight:bold;cursor:pointer;border-radius:6px;flex:1;font-size:11px;transition:0.3s;} .fair-btn{background:#00e5ff;border:none;padding:8px;color:black;font-weight:bold;cursor:pointer;border-radius:6px;width:100%;margin-top:5px;font-size:10px;transition:0.3s;} .date-box{background:#1e293b;padding:10px;border-radius:6px;margin:10px 15px;font-size:10px;border-left:3px solid var(--accent-color);}
-.bracket-scroll-container{width:100%;overflow-x:auto;padding-bottom:15px;margin-top:20px;} .cl-bracket{display:flex;justify-content:space-between;align-items:center;margin:0 auto;padding:20px 0;} .bracket-col{display:flex;flex-direction:column;justify-content:space-around;gap:15px;height:100%;} .bracket-match{background:#0b1329;border:1px solid var(--border-color);border-radius:6px;padding:10px;width:140px;text-align:center;font-size:10px;font-weight:bold;} .bracket-center{display:flex;flex-direction:column;align-items:center;padding:0 20px;}
-.rules-content{padding:15px;font-size:12px;line-height:1.7;color:#cbd5e1;} .rules-content h3{color:var(--accent-color);border-bottom:1px solid var(--divider);padding-bottom:5px;margin-top:25px;text-align:left;} .rules-content p,.rules-content ul{text-align:left;margin:10px 0;} .example-box{background:rgba(255,215,0,0.05);border-left:3px solid var(--accent-color);padding:15px;margin-top:15px;border-radius:0 6px 6px 0;text-align:left;}
-.notification-card{background:rgba(245,158,11,0.1);border-left:4px solid var(--warning);padding:12px;margin-top:10px;font-size:11px;text-align:left;border-radius:4px;} .admin-notif-row{padding:10px;border-bottom:1px solid var(--divider);font-size:11px;display:flex;justify-content:space-between;align-items:center;} .global-alert{text-align:center;padding:30px;border:1px dashed var(--warning);border-radius:8px;color:var(--warning);background:#1e293b;margin-top:20px;font-weight:bold;}
-.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999;justify-content:center;align-items:center;padding:15px;box-sizing:border-box;} .modal-content{background:#0f172a;padding:30px;border-radius:12px;border:2px solid var(--accent-color);text-align:center;width:100%;max-width:450px;color:white;box-shadow:0 0 30px rgba(255,215,0,0.2);position:relative;} .modal-btn{background:var(--success);color:black;font-weight:bold;border:none;padding:12px 20px;border-radius:6px;cursor:pointer;font-size:13px;margin-top:20px;width:100%;}
-.player-link{cursor:pointer;text-decoration:underline;color:inherit;transition:0.2s;} .player-link:hover{color:var(--success);}
-.tournament-card{background:#1e293b;padding:15px;border-radius:8px;border:1px solid var(--border-color);margin-bottom:15px;display:flex;flex-direction:column;gap:10px;} .tournament-badge{padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;}
-@keyframes blink{0%{opacity:1;}50%{opacity:0.4;}100%{opacity:1;}}
-#authWrapper{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;margin-top:20px;}
-.auth-card{background:var(--card-bg);padding:25px;border-radius:12px;border:1px solid var(--border-color);box-shadow:0 4px 20px rgba(0,0,0,0.5);width:100%;max-width:550px;text-align:center;display:none;margin-bottom:20px;}
-
-.toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 999999; display: flex; flex-direction: column; gap: 10px; }
-.toast { min-width: 260px; background: #1e293b; color: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); font-size: 12px; font-weight: bold; border-left: 5px solid var(--accent-color); opacity: 0; transform: translateX(100%); animation: slideIn 0.3s forwards; display: flex; gap: 10px; align-items: center; }
-.toast.success { border-left-color: var(--success); }
-.toast.error { border-left-color: var(--danger); }
-.toast.warning { border-left-color: var(--warning); }
-@keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
-@keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
-.dialog-text { font-size: 13px; margin-bottom: 20px; line-height: 1.5; color: #cbd5e1; }
-.dialog-actions { display: flex; gap: 10px; margin-top: 15px; }
-.dialog-btn { flex: 1; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; transition: 0.2s; font-size: 12px; }
-.dialog-btn.cancel { background: #334155; color: white; }
-.dialog-btn.cancel:hover { background: #475569; }
-.dialog-btn.confirm { background: var(--success); color: black; }
-.dialog-btn.danger { background: var(--danger); color: white; }
-
-/* =========================================
-   GÖRSELDEKİ PREMİUM TASARIMI ZORLA (OVERRIDE)
-========================================= */
-:root {
-    --bg-color: #0b1120 !important; /* Daha karanlık, derin bir lacivert/siyah */
-    --card-bg: rgba(15, 23, 42, 0.4) !important; /* Cam şeffaflığı */
-    --accent-color: #d4af37 !important; /* Gerçek logo altını */
-    --neon-cyan: #00e5ff !important;
-    --border-color: rgba(212, 175, 55, 0.3) !important;
-}
-
-body {
-    background-color: var(--bg-color) !important;
-    background-image: radial-gradient(circle at top, #162032 0%, #0b1120 100%) !important;
-}
-
-/* Giriş Kartı Cam Efekti (Görseldeki gibi) */
-.auth-card {
-    background: var(--card-bg) !important;
-    backdrop-filter: blur(15px) !important;
-    -webkit-backdrop-filter: blur(15px) !important;
-    border: 1px solid var(--border-color) !important;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
-    border-radius: 20px !important;
-    padding: 35px 25px !important;
-}
-
-/* Altın Çerçeveli ve Yuvarlak İnputlar */
-.auth-input, .auth-select {
-    background: rgba(0, 0, 0, 0.4) !important;
-    border: 1px solid var(--border-color) !important;
-    border-radius: 25px !important; /* Görseldeki gibi oval */
-    padding: 14px 20px !important;
-    color: #fff !important;
-    font-size: 13px !important;
-}
-.auth-input:focus, .auth-select:focus {
     border-color: var(--neon-cyan) !important;
+    outline: none;
     box-shadow: 0 0 10px rgba(0, 229, 255, 0.2) !important;
 }
+.force-upper { text-transform: uppercase; }
 
-/* Neon Turkuaz Aksiyon Butonu */
-.auth-card .auth-btn {
+/* === NEON TURKUAZ AKSİYON BUTONLARI (OVAL) === */
+.auth-btn, button.action-btn {
     background: var(--neon-cyan) !important;
     color: #000 !important;
-    border-radius: 30px !important; /* Tam oval buton */
-    font-weight: 900 !important;
-    font-size: 14px !important;
-    padding: 15px !important;
-    letter-spacing: 1px !important;
-    box-shadow: 0 0 15px rgba(0, 229, 255, 0.4) !important;
     border: none !important;
-    margin-top: 15px !important;
+    padding: 15px !important;
+    border-radius: 30px !important; /* Tam oval */
+    font-weight: 900 !important;
+    cursor: pointer;
+    margin: 5px 0;
+    font-size: 13px !important;
+    transition: 0.3s;
+    width: 100%;
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.4) !important;
+    text-transform: uppercase;
+    letter-spacing: 1px !important;
+}
+.auth-btn:hover, button.action-btn:hover {
+    box-shadow: 0 0 25px rgba(0, 240, 255, 0.7) !important;
+    transform: translateY(-2px);
 }
 
-/* Yeni Kayıt Ol Butonu Rengi (Neon Çerçeveli) */
+/* Kayıt Ol Butonu (Neon Çerçeveli Şık Hali) */
 .auth-card .auth-btn[onclick="toggleAuth('registerPanel')"] {
     background: rgba(0, 229, 255, 0.05) !important;
     color: var(--neon-cyan) !important;
@@ -228,107 +172,56 @@ body {
     box-shadow: none !important;
 }
 
-/* Yazı linkleri */
-.switch-link { color: var(--accent-color) !important; font-weight: bold; }
-
-/* === UYGULAMANIN İÇİ: SEKMELER, TABLOLAR VE KARTLAR === */
-
-/* Üst Menü ve Navigasyon */
-.nav-bar {
-    background: var(--card-bg) !important;
-    backdrop-filter: blur(15px) !important;
-    -webkit-backdrop-filter: blur(15px) !important;
-    border: 1px solid var(--border-color) !important;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
-    border-radius: 16px !important;
-}
-.nav-btn {
-    background: rgba(0,0,0,0.5) !important;
-    border: 1px solid var(--border-color) !important;
-    color: var(--accent-color) !important;
-}
-
-/* Ana Sekmeler (Tabs) */
-.tab-btn {
-    background-color: rgba(0,0,0,0.4) !important;
-    color: var(--sub-text) !important;
-    border: 1px solid rgba(255,255,255,0.05) !important;
-    border-radius: 20px !important;
-    padding: 12px 15px !important;
-}
-.tab-btn.active {
-    background-color: rgba(0, 229, 255, 0.1) !important;
-    color: var(--neon-cyan) !important;
-    border: 1px solid var(--neon-cyan) !important;
-    box-shadow: 0 0 15px rgba(0, 229, 255, 0.25) !important;
-    font-weight: bold !important;
-}
-
-/* Paneller, Turnuva ve Maç Kartları (Buzlu Cam) */
-.panel, .tournament-card, .match-card, .player-rivals-card, .slider-container {
-    background: var(--card-bg) !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    border: 1px solid var(--border-color) !important;
-    border-radius: 16px !important;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.5) !important;
-}
-
-/* Kart Başlıkları (Koyu Transparan) */
-.match-card-header, .player-main-title {
-    background: rgba(0,0,0,0.5) !important;
-    border-bottom: 1px solid var(--border-color) !important;
-}
-
-/* Genel Aksiyon Butonları */
-button.action-btn {
-    background: var(--neon-cyan) !important;
-    color: #000 !important;
-    border-radius: 25px !important;
-    box-shadow: 0 0 15px rgba(0, 229, 255, 0.3) !important;
-    border: none !important;
-    text-transform: uppercase !important;
-    font-weight: 900 !important;
-    padding: 14px !important;
-    letter-spacing: 0.5px !important;
-}
-.action-sm {
-    border-radius: 12px !important;
-    border: 1px solid var(--border-color) !important;
-}
-
-/* Skor Kaydet / Onayla Butonları */
-.save-btn { background: var(--success) !important; color: #000 !important; border-radius: 15px !important; }
-.pending-btn { background: var(--warning) !important; color: #000 !important; border-radius: 15px !important; }
-
-/* Sıralama Tabloları */
-table { background: transparent !important; }
+/* === SIRALAMA TABLOLARI VE FİKSTÜRÜ === */
+table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; background: transparent !important; }
+th, td { padding: 8px 4px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05) !important; }
 th { 
     background-color: rgba(0,0,0,0.6) !important; 
     color: var(--accent-color) !important; 
     border-bottom: 2px solid var(--border-color) !important; 
-    padding: 10px 5px !important;
 }
-td { border-bottom: 1px solid rgba(255,255,255,0.05) !important; padding: 10px 5px !important; }
-.zone-direct { background-color: rgba(0, 229, 255, 0.05) !important; border-left: 3px solid var(--neon-cyan) !important; }
-.zone-playoff { background-color: rgba(212, 175, 55, 0.05) !important; border-left: 3px solid var(--accent-color) !important; }
+.zone-direct { background-color: rgba(0, 229, 255, 0.04) !important; border-left: 3px solid var(--neon-cyan) !important; }
+.zone-playoff { background-color: rgba(212, 175, 55, 0.04) !important; border-left: 3px solid var(--accent-color) !important; }
+.zone-eliminated { background-color: rgba(239,68,68,0.02) !important; border-left: 3px solid var(--danger) !important; }
+.zone-global { background-color: rgba(0, 229, 255, 0.03) !important; border-left: 3px solid #00e5ff !important; }
 
-/* Modallar (Açılır Pencereler) */
+.match-card-header, .player-main-title {
+    background: rgba(0,0,0,0.5) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    padding: 8px 12px;
+}
+.rival-line { display: flex; justify-content: space-between; padding: 8px 2px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 11px; align-items: center; flex-wrap: wrap; }
+
+/* === SKOR TABLOSU (SCOREBOARD) === */
+.scoreboard { display: flex; flex-direction: column; background: transparent !important; border-radius: 8px; border: 1px solid var(--border-color) !important; overflow: hidden; margin-bottom: 10px; }
+.sb-row { display: flex; border-bottom: 1px solid var(--border-color) !important; background: transparent !important; }
+.sb-header { background: rgba(0,0,0,0.6) !important; color: var(--accent-color) !important; font-size: 10px; font-weight: bold; text-align: center; }
+.sb-cell { flex: 1; display: flex; justify-content: center; align-items: center; padding: 8px 4px; border-left: 1px dashed rgba(212, 175, 55, 0.2); position: relative; }
+.sb-name { flex: 3; padding: 8px 10px; font-size: 11px; font-weight: bold; display: flex; align-items: center; text-transform: uppercase; }
+.sb-input { width: 33px; background: rgba(0,0,0,0.5) !important; color: white; border: 1px solid var(--border-color) !important; padding: 6px 0; text-align: center; font-weight: bold; border-radius: 8px !important; font-size: 12px; transition: 0.2s; }
+.sb-input:focus { border-color: var(--neon-cyan) !important; box-shadow: 0 0 8px rgba(0,229,255,0.3) !important; outline: none; }
+.sb-tb-input { width: 22px; background: #241c00; color: var(--warning); border: 1px solid #78350f; padding: 5px 0; text-align: center; font-weight: bold; border-radius: 4px; font-size: 10px; margin-left: 4px; display: none; }
+
+/* Küçük Düzenlemeler */
+.switch-link { color: var(--accent-color) !important; font-weight: bold; cursor: pointer; text-decoration: none; font-size: 11px; }
+.action-sm { background: #1e293b; color: white; border: 1px solid var(--border-color) !important; padding: 5px 10px; border-radius: 12px !important; font-size: 10px; cursor: pointer; font-weight: bold; }
+.save-btn { background: var(--success) !important; color: black !important; font-weight: bold; border-radius: 15px !important; border: none; padding: 10px; cursor: pointer; }
+.pending-btn { background: var(--warning) !important; color: black !important; font-weight: bold; border-radius: 15px !important; border: none; padding: 10px; cursor: pointer; }
+.fair-btn { background: rgba(0, 229, 255, 0.1) !important; border: 1px solid var(--neon-cyan) !important; color: var(--neon-cyan) !important; padding: 8px; font-weight: bold; cursor: pointer; border-radius: 12px !important; width: 100%; margin-top: 8px; font-size: 10px; }
+
+/* Modallar */
 .modal-content {
-    background: rgba(11, 17, 32, 0.9) !important;
+    background: rgba(11, 17, 32, 0.95) !important;
     backdrop-filter: blur(15px) !important;
     -webkit-backdrop-filter: blur(15px) !important;
     border: 1px solid var(--neon-cyan) !important;
-    box-shadow: 0 0 40px rgba(0, 229, 255, 0.2) !important;
+    box-shadow: 0 0 40px rgba(0, 229, 255, 0.25) !important;
     border-radius: 24px !important;
 }
-
-/* Skor Tablosu (Scoreboard) Tasarımı */
-.scoreboard { border-color: var(--border-color) !important; background: transparent !important; }
-.sb-row { border-color: var(--border-color) !important; background: transparent !important; }
-.sb-header { background: rgba(0,0,0,0.6) !important; color: var(--accent-color) !important; }
-.sb-input { background: rgba(0,0,0,0.5) !important; border: 1px solid rgba(212, 175, 55, 0.3) !important; border-radius: 8px !important;}
-.sb-input:focus { border-color: var(--neon-cyan) !important; box-shadow: 0 0 8px rgba(0,229,255,0.3) !important; }
+.modal-btn { background: var(--success) !important; color: black !important; border-radius: 8px; font-weight: bold; }
+.player-link { cursor: pointer; text-decoration: underline; color: inherit; transition: 0.2s; }
+.player-link:hover { color: var(--neon-cyan) !important; }
+@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
 </style>
 </head>
