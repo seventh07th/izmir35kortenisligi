@@ -13,44 +13,106 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
     <style>
 
-:root {
+h:root {
     /* Ana Arka Plan - Gece Mavisi / Karbon Siyah */
-    --bg-dark: #0f172a;
+    --bg-color: #0f172a;
     
-    /* Cam Efekti (Glassmorphism) İçin Kart Zeminleri */
-    --bg-card: rgba(30, 41, 59, 0.6); 
-
+    /* Cam Efekti (Glassmorphism) İçin Yarı Saydam Zemin */
+    --card-bg: rgba(15, 23, 42, 0.65); 
+    
     /* Altın Detaylar (KOR Logosu Referanslı) */
-    --gold-primary: #d4af37;
-    --gold-light: #fbeba5;
-    --gold-dark: #997a00;
-
-    /* Neon Turkuaz (Aksiyon ve Yükseliş Çizgisi) */
+    --accent-color: #d4af37; /* Gold */
+    
+    /* Neon Turkuaz (Aksiyon Butonları ve Yükseliş Çizgisi) */
     --neon-cyan: #00f0ff;
-    --neon-glow: rgba(0, 240, 255, 0.4);
-
-    /* Metin Renkleri */
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-
-    /* Çerçeveler (Hafif altın yansımalı) */
-    --border-glass: rgba(212, 175, 55, 0.2); 
+    
+    /* Diğer Sistem Renkleri */
+    --text-color: #f8fafc;
+    --sub-text: #94a3b8;
+    --border-color: rgba(212, 175, 55, 0.25); /* Altın yansımalı ince çerçeve */
+    --divider: rgba(212, 175, 55, 0.1);
+    --success: #00ffaa;
+    --warning: #ffbd00;
+    --danger: #ef4444;
 }
 
-/* Tüm Sayfanın Ana Zeminini ve Yazı Tipini Ayarlama */
+* { box-sizing: border-box; }
+
 body {
-    background-color: var(--bg-dark);
-    color: var(--text-main);
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-color);
+    /* Zengine derinlik katmak için radyal (merkezden dışa) ışık efekti */
+    background: radial-gradient(circle at top, #1e293b 0%, #0f172a 80%);
+    color: var(--text-color);
     margin: 0;
-    padding: 0;
-    /* Eğer arka planda hafif bir doku/desen istersen ileride buraya ekleyeceğiz */
+    padding: 10px;
+    width: 100vw;
+    min-height: 100vh;
+    overflow-x: hidden;
+    font-size: 12px;
 }
 
-:root{--bg-color:#040814;--card-bg:#0b1329;--accent-color:#ffd700;--text-color:#ffffff;--success:#00ffaa;--warning:#ffbd00;--danger:#ef4444;--border-color:#1e293b;--sub-text:#94a3b8;--divider:#334155;}
-* { box-sizing: border-box; } /* Ekrana sığmama sorununu kökten çözer */
-body{font-family:'Segoe UI',sans-serif;background-color:var(--bg-color);color:var(--text-color);margin:0;padding:10px;width:100vw;overflow-x:hidden;transition:0.3s; font-size:12px;}
-.container{max-width:1000px;margin:0 auto;padding-bottom:30px;} h1,h2,h3{text-align:center;color:var(--accent-color);margin:10px 0;letter-spacing:1px;}
+.container{max-width:1000px;margin:0 auto;padding-bottom:30px;} 
+h1,h2,h3{text-align:center;color:var(--accent-color);margin:10px 0;letter-spacing:1px;}
+
+/* === CAM EFEKTLİ GİRİŞ KARTLARI (GLASSMORPHISM) === */
+.auth-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px); /* Arka planı buzlu cam yapar */
+    -webkit-backdrop-filter: blur(12px);
+    padding: 25px;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6); /* Derin premium gölge */
+    width: 100%; 
+    max-width: 550px; 
+    text-align: center; 
+    display: none; 
+    margin-bottom: 20px;
+}
+
+/* === NEON TURKUAZ AKSİYON BUTONLARI === */
+.auth-btn {
+    background: var(--neon-cyan);
+    color: #000;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-weight: 900;
+    cursor: pointer;
+    margin: 5px 0;
+    font-size: 13px;
+    transition: 0.3s;
+    width: 100%;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.3); /* Neon Parıltı */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.auth-btn:hover {
+    box-shadow: 0 0 25px rgba(0, 240, 255, 0.6); /* Tıklarken parlar */
+    transform: translateY(-2px);
+}
+
+/* === YARI SAYDAM GİRİŞ KUTULARI === */
+.auth-input, .auth-select {
+    padding: 12px;
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
+    text-align: center;
+    font-size: 12px;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+    transition: 0.3s;
+}
+.auth-input:focus, .auth-select:focus {
+    border-color: var(--neon-cyan);
+    outline: none;
+    box-shadow: inset 0 0 8px rgba(0, 240, 255, 0.2);
+}
+.force-upper{text-transform:uppercase;}1,h2,h3{text-align:center;color:var(--accent-color);margin:10px 0;letter-spacing:1px;}
 
 /* YENİ: Ferah Üst Menü ve İki Satırlı Sekmeler */
 .nav-bar{display:none;flex-direction:column;background:var(--card-bg);padding:12px 15px;border-radius:16px;border:1px solid var(--border-color);margin-bottom:15px;gap:12px;box-shadow:0 6px 20px rgba(0,0,0,0.4);}
