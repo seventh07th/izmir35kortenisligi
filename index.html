@@ -12,6 +12,41 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
     <style>
+
+:root {
+    /* Ana Arka Plan - Gece Mavisi / Karbon Siyah */
+    --bg-dark: #0f172a;
+    
+    /* Cam Efekti (Glassmorphism) İçin Kart Zeminleri */
+    --bg-card: rgba(30, 41, 59, 0.6); 
+
+    /* Altın Detaylar (KOR Logosu Referanslı) */
+    --gold-primary: #d4af37;
+    --gold-light: #fbeba5;
+    --gold-dark: #997a00;
+
+    /* Neon Turkuaz (Aksiyon ve Yükseliş Çizgisi) */
+    --neon-cyan: #00f0ff;
+    --neon-glow: rgba(0, 240, 255, 0.4);
+
+    /* Metin Renkleri */
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+
+    /* Çerçeveler (Hafif altın yansımalı) */
+    --border-glass: rgba(212, 175, 55, 0.2); 
+}
+
+/* Tüm Sayfanın Ana Zeminini ve Yazı Tipini Ayarlama */
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    margin: 0;
+    padding: 0;
+    /* Eğer arka planda hafif bir doku/desen istersen ileride buraya ekleyeceğiz */
+}
+
 :root{--bg-color:#040814;--card-bg:#0b1329;--accent-color:#ffd700;--text-color:#ffffff;--success:#00ffaa;--warning:#ffbd00;--danger:#ef4444;--border-color:#1e293b;--sub-text:#94a3b8;--divider:#334155;}
 * { box-sizing: border-box; } /* Ekrana sığmama sorununu kökten çözer */
 body{font-family:'Segoe UI',sans-serif;background-color:var(--bg-color);color:var(--text-color);margin:0;padding:10px;width:100vw;overflow-x:hidden;transition:0.3s; font-size:12px;}
