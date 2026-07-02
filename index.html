@@ -230,6 +230,106 @@ body {
 
 /* Yazı linkleri */
 .switch-link { color: var(--accent-color) !important; font-weight: bold; }
+
+/* === UYGULAMANIN İÇİ: SEKMELER, TABLOLAR VE KARTLAR === */
+
+/* Üst Menü ve Navigasyon */
+.nav-bar {
+    background: var(--card-bg) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+    border-radius: 16px !important;
+}
+.nav-btn {
+    background: rgba(0,0,0,0.5) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--accent-color) !important;
+}
+
+/* Ana Sekmeler (Tabs) */
+.tab-btn {
+    background-color: rgba(0,0,0,0.4) !important;
+    color: var(--sub-text) !important;
+    border: 1px solid rgba(255,255,255,0.05) !important;
+    border-radius: 20px !important;
+    padding: 12px 15px !important;
+}
+.tab-btn.active {
+    background-color: rgba(0, 229, 255, 0.1) !important;
+    color: var(--neon-cyan) !important;
+    border: 1px solid var(--neon-cyan) !important;
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.25) !important;
+    font-weight: bold !important;
+}
+
+/* Paneller, Turnuva ve Maç Kartları (Buzlu Cam) */
+.panel, .tournament-card, .match-card, .player-rivals-card, .slider-container {
+    background: var(--card-bg) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5) !important;
+}
+
+/* Kart Başlıkları (Koyu Transparan) */
+.match-card-header, .player-main-title {
+    background: rgba(0,0,0,0.5) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+/* Genel Aksiyon Butonları */
+button.action-btn {
+    background: var(--neon-cyan) !important;
+    color: #000 !important;
+    border-radius: 25px !important;
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.3) !important;
+    border: none !important;
+    text-transform: uppercase !important;
+    font-weight: 900 !important;
+    padding: 14px !important;
+    letter-spacing: 0.5px !important;
+}
+.action-sm {
+    border-radius: 12px !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+/* Skor Kaydet / Onayla Butonları */
+.save-btn { background: var(--success) !important; color: #000 !important; border-radius: 15px !important; }
+.pending-btn { background: var(--warning) !important; color: #000 !important; border-radius: 15px !important; }
+
+/* Sıralama Tabloları */
+table { background: transparent !important; }
+th { 
+    background-color: rgba(0,0,0,0.6) !important; 
+    color: var(--accent-color) !important; 
+    border-bottom: 2px solid var(--border-color) !important; 
+    padding: 10px 5px !important;
+}
+td { border-bottom: 1px solid rgba(255,255,255,0.05) !important; padding: 10px 5px !important; }
+.zone-direct { background-color: rgba(0, 229, 255, 0.05) !important; border-left: 3px solid var(--neon-cyan) !important; }
+.zone-playoff { background-color: rgba(212, 175, 55, 0.05) !important; border-left: 3px solid var(--accent-color) !important; }
+
+/* Modallar (Açılır Pencereler) */
+.modal-content {
+    background: rgba(11, 17, 32, 0.9) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1px solid var(--neon-cyan) !important;
+    box-shadow: 0 0 40px rgba(0, 229, 255, 0.2) !important;
+    border-radius: 24px !important;
+}
+
+/* Skor Tablosu (Scoreboard) Tasarımı */
+.scoreboard { border-color: var(--border-color) !important; background: transparent !important; }
+.sb-row { border-color: var(--border-color) !important; background: transparent !important; }
+.sb-header { background: rgba(0,0,0,0.6) !important; color: var(--accent-color) !important; }
+.sb-input { background: rgba(0,0,0,0.5) !important; border: 1px solid rgba(212, 175, 55, 0.3) !important; border-radius: 8px !important;}
+.sb-input:focus { border-color: var(--neon-cyan) !important; box-shadow: 0 0 8px rgba(0,229,255,0.3) !important; }
+
 </style>
 </head>
 <body>
