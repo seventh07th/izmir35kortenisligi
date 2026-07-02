@@ -1622,7 +1622,7 @@ window.switchTab = function(t) {
 function renderGlobalStandings() {
         let titleEl = document.getElementById('standingsTitle'); if(titleEl) titleEl.innerText = "🏆 GENEL SIRALAMA (TÜM ZAMANLAR)";
         let headEl = document.getElementById('standingsHead'); if(headEl) headEl.innerHTML = "<tr><th>#</th><th style='text-align:left;'>OYUNCU</th><th>O</th><th>G</th><th>M</th><th>K-KOR 🌟</th></tr>";
-        let globalArray = Object.keys(globalUsers).map(uid => { let user = globalUsers[uid]; if(!user) return null; let dStats = derivedGlobalStats[uid] || { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0, dynamicNTRP: user.sysScore }; return { id: uid, name: user.name, tier: user.tier || 'BELİRSİZ', sysScore: dStats.dynamicNTRP, k_kor: dStats.k_kor, gMatch: dStats.gMatch, gWins: dStats.gWins, gLoss: dStats.gLoss, dynamicTier: dStats.dynamicTier }; }).filter(u => u !== null);
+       let globalArray = Object.keys(globalUsers).map(uid => { let user = globalUsers[uid]; if(!user || !user.name) return null; let dStats = derivedGlobalStats[uid] || { k_kor: 0, gWins: 0, gLoss: 0, gMatch: 0, dynamicNTRP: user.sysScore }; return { id: uid, name: user.name, tier: user.tier || 'BELİRSİZ', sysScore: dStats.dynamicNTRP, k_kor: dStats.k_kor, gMatch: dStats.gMatch, gWins: dStats.gWins, gLoss: dStats.gLoss, dynamicTier: dStats.dynamicTier }; }).filter(u => u !== null);
         let sortedUsers = globalArray.sort((a,b) => (b.k_kor || 0) - (a.k_kor || 0));
         
         const tbody = document.getElementById("standingsBody"); if(!tbody) return; 
