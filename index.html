@@ -1151,18 +1151,27 @@ function changeAdminPassword() {
     window.dismissAlert = function(key) { if(loggedInUser && loggedInUser.id) { database.ref(`the_35_gold_league/users/${loggedInUser.id}/alerts/${key}`).remove(); } };
     window.deletePwReset = function(key) { database.ref('the_35_gold_league/password_resets/' + key).remove(); };
 
-function enterApp() {
+    function enterApp() {
+        // 1. Önce ekranın genel hatlarını aç
         document.getElementById('authWrapper').style.display = "none"; 
         document.getElementById('mainApp').style.display = "block"; 
         document.getElementById('appNavBar').style.display = "flex";
-        
         document.getElementById('homeBtn').style.display = "inline-block"; 
 
+        // 2. TEMİZLİK: Hayalet sekmeleri önlemek için önce her şeyi gizle
+        document.getElementById('adminTopBar').style.display = "none"; 
+        document.getElementById('navAdminNotifBtn').style.display = "none"; 
+        document.getElementById('navAdminTournamentsBtn').style.display = "none"; 
+        document.getElementById('navAdminManualBtn').style.display = "none";
+        document.getElementById('tabsContainer').style.display = "none"; 
+        document.getElementById('userActiveLeagueSelect').style.display = "none";
+
+        // 3. Giriş yapanın rolüne göre sadece ilgili menüleri aç
         if(isAdmin) { 
             document.getElementById('adminTopBar').style.display = "block"; 
             document.getElementById('navAdminNotifBtn').style.display = "inline-block"; 
             document.getElementById('navAdminTournamentsBtn').style.display = "inline-block"; 
-            document.getElementById('navAdminManualBtn').style.display = "inline-block"; // YENİ BUTON
+            document.getElementById('navAdminManualBtn').style.display = "inline-block"; 
             populateLeagueDropdowns(); 
             openAdminGlobalNotifs(); 
         } else { 
@@ -1172,6 +1181,7 @@ function enterApp() {
             switchTab('profile'); 
         }
     }
+
 
     // YENİ EKLENEN YÖNLENDİRİCİ FONKSİYON
     window.openAdminManual = function() { 
