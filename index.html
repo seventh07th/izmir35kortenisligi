@@ -239,6 +239,70 @@ td:last-child { border-radius: 0 12px 12px 0 !important; border-right: 1px solid
     border-left: 3px solid var(--accent-color) !important; 
 }
 
+/* =========================================
+   PREMİUM VİTRİN CİLASI - V2 (KESİN ÇÖZÜM)
+========================================= */
+
+/* 1. Kapsül Tablo Satırları (Havada Duran Tasarım) */
+table { border-collapse: separate !important; border-spacing: 0 10px !important; }
+th { border: none !important; background: transparent !important; color: var(--sub-text) !important; text-transform: uppercase; font-size: 10px !important; padding-bottom: 5px !important; }
+td { 
+    background: rgba(30, 41, 59, 0.4) !important; /* Hafif aydınlık cam zemin */
+    border-top: 1px solid rgba(255,255,255,0.05) !important;
+    border-bottom: 1px solid rgba(0,0,0,0.5) !important;
+    padding: 14px 5px !important; 
+    transition: 0.3s;
+}
+tr:hover td { background: rgba(212, 175, 55, 0.1) !important; }
+td:first-child { border-radius: 12px 0 0 12px !important; border-left: 3px solid var(--accent-color) !important; }
+td:last-child { border-radius: 0 12px 12px 0 !important; border-right: 1px solid rgba(255,255,255,0.05) !important; }
+
+/* 2. Kart Derinliği (3D Işık ve Gölge) */
+.auth-card, .panel, .tournament-card {
+    background: linear-gradient(145deg, rgba(30,41,59,0.5), rgba(15,23,42,0.8)) !important;
+    border-top: 1px solid rgba(255,255,255,0.1) !important;
+    border-bottom: 1px solid rgba(0,0,0,0.8) !important;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.9) !important;
+}
+
+/* 3. Agresif Renkleri Tıraşlama (Lüks Uyum) */
+/* Kayıt Ol Butonunu Zarifleştirme */
+.auth-card .auth-btn[onclick="toggleAuth('registerPanel')"] {
+    background: rgba(0, 229, 255, 0.05) !important;
+    color: var(--neon-cyan) !important;
+    border: 1px solid var(--neon-cyan) !important;
+    box-shadow: none !important;
+}
+/* Agresif Kırmızı Butonları Şıklaştırma (Çıkış vb.) */
+.nav-btn[onclick="logoutSession()"], button[onclick="changeOwnPassword()"], button[onclick="deleteCurrentTournament()"] {
+    background: rgba(239, 68, 68, 0.1) !important;
+    color: var(--danger) !important;
+    border: 1px solid var(--danger) !important;
+    box-shadow: none !important;
+}
+
+/* 4. Üst Menü Kalabalığını Temizleme */
+#appNavBar { 
+    background: transparent !important; 
+    border: none !important; 
+    box-shadow: none !important; 
+    padding: 0 !important; 
+    margin-bottom: 5px !important;
+}
+.tabs {
+    background: rgba(0,0,0,0.6) !important; 
+    padding: 6px !important; 
+    border-radius: 30px !important; 
+    border: 1px solid rgba(255,255,255,0.05) !important;
+    box-shadow: inset 0 4px 10px rgba(0,0,0,0.5) !important;
+}
+.tab-btn { margin: 0 !important; border: none !important; }
+.tab-btn.active {
+    background: linear-gradient(135deg, var(--accent-color), #fff2a8) !important; 
+    color: #000 !important; 
+    font-weight: 900 !important; 
+}
+
 
 </style>
 </head>
