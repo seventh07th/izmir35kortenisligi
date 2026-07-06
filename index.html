@@ -1694,10 +1694,16 @@ window.viewPendingTournament = function(tid, tab) {
     }
  
 window.switchTab = function(t) {
+    // İŞTE ÇÖZÜM: Sekmeye tıklandığı an sayfayı yumuşak bir şekilde en üste kaydırır
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
     let currentActivePanel = document.querySelector('.panel.active');
     if (currentActivePanel && currentActivePanel.id !== t) {
         previousTab = currentActivePanel.id;
     }
+    
+    // ... kodun geri kalanı aynı şekilde devam ediyor ...
+
 
     // İŞTE SİHİRLİ DOKUNUŞ: Eğer Profil veya Ligler'e tıklanırsa OTOMATİK GENEL MODA GEÇ
     if (!isAdmin && (t === 'profile' || t === 'tournaments') && currentTid !== null) {
