@@ -308,45 +308,47 @@ td:last-child { border-radius: 0 12px 12px 0 !important; border-right: 1px solid
 ========================================= */
 #tabsContainer {
     position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
+    bottom: 0 !important; left: 0 !important; width: 100% !important;
     background: rgba(11, 17, 32, 0.95) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border: none !important;
-    border-top: 1px solid rgba(212, 175, 55, 0.2) !important;
+    backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important;
+    border: none !important; border-top: 1px solid rgba(212, 175, 55, 0.2) !important;
     border-radius: 24px 24px 0 0 !important;
-    padding: 10px 5px 25px 5px !important; /* Alt kısım mobil ekranlar için boşluklu */
+    padding: 10px 5px 20px 5px !important; /* Yükseklik ve boşluklar optimize edildi */
     margin: 0 !important;
     display: flex !important;
-    justify-content: space-around !important;
-    z-index: 9999;
+    flex-wrap: nowrap !important; /* Asla alt satıra geçmez */
+    justify-content: flex-start !important;
+    overflow-x: auto !important; 
+    gap: 5px !important; z-index: 9999;
     box-shadow: 0 -5px 25px rgba(0,0,0,0.8) !important;
 }
 
+#tabsContainer::-webkit-scrollbar { display: none; }
+#tabsContainer { -ms-overflow-style: none; scrollbar-width: none; }
+
 #tabsContainer .tab-btn {
-    background: transparent !important;
-    border: none !important;
+    background: transparent !important; border: none !important;
     color: var(--sub-text) !important;
-    font-size: 10px !important;
-    padding: 8px 2px !important;
-    min-width: 60px !important;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    box-shadow: none !important;
+    font-size: 9px !important; font-weight: bold; letter-spacing: 0.5px;
+    padding: 0 !important; 
+    min-width: 65px !important; 
+    height: 50px !important; /* Yükseklik sabitlendi, ikonlar ezilmeyecek */
+    flex: 0 0 auto !important; 
+    display: flex !important; flex-direction: column !important; 
+    align-items: center !important; justify-content: center !important; /* İkon ve metin tam ortalandı */
+    gap: 4px !important;
+    box-shadow: none !important; transition: 0.3s !important; opacity: 0.6;
+    margin: 0 !important;
 }
 
-#tabsContainer .tab-btn.active {
-    background: transparent !important;
-    color: var(--neon-cyan) !important;
-    font-weight: 900 !important;
-    text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
-}
+.tab-icon { width: 22px; height: 22px; transition: 0.3s; margin-bottom: 2px !important; }
 
-/* Sayfanın en altı menünün altında kalmasın diye ana konteynere boşluk veriyoruz */
-.container { padding-bottom: 90px !important; }
+/* Aktif Sekme Parıltısı */
+#tabsContainer .tab-btn.active { background: transparent !important; color: var(--neon-cyan) !important; opacity: 1; text-shadow: 0 0 10px rgba(0,229,255,0.4); }
+#tabsContainer .tab-btn.active .tab-icon { stroke: var(--neon-cyan); filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.8)); transform: translateY(-2px); }
+
+.container { padding-bottom: 95px !important; }
+
 
 /* =========================================
    NATIVE APP İKONLU ALT MENÜ (BOTTOM NAV) - DÜZELTİLMİŞ
@@ -600,7 +602,6 @@ td:last-child { border-radius: 0 12px 12px 0 !important; border-right: 1px solid
     </div>
     <div id="mainApp">
         <div id="adminTopBar"><span style="color:var(--warning); font-size:13px; font-weight:bold; margin-right:5px;">⚙️ KONTROL MERKEZİ:</span><select id="adminLeagueSelect" class="auth-input force-upper" style="width:auto; margin:0; padding:6px; font-size:13px; display:inline-block;" onchange="adminSwitchLeague()"><option value="new_pending">➕ YENİ TURNUVA (KAYDA AÇ)</option></select><button class="action-sm" style="background:var(--danger); padding:6px 12px; display:none;" id="deleteLeagueBtn" onclick="deleteCurrentTournament()">🗑️ LİGİ SİL</button></div>
-        <div class="tabs" id="tabsContainer" style="display:none;"><button class="tab-btn" id="tabProfileBtn" onclick="switchTab('profile')">👤 Profil</button><button class="tab-btn" id="tabTournamentsBtn" onclick="switchTab('tournaments')">🎾 Turnuvalar</button><button class="tab-btn" id="tabRulesBtn" onclick="switchTab('rules')">📜 Sistem Rehberi</button><button class="tab-btn active" id="tabStandingsBtn" onclick="switchTab('standings')">🏆 Genel Sıralama</button><button class="tab-btn" id="tabRivalsBtn" onclick="switchTab('rivals')">Fikstür</button><button class="tab-btn" id="tabMatchesBtn" onclick="switchTab('matches')">Skor Gir</button><button class="tab-btn" id="tabTreeBtn" onclick="switchTab('tree')">Turnuva Ağacı</button></div>
         <div id="tournaments" class="panel"><h2 style="color:var(--accent-color); margin-top:0;">🎾 LİG VE TURNUVA MERKEZİ</h2><h3 style="text-align:left; color:var(--success); border-bottom:1px dashed var(--divider); padding-bottom:5px;">AÇIK KAYITLAR (Yaklaşan)</h3><div id="pendingTournamentsList">Yükleniyor...</div><h3 style="text-align:left; color:var(--warning); border-bottom:1px dashed var(--divider); padding-bottom:5px; margin-top:20px;">AKTİF TURNUVALAR (Oynanıyor)</h3><div id="activeTournamentsList">Yükleniyor...</div></div>
        <div id="profile" class="panel">
     <div style="background: linear-gradient(145deg, rgba(15, 23, 42, 0.8), rgba(0, 0, 0, 0.9)); border-radius: 20px; border: 1px solid var(--border-color); padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); position: relative; overflow: hidden;">
