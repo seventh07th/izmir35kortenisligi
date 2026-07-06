@@ -275,6 +275,38 @@ th { background-color: rgba(0,0,0,0.6); color: var(--accent-color); border-botto
     font-size: 8.5px !important;
 }
 
+/* =========================================
+   GEREKSİZ SCROLL (KAYDIRMA) KİLİDİ
+========================================= */
+
+/* 1. Kök yükseklik ayarı (Mobil tarayıcı barları için 100dvh) */
+body {
+    min-height: 100dvh !important;
+    padding: 10px 10px 0 10px !important; /* Alt boşluğu sıfırladık, scroll yapmasın */
+    box-sizing: border-box !important;
+}
+
+/* 2. Giriş ekranındaki o GİZLİ 95px boşluğu tamamen siliyoruz */
+.container { padding-bottom: 0 !important; }
+
+/* 3. O 95px boşluğu (Alt menü payını) SADECE sisteme girince veriyoruz */
+#mainApp { padding-bottom: 95px !important; }
+
+/* 4. Giriş ekranı kutusunu tam ekrana milimetrik oturt, taşırma */
+#authWrapper {
+    min-height: calc(100dvh - 30px) !important;
+    margin-top: 0 !important;
+    justify-content: center !important;
+}
+
+/* Profil gibi kısa ekranlarda da içeriği toplayarak taşırmayı önle */
+#profile {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: calc(100dvh - 120px); /* Üst/Alt menü payı çıkarılmış tam ekran */
+}
+
 
 </style>
 </head>
