@@ -403,6 +403,27 @@ td:last-child { border-radius: 0 12px 12px 0 !important; border-right: 1px solid
 /* Menü içeriğin üstünü kapatmasın diye en alta biraz daha boşluk veriyoruz */
 .container { padding-bottom: 110px !important; }
 
+/* =========================================
+   UX RÖTUŞLARI (TAM EKRAN VE BOŞLUK TEMİZLİĞİ)
+========================================= */
+
+/* 1. Giriş ekranındaki gereksiz alt boşluğu sil, sadece ana uygulamaya ver */
+.container { padding-bottom: 0 !important; }
+#mainApp { padding-bottom: 95px !important; } 
+
+/* 2. Kartlardaki aşırı boşlukları daralt (Scrollsuz tam ekran görünümü için) */
+.panel, .tournament-card, .match-card, .slider-container {
+    padding: 15px !important; /* Eski 25px değerini daralttık */
+    margin-bottom: 15px !important;
+}
+.auth-card { padding: 25px 20px !important; } /* Kayıt ekranını toparladık */
+
+/* 3. Kafa karıştıran o "Genel Mod" açılır menüsünü tamamen yok et */
+#userActiveLeagueSelect { display: none !important; }
+
+/* Profil kartı içindeki metin aralıklarını daraltma */
+#profile > div:first-child h2 { font-size: 20px !important; margin-bottom: 5px !important; }
+#profile > div:first-child .action-sm { padding: 4px 8px !important; }
 
 
 </style>
@@ -1264,8 +1285,7 @@ function changeAdminPassword() {
             openAdminGlobalNotifs(); 
         } else { 
             if(adminTools) adminTools.style.display = "flex";
-            document.getElementById('tabsContainer').style.display = "flex"; 
-            document.getElementById('userActiveLeagueSelect').style.display = "inline-block"; 
+            document.getElementById('tabsContainer').style.display = "flex";  
             populateLeagueDropdowns(); 
             switchTab('profile'); 
         }
@@ -1828,6 +1848,13 @@ window.switchTab = function(t) {
         previousTab = currentActivePanel.id;
     }
 
+    // İŞTE SİHİRLİ DOKUNUŞ: Eğer Profil veya Ligler'e tıklanırsa OTOMATİK GENEL MODA GEÇ
+    if (!isAdmin && (t === 'profile' || t === 'tournaments') && currentTid !== null) {
+        currentTid = null; // Turnuva bağını kopar
+        document.getElementById('navLeagueTitle').innerText = "İZMİR 35 KORTENİS LİGİ"; 
+        document.getElementById('navLeagueSub').innerText = "KARİYER VE LİG YÖNETİM SİSTEMİ";
+    }
+
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); 
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     
@@ -1838,22 +1865,19 @@ window.switchTab = function(t) {
         let attr = b.getAttribute('onclick'); 
         if(attr && (attr.includes(`'${t}'`) || attr.includes(`"${t}"`))) { 
             b.classList.add('active'); 
-            // Tıklanan ikonun ekranın ortasına yumuşakça kayması (Lüks Uygulama Hissi)
             b.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         } 
     });
 
     let isGeneralMode = currentTid === null;
     
-    // HANGİ MODDAYSAK ONA GÖRE İKONLARI GÖSTER (flex) VEYA GİZLE (none)
-    let tp = document.getElementById('tabProfileBtn'); if(tp) tp.style.display = isGeneralMode ? 'flex' : 'none';
-    let tt = document.getElementById('tabTournamentsBtn'); if(tt) tt.style.display = isGeneralMode ? 'flex' : 'none';
+    // AKILLI MENÜ GİZLEME
+    let tp = document.getElementById('tabProfileBtn'); if(tp) tp.style.display = 'flex'; // Hep Görünür
+    let tt = document.getElementById('tabTournamentsBtn'); if(tt) tt.style.display = 'flex'; // Hep Görünür
     let tr = document.getElementById('tabRivalsBtn'); if(tr) tr.style.display = !isGeneralMode ? 'flex' : 'none';
     let tm = document.getElementById('tabMatchesBtn'); if(tm) tm.style.display = !isGeneralMode ? 'flex' : 'none';
     let ttree = document.getElementById('tabTreeBtn'); if(ttree) ttree.style.display = !isGeneralMode ? 'flex' : 'none';
-   
 
-    // Sadece yazıları değiştiren güvenli kod (SVG'leri silmez)
     let rulesTxt = document.getElementById('rulesTabTxt'); let stdTxt = document.getElementById('stdTabTxt');
     if(!isGeneralMode) { 
         if(rulesTxt) rulesTxt.innerHTML = "Kurallar"; 
@@ -1877,11 +1901,13 @@ window.switchTab = function(t) {
     } else {
         if(t === 'rules') renderGlobalRules();
         if(t === 'standings') renderGlobalStandings();
-        if(t === 'rivals') { if(rf) rf.style.display = 'none'; let c = document.getElementById('rivalsGridContainer'); if(c) c.innerHTML = `<div class="global-alert">⚠️ Bu sekmeyi görüntülemek için lütfen üst menüden oynadığınız bir turnuvayı seçin.</div>`; }
-        if(t === 'matches') { if(mf) mf.style.display = 'none'; let m = document.getElementById('matchListContainer'); if(m) m.innerHTML = `<div class="global-alert">⚠️ Bu sekmeyi görüntülemek için lütfen üst menüden oynadığınız bir turnuvayı seçin.</div>`; }
-        if(t === 'tree') { let ttTitle = document.getElementById('treeDynamicTitle'); if(ttTitle) ttTitle.style.display = 'none'; let b = document.getElementById('bracketView'); if(b) b.innerHTML = `<div class="global-alert">⚠️ Bu sekmeyi görüntülemek için lütfen üst menüden oynadığınız bir turnuvayı seçin.</div>`; }
+        // Genel modda turnuva içi sekmelerin içeriğini boşaltıp uyarı koyuyoruz (Güvenlik)
+        if(t === 'rivals') { if(rf) rf.style.display = 'none'; let c = document.getElementById('rivalsGridContainer'); if(c) c.innerHTML = `<div class="global-alert">⚠️ Bu sekme sadece turnuva içindeyken aktiftir.</div>`; }
+        if(t === 'matches') { if(mf) mf.style.display = 'none'; let m = document.getElementById('matchListContainer'); if(m) m.innerHTML = `<div class="global-alert">⚠️ Bu sekme sadece turnuva içindeyken aktiftir.</div>`; }
+        if(t === 'tree') { let ttTitle = document.getElementById('treeDynamicTitle'); if(ttTitle) ttTitle.style.display = 'none'; let b = document.getElementById('bracketView'); if(b) b.innerHTML = `<div class="global-alert">⚠️ Bu sekme sadece turnuva içindeyken aktiftir.</div>`; }
     }
 };
+
 
  
     function loadTournamentData(tid) {
