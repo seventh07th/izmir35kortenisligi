@@ -334,7 +334,7 @@ td:last-child { border-radius: 0 12px 12px 0 !important; border-right: 1px solid
     min-width: 65px !important; 
     height: 50px !important; /* Yükseklik sabitlendi, ikonlar ezilmeyecek */
     flex: 0 0 auto !important; 
-    display: flex !important; flex-direction: column !important; 
+    display: flex; flex-direction: column !important; 
     align-items: center !important; justify-content: center !important; /* İkon ve metin tam ortalandı */
     gap: 4px !important;
     box-shadow: none !important; transition: 0.3s !important; opacity: 0.6;
@@ -1237,23 +1237,25 @@ function changeAdminPassword() {
     window.dismissAlert = function(key) { if(loggedInUser && loggedInUser.id) { database.ref(`the_35_gold_league/users/${loggedInUser.id}/alerts/${key}`).remove(); } };
     window.deletePwReset = function(key) { database.ref('the_35_gold_league/password_resets/' + key).remove(); };
 
-    function enterApp() {
-        // 1. Önce ekranın genel hatlarını aç
+     function enterApp() {
         document.getElementById('authWrapper').style.display = "none"; 
         document.getElementById('mainApp').style.display = "block"; 
         document.getElementById('appNavBar').style.display = "flex";
-        document.getElementById('homeBtn').style.display = "inline-block"; 
+        // homeBtn hatası buradan silindi, kod artık çökmeyecek!
 
-        // 2. TEMİZLİK: Hayalet sekmeleri önlemek için önce her şeyi gizle
+        // 2. KUSURSUZ TEMİZLİK: Admin ve Oyuncu ekranı karışmasın
         document.getElementById('adminTopBar').style.display = "none"; 
+        let adminTools = document.getElementById('adminNavTools');
+        if(adminTools) adminTools.style.display = "none";
         document.getElementById('navAdminNotifBtn').style.display = "none"; 
         document.getElementById('navAdminTournamentsBtn').style.display = "none"; 
         document.getElementById('navAdminManualBtn').style.display = "none";
         document.getElementById('tabsContainer').style.display = "none"; 
         document.getElementById('userActiveLeagueSelect').style.display = "none";
 
-        // 3. Giriş yapanın rolüne göre sadece ilgili menüleri aç
+        // 3. Giriş yapanın rolüne göre doğru menüleri aç
         if(isAdmin) { 
+            if(adminTools) adminTools.style.display = "flex";
             document.getElementById('adminTopBar').style.display = "block"; 
             document.getElementById('navAdminNotifBtn').style.display = "inline-block"; 
             document.getElementById('navAdminTournamentsBtn').style.display = "inline-block"; 
@@ -1261,6 +1263,7 @@ function changeAdminPassword() {
             populateLeagueDropdowns(); 
             openAdminGlobalNotifs(); 
         } else { 
+            if(adminTools) adminTools.style.display = "flex";
             document.getElementById('tabsContainer').style.display = "flex"; 
             document.getElementById('userActiveLeagueSelect').style.display = "inline-block"; 
             populateLeagueDropdowns(); 
@@ -1842,11 +1845,13 @@ window.switchTab = function(t) {
 
     let isGeneralMode = currentTid === null;
     
-    let tp = document.getElementById('tabProfileBtn'); if(tp) tp.style.display = isGeneralMode ? '' : 'flex';
-    let tt = document.getElementById('tabTournamentsBtn'); if(tt) tt.style.display = isGeneralMode ? '' : 'flex';
-    let tr = document.getElementById('tabRivalsBtn'); if(tr) tr.style.display = !isGeneralMode ? '' : 'none';
-    let tm = document.getElementById('tabMatchesBtn'); if(tm) tm.style.display = !isGeneralMode ? '' : 'none';
-    let ttree = document.getElementById('tabTreeBtn'); if(ttree) ttree.style.display = !isGeneralMode ? '' : 'none';
+    // HANGİ MODDAYSAK ONA GÖRE İKONLARI GÖSTER (flex) VEYA GİZLE (none)
+    let tp = document.getElementById('tabProfileBtn'); if(tp) tp.style.display = isGeneralMode ? 'flex' : 'none';
+    let tt = document.getElementById('tabTournamentsBtn'); if(tt) tt.style.display = isGeneralMode ? 'flex' : 'none';
+    let tr = document.getElementById('tabRivalsBtn'); if(tr) tr.style.display = !isGeneralMode ? 'flex' : 'none';
+    let tm = document.getElementById('tabMatchesBtn'); if(tm) tm.style.display = !isGeneralMode ? 'flex' : 'none';
+    let ttree = document.getElementById('tabTreeBtn'); if(ttree) ttree.style.display = !isGeneralMode ? 'flex' : 'none';
+   
 
     // Sadece yazıları değiştiren güvenli kod (SVG'leri silmez)
     let rulesTxt = document.getElementById('rulesTabTxt'); let stdTxt = document.getElementById('stdTabTxt');
@@ -2446,32 +2451,27 @@ function grantFounderStatus() {
     }
  
 function logoutSession() {
-    // 1. HAYALET SEKMELERİ ÖNLEME: Tüm açık panelleri ve aktif butonları zorla temizle
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    
-    // 2. Yöneticiden oyuncuya sızabilecek tüm ekstra barları gizle
-    document.getElementById('adminTopBar').style.display = "none";
-    document.getElementById('tabsContainer').style.display = "none";
-    document.getElementById('navAdminNotifBtn').style.display = "none"; 
-    document.getElementById('navAdminTournamentsBtn').style.display = "none"; 
-    document.getElementById('navAdminManualBtn').style.display = "none";
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        
+        document.getElementById('adminTopBar').style.display = "none";
+        let adminTools = document.getElementById('adminNavTools');
+        if(adminTools) adminTools.style.display = "none";
+        document.getElementById('tabsContainer').style.display = "none";
+        document.getElementById('navAdminNotifBtn').style.display = "none"; 
+        document.getElementById('navAdminTournamentsBtn').style.display = "none"; 
+        document.getElementById('navAdminManualBtn').style.display = "none";
+        document.getElementById('userActiveLeagueSelect').style.display = "none";
 
-    // 3. Güvenli Çıkış İşlemi
-    firebase.auth().signOut().then(() => {
-        loggedInUser = null;
-        isAdmin = false;
-        currentTid = null;
-        previousTab = null;
-        
-        document.getElementById('mainApp').style.display = "none";
-        document.getElementById('appNavBar').style.display = "none";
-        document.getElementById('authWrapper').style.display = "flex";
-        toggleAuth('loginPanel');
-        
-        showToast("Başarıyla çıkış yapıldı.", "success");
-    }).catch(err => showToast("Çıkış yapılırken hata oluştu.", "error"));
-}
+        firebase.auth().signOut().then(() => {
+            loggedInUser = null; isAdmin = false; currentTid = null; previousTab = null;
+            document.getElementById('mainApp').style.display = "none";
+            document.getElementById('appNavBar').style.display = "none";
+            document.getElementById('authWrapper').style.display = "flex";
+            toggleAuth('loginPanel');
+            showToast("Başarıyla çıkış yapıldı.", "success");
+        }).catch(err => showToast("Çıkış yapılırken hata oluştu.", "error"));
+    }
 
 
 // ==========================================
