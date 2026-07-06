@@ -177,6 +177,69 @@ th { background-color: rgba(0,0,0,0.6); color: var(--accent-color); border-botto
 .dialog-btn.confirm { background: var(--success); color: black; box-shadow: 0 0 10px rgba(0,255,170,0.3); }
 .dialog-btn.danger { background: var(--danger); color: white; box-shadow: 0 0 10px rgba(239,68,68,0.3); }
 
+/* =========================================
+   PREMİUM VİTRİN CİLASI (LÜKS GÜNCELLEME)
+========================================= */
+
+/* 1. Lüks Sekmeler (Apple Tarzı Kapsül) */
+.tabs { 
+    background: rgba(0,0,0,0.6) !important; 
+    padding: 6px !important; 
+    border-radius: 30px !important; 
+    border: 1px solid rgba(255,255,255,0.05) !important; 
+    display: inline-flex !important; 
+    flex-wrap: nowrap !important; 
+    overflow-x: auto !important; 
+    max-width: 100% !important; 
+    margin-bottom: 25px !important; 
+    box-shadow: inset 0 4px 10px rgba(0,0,0,0.5) !important;
+}
+.tab-btn { 
+    background: transparent !important; 
+    border: none !important; 
+    color: var(--sub-text) !important; 
+    padding: 12px 20px !important; 
+    border-radius: 25px !important; 
+    box-shadow: none !important; 
+    margin: 0 !important; 
+}
+.tab-btn.active { 
+    background: linear-gradient(135deg, var(--accent-color), #fff2a8) !important; 
+    color: #000 !important; 
+    font-weight: 900 !important; 
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4) !important; 
+    transform: none !important; 
+}
+
+/* 2. Premium Sıralama Tabloları (Ayrı Kapsül Satırlar) */
+table { border-collapse: separate !important; border-spacing: 0 8px !important; }
+th { background: transparent !important; color: var(--sub-text) !important; border: none !important; font-size: 10px !important; letter-spacing: 1px !important; padding-bottom: 5px !important; text-transform: uppercase; }
+td { background: rgba(0, 0, 0, 0.4) !important; border-top: 1px solid rgba(255,255,255,0.03) !important; border-bottom: 1px solid rgba(255,255,255,0.03) !important; transition: 0.3s !important; }
+tr:hover td { background: rgba(212, 175, 55, 0.08) !important; }
+td:first-child { border-radius: 12px 0 0 12px !important; border-left: 1px solid rgba(255,255,255,0.03) !important; }
+td:last-child { border-radius: 0 12px 12px 0 !important; border-right: 1px solid rgba(255,255,255,0.03) !important; }
+
+/* 3. Kartlara Derinlik ve İç Işık (Inner Glow) */
+.panel, .tournament-card, .match-card {
+    background: linear-gradient(145deg, rgba(15, 23, 42, 0.7), rgba(0, 0, 0, 0.9)) !important;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1) !important;
+    border: 1px solid rgba(212, 175, 55, 0.2) !important;
+}
+
+/* 4. Bildirim Kartları ve Şık Detaylar */
+.notification-card { 
+    background: linear-gradient(to right, rgba(0, 229, 255, 0.05), rgba(0,0,0,0.5)) !important; 
+    border: 1px solid rgba(0, 229, 255, 0.1) !important; 
+    border-left: 4px solid var(--neon-cyan) !important; 
+    border-radius: 8px !important; 
+}
+.date-box { 
+    background: rgba(0,0,0,0.6) !important; 
+    border: 1px solid rgba(255,255,255,0.05) !important; 
+    border-left: 3px solid var(--accent-color) !important; 
+}
+
+
 </style>
 </head>
 <body>
