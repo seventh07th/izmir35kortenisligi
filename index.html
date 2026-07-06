@@ -250,6 +250,30 @@ th { background-color: rgba(0,0,0,0.6); color: var(--accent-color); border-botto
     font-size: 8.5px !important; /* Ekrana tam sığması için font boyutunu hafifçe uyarladık */
 }
 
+/* =========================================
+   ALT MENÜ İKON VE METİN HİZALAMASI (KESİN MERKEZLEME)
+========================================= */
+#tabsContainer .tab-btn {
+    display: flex !important; 
+    flex-direction: column !important; 
+    align-items: center !important; /* İkonu yatayda tam ortalar */
+    justify-content: center !important; /* Dikeyde ortalar */
+    text-align: center !important; /* Tüm içeriği merkeze kilitler */
+}
+
+#tabsContainer .tab-btn .tab-icon {
+    margin: 0 auto 3px auto !important; /* İkonu zorla ortaya alır ve alttan hafif boşluk verir */
+    display: block !important;
+}
+
+#tabsContainer .tab-btn span {
+    display: block !important;
+    width: 100% !important;
+    text-align: center !important; /* Yazıların sağa/sola kaymasını engeller */
+    white-space: normal !important; /* Yazının alt satıra geçmesine izin verir */
+    line-height: 1.1 !important; /* Satır aralığını sıkı tutar */
+    font-size: 8.5px !important;
+}
 
 
 </style>
