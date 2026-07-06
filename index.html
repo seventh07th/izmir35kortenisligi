@@ -238,6 +238,18 @@ th { background-color: rgba(0,0,0,0.6); color: var(--accent-color); border-botto
 /* Aktif Sekme Parıltısı */
 #tabsContainer .tab-btn.active { color: var(--neon-cyan) !important; opacity: 1 !important; text-shadow: 0 0 10px rgba(0,229,255,0.4) !important; }
 #tabsContainer .tab-btn.active .tab-icon { stroke: var(--neon-cyan) !important; filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.8)) !important; transform: translateY(-2px) !important; }
+/* Alt Menü Metin Hizalaması ve Çoklu Satır Desteği */
+#tabsContainer .tab-btn {
+    height: 55px !important; /* İki satırlık metinlere yer açmak için yüksekliği 50'den 55'e çıkardık */
+}
+#tabsContainer .tab-btn span {
+    white-space: normal !important; /* Uzun metinlerin alt satıra geçmesine izin ver */
+    text-align: center !important;
+    line-height: 1.1 !important; /* Satır aralığını sıkılaştırdık */
+    width: 100% !important;
+    font-size: 8.5px !important; /* Ekrana tam sığması için font boyutunu hafifçe uyarladık */
+}
+
 
 
 </style>
@@ -372,15 +384,15 @@ th { background-color: rgba(0,0,0,0.6); color: var(--accent-color); border-botto
     </button>
     <button class="tab-btn" id="tabTournamentsBtn" onclick="switchTab('tournaments')">
         <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-        <span>Ligler</span>
+        <span>Ligler ve<br>Turnuvalar</span>
     </button>
     <button class="tab-btn" id="tabRulesBtn" onclick="switchTab('rules')">
         <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-        <span id="rulesTabTxt">Rehber</span>
+        <span id="rulesTabTxt">Sistem Rehberi</span>
     </button>
     <button class="tab-btn active" id="tabStandingsBtn" onclick="switchTab('standings')">
         <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5A2.5 2.5 0 0 1 2 6.5V5a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v1.5a2.5 2.5 0 0 1-2.5 2.5H18"></path><path d="M18 9v2.5A5.5 5.5 0 0 1 12.5 17h-1A5.5 5.5 0 0 1 6 11.5V9"></path><path d="M12 17v5"></path><path d="M10 22h4"></path></svg>
-        <span id="stdTabTxt">Sıralama</span>
+        <span id="stdTabTxt">Genel Sıralama</span>
     </button>
     <button class="tab-btn" id="tabRivalsBtn" onclick="switchTab('rivals')">
         <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
@@ -392,9 +404,10 @@ th { background-color: rgba(0,0,0,0.6); color: var(--accent-color); border-botto
     </button>
     <button class="tab-btn" id="tabTreeBtn" onclick="switchTab('tree')">
         <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
-        <span>Ağaç</span>
+        <span>Turnuva<br>Ağacı</span>
     </button>
 </div>
+
 
  
  <div id="authWrapper">
@@ -1696,11 +1709,11 @@ window.switchTab = function(t) {
 
     let rulesTxt = document.getElementById('rulesTabTxt'); let stdTxt = document.getElementById('stdTabTxt');
     if(!isGeneralMode) { 
-        if(rulesTxt) rulesTxt.innerHTML = "Kurallar"; 
-        if(stdTxt) stdTxt.innerHTML = "Puanlar"; 
+        if(rulesTxt) rulesTxt.innerHTML = "Turnuva Kuralları"; 
+        if(stdTxt) stdTxt.innerHTML = "Puan Durumu"; 
     } else { 
-        if(rulesTxt) rulesTxt.innerHTML = "Rehber"; 
-        if(stdTxt) stdTxt.innerHTML = "Sıralama"; 
+        if(rulesTxt) rulesTxt.innerHTML = "Sistem Rehberi"; 
+        if(stdTxt) stdTxt.innerHTML = "Genel Sıralama"; 
     }
 
     if(t === 'profile') renderProfile();
