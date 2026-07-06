@@ -348,6 +348,53 @@ td:last-child { border-radius: 0 12px 12px 0 !important; border-right: 1px solid
 /* Sayfanın en altı menünün altında kalmasın diye ana konteynere boşluk veriyoruz */
 .container { padding-bottom: 90px !important; }
 
+/* =========================================
+   NATIVE APP İKONLU ALT MENÜ (BOTTOM NAV)
+========================================= */
+.nav-btn-icon {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 50%; width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: 0.3s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+#tabsContainer {
+    position: fixed !important;
+    bottom: 0 !important; left: 0 !important; width: 100% !important;
+    background: rgba(11, 17, 32, 0.95) !important;
+    backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important;
+    border: none !important; border-top: 1px solid rgba(212, 175, 55, 0.2) !important;
+    border-radius: 24px 24px 0 0 !important;
+    padding: 15px 5px 25px 5px !important;
+    margin: 0 !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+    overflow-x: auto !important; /* Menü yanlara kaydırılabilir */
+    gap: 8px !important; z-index: 9999;
+    box-shadow: 0 -5px 25px rgba(0,0,0,0.8) !important;
+}
+#tabsContainer::-webkit-scrollbar { display: none; }
+#tabsContainer { -ms-overflow-style: none; scrollbar-width: none; }
+
+.tab-btn {
+    background: transparent !important; border: none !important;
+    color: var(--sub-text) !important;
+    font-size: 9px !important; font-weight: bold; letter-spacing: 0.5px;
+    padding: 5px !important; min-width: 65px !important;
+    display: flex !important; flex-direction: column !important; align-items: center !important; gap: 6px !important;
+    box-shadow: none !important; transition: 0.3s !important; opacity: 0.6;
+}
+.tab-icon { width: 22px; height: 22px; transition: 0.3s; }
+
+/* Aktif Sekme Parıltısı */
+.tab-btn.active { background: transparent !important; color: var(--neon-cyan) !important; opacity: 1; text-shadow: 0 0 10px rgba(0,229,255,0.4); }
+.tab-btn.active .tab-icon { stroke: var(--neon-cyan); filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.8)); transform: translateY(-2px); }
+
+/* Menü içeriğin üstünü kapatmasın diye en alta boşluk veriyoruz */
+.container { padding-bottom: 90px !important; }
+
 
 </style>
 </head>
@@ -449,31 +496,62 @@ td:last-child { border-radius: 0 12px 12px 0 !important; border-right: 1px solid
 
 <div class="container">
 
-<div class="nav-bar" id="appNavBar">
-        <div style="display:flex; justify-content:space-between; align-items:center; width:100%; gap:5px;">
-            <div style="display:flex; gap:5px;">
-                <button class="nav-btn" onclick="goBackTab()" id="backBtn" style="background:#334155; color:white; border-radius:20px; padding:8px 12px; display:flex; align-items:center; gap:4px; border:none; font-size:11px;">🔙 Geri</button>
-                <button class="nav-btn" onclick="goHome()" id="homeBtn" style="display:none; background:#1e293b; color:white; border-radius:20px; padding:8px 12px; display:flex; align-items:center; gap:4px; font-size:11px;">🏠 Ana Sayfa</button>
-            </div>
-            
-            <div style="text-align:center; flex:1;">
-                <div style="font-size: 13px; font-weight: 900; color: var(--accent-color); letter-spacing:0.5px; text-transform:uppercase;" id="navLeagueTitle">İZMİR 35 LİGİ</div>
-                <div style="font-size: 9px; color: var(--sub-text); margin-top:2px; font-weight:bold;" id="navLeagueSub">KONTROL PANELİ</div>
-            </div>
-            
-            <button class="nav-btn" style="background:rgba(239,68,68,0.15); border:1px solid var(--danger); color:var(--danger); border-radius:20px; padding:8px 12px; display:flex; align-items:center; gap:4px; font-size:11px;" onclick="logoutSession()">🚪 Çıkış</button>
-        </div>
+<div class="nav-bar" id="appNavBar" style="display:none; flex-direction: row; justify-content: space-between; align-items: center; width: 100%; padding: 5px 0; background: transparent !important; border: none; box-shadow: none; margin-bottom: 10px;">
+    
+    <button class="nav-btn-icon" onclick="goBackTab()" id="backBtn">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </button>
 
-        <div style="display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:6px; width:100%;">
-            <button class="nav-btn" id="navAdminNotifBtn" onclick="openAdminGlobalNotifs()" style="display:none; background:var(--danger); color:white; border-color:var(--danger); border-radius:12px; padding:6px 10px;">🔔 Bildirimler</button>
-            <button class="nav-btn" id="navAdminTournamentsBtn" onclick="openAdminGlobalTournaments()" style="display:none; background:var(--success); color:black; border-color:var(--success); border-radius:12px; padding:6px 10px;">🎾 Turnuvalar</button>
-            <button class="nav-btn" id="navAdminManualBtn" onclick="openAdminManual()" style="display:none; background:#00e5ff; color:black; border-color:#00e5ff; border-radius:12px; padding:6px 10px;">⚙️ Kura Motoru</button>
-            
-<select id="userActiveLeagueSelect" class="auth-input force-upper" style="width:100%; max-width:280px; margin:0; padding:6px; font-size:10px; font-weight:bold; display:none; border-radius:12px; height:32px;" onchange="userSwitchLeague()">
-                <option value="none">GENEL MOD (TÜM ZAMANLAR)</option>
-            </select>
-        </div>
+    <div style="text-align:center; flex:1;">
+        <div style="font-size: 15px; font-weight: 900; color: var(--accent-color); letter-spacing:1px; text-transform:uppercase;" id="navLeagueTitle">İZMİR 35 LİGİ</div>
+        <div style="font-size: 9px; color: var(--sub-text); margin-top:2px; font-weight:bold;" id="navLeagueSub">KONTROL PANELİ</div>
     </div>
+
+    <button class="nav-btn-icon" onclick="logoutSession()" style="border-color: rgba(239, 68, 68, 0.3);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+    </button>
+</div>
+
+<div style="display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:6px; width:100%; margin-bottom:15px;" id="adminNavTools">
+    <button class="nav-btn" id="navAdminNotifBtn" onclick="openAdminGlobalNotifs()" style="display:none; background:var(--danger); color:white; border-color:var(--danger); border-radius:12px; padding:6px 10px;">🔔 Bildirimler</button>
+    <button class="nav-btn" id="navAdminTournamentsBtn" onclick="openAdminGlobalTournaments()" style="display:none; background:var(--success); color:black; border-color:var(--success); border-radius:12px; padding:6px 10px;">🎾 Turnuvalar</button>
+    <button class="nav-btn" id="navAdminManualBtn" onclick="openAdminManual()" style="display:none; background:#00e5ff; color:black; border-color:#00e5ff; border-radius:12px; padding:6px 10px;">⚙️ Kura Motoru</button>
+    <select id="userActiveLeagueSelect" class="auth-input force-upper" style="width:100%; max-width:280px; margin:0; padding:8px; font-size:11px; font-weight:bold; display:none; border-radius:12px; height:36px;" onchange="userSwitchLeague()">
+        <option value="none">GENEL MOD (TÜM ZAMANLAR)</option>
+    </select>
+</div>
+
+<div class="tabs" id="tabsContainer" style="display:none;">
+    <button class="tab-btn" id="tabProfileBtn" onclick="switchTab('profile')">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <span>Profil</span>
+    </button>
+    <button class="tab-btn" id="tabTournamentsBtn" onclick="switchTab('tournaments')">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        <span>Ligler</span>
+    </button>
+    <button class="tab-btn" id="tabRulesBtn" onclick="switchTab('rules')">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+        <span id="rulesTabTxt">Rehber</span>
+    </button>
+    <button class="tab-btn active" id="tabStandingsBtn" onclick="switchTab('standings')">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5A2.5 2.5 0 0 1 2 6.5V5a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v1.5a2.5 2.5 0 0 1-2.5 2.5H18"></path><path d="M18 9v2.5A5.5 5.5 0 0 1 12.5 17h-1A5.5 5.5 0 0 1 6 11.5V9"></path><path d="M12 17v5"></path><path d="M10 22h4"></path></svg>
+        <span id="stdTabTxt">Sıralama</span>
+    </button>
+    <button class="tab-btn" id="tabRivalsBtn" onclick="switchTab('rivals')">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <span>Fikstür</span>
+    </button>
+    <button class="tab-btn" id="tabMatchesBtn" onclick="switchTab('matches')">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        <span>Skor Gir</span>
+    </button>
+    <button class="tab-btn" id="tabTreeBtn" onclick="switchTab('tree')">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
+        <span>Ağaç</span>
+    </button>
+</div>
+
  
  <div id="authWrapper">
         <img src="icon-512.png" alt="KOR Logo" style="width: 140px; height: auto; margin-bottom: 15px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));">
@@ -1734,61 +1812,64 @@ window.viewPendingTournament = function(tid, tab) {
     }
  
 window.switchTab = function(t) {
-        let currentActivePanel = document.querySelector('.panel.active');
-        if (currentActivePanel && currentActivePanel.id !== t) {
-            previousTab = currentActivePanel.id;
-        }
+    let currentActivePanel = document.querySelector('.panel.active');
+    if (currentActivePanel && currentActivePanel.id !== t) {
+        previousTab = currentActivePanel.id;
+    }
 
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); 
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        
-        let targetPanel = document.getElementById(t); 
-        if(targetPanel) targetPanel.classList.add('active');
-        
-        document.querySelectorAll('.tab-btn').forEach(b => { 
-            let attr = b.getAttribute('onclick'); 
-            if(attr && (attr.includes(`'${t}'`) || attr.includes(`"${t}"`))) { 
-                b.classList.add('active'); 
-            } 
-        });
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); 
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    
+    let targetPanel = document.getElementById(t); 
+    if(targetPanel) targetPanel.classList.add('active');
+    
+    document.querySelectorAll('.tab-btn').forEach(b => { 
+        let attr = b.getAttribute('onclick'); 
+        if(attr && (attr.includes(`'${t}'`) || attr.includes(`"${t}"`))) { 
+            b.classList.add('active'); 
+            // Tıklanan ikonun ekranın ortasına yumuşakça kayması (Lüks Uygulama Hissi)
+            b.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        } 
+    });
 
-        let isGeneralMode = currentTid === null;
-        
-        // SEKME GÖRÜNÜRLÜĞÜ GARANTİ SİSTEMİ (CSS ile uyum için boş bırakıldı)
-        let tp = document.getElementById('tabProfileBtn'); if(tp) tp.style.display = isGeneralMode ? '' : 'none';
-        let tt = document.getElementById('tabTournamentsBtn'); if(tt) tt.style.display = isGeneralMode ? '' : 'none';
-        let tr = document.getElementById('tabRivalsBtn'); if(tr) tr.style.display = !isGeneralMode ? '' : 'none';
-        let tm = document.getElementById('tabMatchesBtn'); if(tm) tm.style.display = !isGeneralMode ? '' : 'none';
-        let ttree = document.getElementById('tabTreeBtn'); if(ttree) ttree.style.display = !isGeneralMode ? '' : 'none';
+    let isGeneralMode = currentTid === null;
+    
+    let tp = document.getElementById('tabProfileBtn'); if(tp) tp.style.display = isGeneralMode ? '' : 'flex';
+    let tt = document.getElementById('tabTournamentsBtn'); if(tt) tt.style.display = isGeneralMode ? '' : 'flex';
+    let tr = document.getElementById('tabRivalsBtn'); if(tr) tr.style.display = !isGeneralMode ? '' : 'none';
+    let tm = document.getElementById('tabMatchesBtn'); if(tm) tm.style.display = !isGeneralMode ? '' : 'none';
+    let ttree = document.getElementById('tabTreeBtn'); if(ttree) ttree.style.display = !isGeneralMode ? '' : 'none';
 
-        let rulesBtn = document.getElementById('tabRulesBtn'); let stdBtn = document.getElementById('tabStandingsBtn');
-        if(!isGeneralMode) { 
-            if(rulesBtn) rulesBtn.innerHTML = "📜 Turnuva Kuralları"; 
-            if(stdBtn) stdBtn.innerHTML = "📊 Puan Durumu"; 
-        } else { 
-            if(rulesBtn) rulesBtn.innerHTML = "📜 Sistem Rehberi"; 
-            if(stdBtn) stdBtn.innerHTML = "🏆 Genel Sıralama"; 
-        }
+    // Sadece yazıları değiştiren güvenli kod (SVG'leri silmez)
+    let rulesTxt = document.getElementById('rulesTabTxt'); let stdTxt = document.getElementById('stdTabTxt');
+    if(!isGeneralMode) { 
+        if(rulesTxt) rulesTxt.innerHTML = "Kurallar"; 
+        if(stdTxt) stdTxt.innerHTML = "Puanlar"; 
+    } else { 
+        if(rulesTxt) rulesTxt.innerHTML = "Rehber"; 
+        if(stdTxt) stdTxt.innerHTML = "Sıralama"; 
+    }
 
-        if(t === 'profile') renderProfile();
-        if(t === 'tournaments') renderTournamentsList();
+    if(t === 'profile') renderProfile();
+    if(t === 'tournaments') renderTournamentsList();
 
-        let rf = document.getElementById('playerFilterSelect'); let mf = document.getElementById('matchFilterSelect');
+    let rf = document.getElementById('playerFilterSelect'); let mf = document.getElementById('matchFilterSelect');
 
-        if(!isGeneralMode && allTourneys[currentTid]) {
-            if(t === 'rules') generateDynamicRules(currentSettings);
-            if(t === 'standings') renderLocalStandings();
-            if(t === 'rivals') { if(rf) rf.style.display = 'block'; populateFilterSelects(); renderRivalsGrid(); }
-            if(t === 'matches') { if(mf) mf.style.display = 'block'; populateFilterSelects(); renderMatchesView(); }
-            if(t === 'tree') { let ttTitle = document.getElementById('treeDynamicTitle'); if(ttTitle) ttTitle.style.display = 'block'; renderVisualBracket(); }
-        } else {
-            if(t === 'rules') renderGlobalRules();
-            if(t === 'standings') renderGlobalStandings();
-            if(t === 'rivals') { if(rf) rf.style.display = 'none'; let c = document.getElementById('rivalsGridContainer'); if(c) c.innerHTML = `<div class="global-alert">⚠️ Bu sekmeyi görüntülemek için lütfen üst menüden oynadığınız bir turnuvayı seçin.</div>`; }
-            if(t === 'matches') { if(mf) mf.style.display = 'none'; let m = document.getElementById('matchListContainer'); if(m) m.innerHTML = `<div class="global-alert">⚠️ Bu sekmeyi görüntülemek için lütfen üst menüden oynadığınız bir turnuvayı seçin.</div>`; }
-            if(t === 'tree') { let ttTitle = document.getElementById('treeDynamicTitle'); if(ttTitle) ttTitle.style.display = 'none'; let b = document.getElementById('bracketView'); if(b) b.innerHTML = `<div class="global-alert">⚠️ Bu sekmeyi görüntülemek için lütfen üst menüden oynadığınız bir turnuvayı seçin.</div>`; }
-        }
-    };
+    if(!isGeneralMode && allTourneys[currentTid]) {
+        if(t === 'rules') generateDynamicRules(currentSettings);
+        if(t === 'standings') renderLocalStandings();
+        if(t === 'rivals') { if(rf) rf.style.display = 'block'; populateFilterSelects(); renderRivalsGrid(); }
+        if(t === 'matches') { if(mf) mf.style.display = 'block'; populateFilterSelects(); renderMatchesView(); }
+        if(t === 'tree') { let ttTitle = document.getElementById('treeDynamicTitle'); if(ttTitle) ttTitle.style.display = 'block'; renderVisualBracket(); }
+    } else {
+        if(t === 'rules') renderGlobalRules();
+        if(t === 'standings') renderGlobalStandings();
+        if(t === 'rivals') { if(rf) rf.style.display = 'none'; let c = document.getElementById('rivalsGridContainer'); if(c) c.innerHTML = `<div class="global-alert">⚠️ Bu sekmeyi görüntülemek için lütfen üst menüden oynadığınız bir turnuvayı seçin.</div>`; }
+        if(t === 'matches') { if(mf) mf.style.display = 'none'; let m = document.getElementById('matchListContainer'); if(m) m.innerHTML = `<div class="global-alert">⚠️ Bu sekmeyi görüntülemek için lütfen üst menüden oynadığınız bir turnuvayı seçin.</div>`; }
+        if(t === 'tree') { let ttTitle = document.getElementById('treeDynamicTitle'); if(ttTitle) ttTitle.style.display = 'none'; let b = document.getElementById('bracketView'); if(b) b.innerHTML = `<div class="global-alert">⚠️ Bu sekmeyi görüntülemek için lütfen üst menüden oynadığınız bir turnuvayı seçin.</div>`; }
+    }
+};
+
  
     function loadTournamentData(tid) {
         let t = allTourneys[tid]; if (!t) return;
