@@ -178,134 +178,34 @@ th { background-color: rgba(0,0,0,0.6); color: var(--accent-color); border-botto
 .dialog-btn.danger { background: var(--danger); color: white; box-shadow: 0 0 10px rgba(239,68,68,0.3); }
 
 /* =========================================
-   PREMİUM VİTRİN CİLASI (LÜKS GÜNCELLEME)
+   NATIVE APP İKONLU ALT MENÜ VE ÜST BAR (KUSURSUZ)
 ========================================= */
-
-/* 1. Lüks Sekmeler (Apple Tarzı Kapsül) */
-.tabs { 
-    background: rgba(0,0,0,0.6) !important; 
-    padding: 6px !important; 
-    border-radius: 30px !important; 
-    border: 1px solid rgba(255,255,255,0.05) !important; 
-    display: inline-flex !important; 
-    flex-wrap: nowrap !important; 
-    overflow-x: auto !important; 
-    max-width: 100% !important; 
-    margin-bottom: 25px !important; 
-    box-shadow: inset 0 4px 10px rgba(0,0,0,0.5) !important;
-}
-.tab-btn { 
-    background: transparent !important; 
-    border: none !important; 
-    color: var(--sub-text) !important; 
-    padding: 12px 20px !important; 
-    border-radius: 25px !important; 
-    box-shadow: none !important; 
-    margin: 0 !important; 
-}
-.tab-btn.active { 
-    background: linear-gradient(135deg, var(--accent-color), #fff2a8) !important; 
-    color: #000 !important; 
-    font-weight: 900 !important; 
-    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4) !important; 
-    transform: none !important; 
-}
-
-/* 2. Premium Sıralama Tabloları (Ayrı Kapsül Satırlar) */
-table { border-collapse: separate !important; border-spacing: 0 8px !important; }
-th { background: transparent !important; color: var(--sub-text) !important; border: none !important; font-size: 10px !important; letter-spacing: 1px !important; padding-bottom: 5px !important; text-transform: uppercase; }
-td { background: rgba(0, 0, 0, 0.4) !important; border-top: 1px solid rgba(255,255,255,0.03) !important; border-bottom: 1px solid rgba(255,255,255,0.03) !important; transition: 0.3s !important; }
-tr:hover td { background: rgba(212, 175, 55, 0.08) !important; }
-td:first-child { border-radius: 12px 0 0 12px !important; border-left: 1px solid rgba(255,255,255,0.03) !important; }
-td:last-child { border-radius: 0 12px 12px 0 !important; border-right: 1px solid rgba(255,255,255,0.03) !important; }
-
-/* 3. Kartlara Derinlik ve İç Işık (Inner Glow) */
-.panel, .tournament-card, .match-card {
-    background: linear-gradient(145deg, rgba(15, 23, 42, 0.7), rgba(0, 0, 0, 0.9)) !important;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1) !important;
-    border: 1px solid rgba(212, 175, 55, 0.2) !important;
-}
-
-/* 4. Bildirim Kartları ve Şık Detaylar */
-.notification-card { 
-    background: linear-gradient(to right, rgba(0, 229, 255, 0.05), rgba(0,0,0,0.5)) !important; 
-    border: 1px solid rgba(0, 229, 255, 0.1) !important; 
-    border-left: 4px solid var(--neon-cyan) !important; 
-    border-radius: 8px !important; 
-}
-.date-box { 
-    background: rgba(0,0,0,0.6) !important; 
-    border: 1px solid rgba(255,255,255,0.05) !important; 
-    border-left: 3px solid var(--accent-color) !important; 
-}
-
-/* =========================================
-   PREMİUM VİTRİN CİLASI - V2 (KESİN ÇÖZÜM)
-========================================= */
-
-/* 1. Kapsül Tablo Satırları (Havada Duran Tasarım) */
-table { border-collapse: separate !important; border-spacing: 0 10px !important; }
-th { border: none !important; background: transparent !important; color: var(--sub-text) !important; text-transform: uppercase; font-size: 10px !important; padding-bottom: 5px !important; }
-td { 
-    background: rgba(30, 41, 59, 0.4) !important; /* Hafif aydınlık cam zemin */
-    border-top: 1px solid rgba(255,255,255,0.05) !important;
-    border-bottom: 1px solid rgba(0,0,0,0.5) !important;
-    padding: 14px 5px !important; 
-    transition: 0.3s;
-}
-tr:hover td { background: rgba(212, 175, 55, 0.1) !important; }
-td:first-child { border-radius: 12px 0 0 12px !important; border-left: 3px solid var(--accent-color) !important; }
-td:last-child { border-radius: 0 12px 12px 0 !important; border-right: 1px solid rgba(255,255,255,0.05) !important; }
-
-/* 2. Kart Derinliği (3D Işık ve Gölge) */
-.auth-card, .panel, .tournament-card {
-    background: linear-gradient(145deg, rgba(30,41,59,0.5), rgba(15,23,42,0.8)) !important;
-    border-top: 1px solid rgba(255,255,255,0.1) !important;
-    border-bottom: 1px solid rgba(0,0,0,0.8) !important;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.9) !important;
-}
-
-/* 3. Agresif Renkleri Tıraşlama (Lüks Uyum) */
-/* Kayıt Ol Butonunu Zarifleştirme */
-.auth-card .auth-btn[onclick="toggleAuth('registerPanel')"] {
-    background: rgba(0, 229, 255, 0.05) !important;
-    color: var(--neon-cyan) !important;
-    border: 1px solid var(--neon-cyan) !important;
+/* 1. Üst Bar ve İkonlar (Geri ve Çıkış Tuşu Düzeltmesi) */
+#appNavBar {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    background: transparent !important;
+    border: none !important;
     box-shadow: none !important;
+    padding: 5px 0 !important;
+    margin-bottom: 10px !important;
 }
-/* Agresif Kırmızı Butonları Şıklaştırma (Çıkış vb.) */
-.nav-btn[onclick="logoutSession()"], button[onclick="changeOwnPassword()"], button[onclick="deleteCurrentTournament()"] {
-    background: rgba(239, 68, 68, 0.1) !important;
-    color: var(--danger) !important;
-    border: 1px solid var(--danger) !important;
-    box-shadow: none !important;
+.nav-btn-icon {
+    background: rgba(15, 23, 42, 0.8) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 50% !important; 
+    width: 42px !important; height: 42px !important; /* İkon çerçevesi boyutu */
+    display: flex !important; align-items: center !important; justify-content: center !important;
+    cursor: pointer !important; padding: 0 !important; margin: 0 !important;
 }
-
-/* 4. Üst Menü Kalabalığını Temizleme */
-#appNavBar { 
-    background: transparent !important; 
-    border: none !important; 
-    box-shadow: none !important; 
-    padding: 0 !important; 
-    margin-bottom: 5px !important;
-}
-.tabs {
-    background: rgba(0,0,0,0.6) !important; 
-    padding: 6px !important; 
-    border-radius: 30px !important; 
-    border: 1px solid rgba(255,255,255,0.05) !important;
-    box-shadow: inset 0 4px 10px rgba(0,0,0,0.5) !important;
-}
-.tab-btn { margin: 0 !important; border: none !important; }
-.tab-btn.active {
-    background: linear-gradient(135deg, var(--accent-color), #fff2a8) !important; 
-    color: #000 !important; 
-    font-weight: 900 !important; 
+.nav-btn-icon svg { 
+    width: 22px !important; height: 22px !important; /* İkonun kendi boyutu */
+    stroke-width: 2.5 !important; 
 }
 
-/* =========================================
-   ALT MENÜ (BOTTOM NAVIGATION) - MOBİL APP GÖRÜNÜMÜ
-========================================= */
+/* 2. Alt Menü Container (Giriş Ekranında Görünmeme Garantili) */
 #tabsContainer {
     position: fixed !important;
     bottom: 0 !important; left: 0 !important; width: 100% !important;
@@ -313,115 +213,31 @@ td:last-child { border-radius: 0 12px 12px 0 !important; border-right: 1px solid
     backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important;
     border: none !important; border-top: 1px solid rgba(212, 175, 55, 0.2) !important;
     border-radius: 24px 24px 0 0 !important;
-    padding: 10px 5px 20px 5px !important; /* Yükseklik ve boşluklar optimize edildi */
-    margin: 0 !important;
-    display: flex !important;
-    flex-wrap: nowrap !important; /* Asla alt satıra geçmez */
-    justify-content: flex-start !important;
-    overflow-x: auto !important; 
-    gap: 5px !important; z-index: 9999;
+    padding: 10px 5px 25px 5px !important; margin: 0 !important;
+    flex-wrap: nowrap !important; justify-content: space-evenly !important; 
+    overflow-x: auto !important; gap: 2px !important; z-index: 9999;
     box-shadow: 0 -5px 25px rgba(0,0,0,0.8) !important;
+    /* DİKKAT: display KODU BURADAN SİLİNDİ, BÖYLECE JS GİZLEYEBİLECEK! */
 }
-
 #tabsContainer::-webkit-scrollbar { display: none; }
 #tabsContainer { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* 3. Alt Menü Butonları */
 #tabsContainer .tab-btn {
     background: transparent !important; border: none !important;
     color: var(--sub-text) !important;
     font-size: 9px !important; font-weight: bold; letter-spacing: 0.5px;
-    padding: 0 !important; 
-    min-width: 65px !important; 
-    height: 50px !important; /* Yükseklik sabitlendi, ikonlar ezilmeyecek */
-    flex: 0 0 auto !important; 
-    display: flex; flex-direction: column !important; 
-    align-items: center !important; justify-content: center !important; /* İkon ve metin tam ortalandı */
-    gap: 4px !important;
-    box-shadow: none !important; transition: 0.3s !important; opacity: 0.6;
-    margin: 0 !important;
+    padding: 0 !important; min-width: 55px !important; max-width: 120px !important; height: 50px !important; 
+    flex: 1 1 0% !important; 
+    /* DİKKAT: display KODU BURADAN SİLİNDİ! */
+    flex-direction: column !important; align-items: center !important; justify-content: center !important; 
+    gap: 4px !important; box-shadow: none !important; transition: 0.3s !important; opacity: 0.6; margin: 0 !important;
 }
-
-.tab-icon { width: 22px; height: 22px; transition: 0.3s; margin-bottom: 2px !important; }
+#tabsContainer .tab-btn .tab-icon { width: 22px !important; height: 22px !important; transition: 0.3s; margin-bottom: 2px !important; }
 
 /* Aktif Sekme Parıltısı */
-#tabsContainer .tab-btn.active { background: transparent !important; color: var(--neon-cyan) !important; opacity: 1; text-shadow: 0 0 10px rgba(0,229,255,0.4); }
-#tabsContainer .tab-btn.active .tab-icon { stroke: var(--neon-cyan); filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.8)); transform: translateY(-2px); }
-
-.container { padding-bottom: 95px !important; }
-
-
-/* =========================================
-   NATIVE APP İKONLU ALT MENÜ (YEPYENİ VE KUSURSUZ)
-========================================= */
-#tabsContainer {
-    position: fixed !important;
-    bottom: 0 !important; left: 0 !important; width: 100% !important;
-    background: rgba(11, 17, 32, 0.95) !important;
-    backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important;
-    border: none !important; border-top: 1px solid rgba(212, 175, 55, 0.2) !important;
-    border-radius: 24px 24px 0 0 !important;
-    padding: 10px 5px 20px 5px !important;
-    margin: 0 !important;
-    
-    /* DİKKAT: Buradan 'display' kodunu TAMAMEN SİLDİK. Böylece giriş ekranında gizli kalacak! */
-    flex-wrap: nowrap !important; 
-    justify-content: space-evenly !important; /* Butonları ekrana eşit yayar */
-    overflow-x: auto !important; 
-    gap: 2px !important; z-index: 9999;
-    box-shadow: 0 -5px 25px rgba(0,0,0,0.8) !important;
-}
-
-#tabsContainer::-webkit-scrollbar { display: none; }
-#tabsContainer { -ms-overflow-style: none; scrollbar-width: none; }
-
-#tabsContainer .tab-btn {
-    background: transparent !important; border: none !important;
-    color: var(--sub-text) !important;
-    font-size: 9px !important; font-weight: bold; letter-spacing: 0.5px;
-    padding: 0 !important; 
-    min-width: 55px !important; /* En fazla bu kadar küçülebilir (7 sekme varken) */
-    max-width: 120px !important; /* En fazla bu kadar büyüyebilir (4 sekme varken) */
-    height: 50px !important; 
-    flex: 1 1 0% !important; /* İŞTE SİHİR: Ekran genişliğini eşit olarak paylaşmalarını sağlar */
-    display: flex !important; 
-    flex-direction: column !important; 
-    align-items: center !important; justify-content: center !important; 
-    gap: 4px !important;
-    box-shadow: none !important; transition: 0.3s !important; opacity: 0.6;
-    margin: 0 !important;
-}
-
-.tab-icon { width: 22px; height: 22px; transition: 0.3s; margin-bottom: 2px !important; }
-
-/* Aktif Sekme Parıltısı */
-#tabsContainer .tab-btn.active { background: transparent !important; color: var(--neon-cyan) !important; opacity: 1; text-shadow: 0 0 10px rgba(0,229,255,0.4); }
-#tabsContainer .tab-btn.active .tab-icon { stroke: var(--neon-cyan); filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.8)); transform: translateY(-2px); }
-
-/* Menü içeriğin üstünü kapatmasın diye en alta boşluk */
-.container { padding-bottom: 95px !important; }
-
-
-/* =========================================
-   UX RÖTUŞLARI (TAM EKRAN VE BOŞLUK TEMİZLİĞİ)
-========================================= */
-
-/* 1. Giriş ekranındaki gereksiz alt boşluğu sil, sadece ana uygulamaya ver */
-.container { padding-bottom: 0 !important; }
-#mainApp { padding-bottom: 95px !important; } 
-
-/* 2. Kartlardaki aşırı boşlukları daralt (Scrollsuz tam ekran görünümü için) */
-.panel, .tournament-card, .match-card, .slider-container {
-    padding: 15px !important; /* Eski 25px değerini daralttık */
-    margin-bottom: 15px !important;
-}
-.auth-card { padding: 25px 20px !important; } /* Kayıt ekranını toparladık */
-
-/* 3. Kafa karıştıran o "Genel Mod" açılır menüsünü tamamen yok et */
-#userActiveLeagueSelect { display: none !important; }
-
-/* Profil kartı içindeki metin aralıklarını daraltma */
-#profile > div:first-child h2 { font-size: 20px !important; margin-bottom: 5px !important; }
-#profile > div:first-child .action-sm { padding: 4px 8px !important; }
+#tabsContainer .tab-btn.active { color: var(--neon-cyan) !important; opacity: 1 !important; text-shadow: 0 0 10px rgba(0,229,255,0.4) !important; }
+#tabsContainer .tab-btn.active .tab-icon { stroke: var(--neon-cyan) !important; filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.8)) !important; transform: translateY(-2px) !important; }
 
 
 </style>
@@ -1867,14 +1683,16 @@ window.switchTab = function(t) {
         } 
     });
 
-    let isGeneralMode = currentTid === null;
+      let isGeneralMode = currentTid === null;
     
-    // AKILLI MENÜ GİZLEME
-    let tp = document.getElementById('tabProfileBtn'); if(tp) tp.style.display = 'flex'; // Hep Görünür
-    let tt = document.getElementById('tabTournamentsBtn'); if(tt) tt.style.display = 'flex'; // Hep Görünür
-    let tr = document.getElementById('tabRivalsBtn'); if(tr) tr.style.display = !isGeneralMode ? 'flex' : 'none';
-    let tm = document.getElementById('tabMatchesBtn'); if(tm) tm.style.display = !isGeneralMode ? 'flex' : 'none';
-    let ttree = document.getElementById('tabTreeBtn'); if(ttree) ttree.style.display = !isGeneralMode ? 'flex' : 'none';
+    // JS İLE KESİN GİZLEME EMRİ (Olası tüm CSS hatalarını ezer geçer)
+    let tp = document.getElementById('tabProfileBtn'); if(tp) tp.style.setProperty('display', 'flex', 'important');
+    let tt = document.getElementById('tabTournamentsBtn'); if(tt) tt.style.setProperty('display', 'flex', 'important');
+    
+    let tr = document.getElementById('tabRivalsBtn'); if(tr) tr.style.setProperty('display', !isGeneralMode ? 'flex' : 'none', 'important');
+    let tm = document.getElementById('tabMatchesBtn'); if(tm) tm.style.setProperty('display', !isGeneralMode ? 'flex' : 'none', 'important');
+    let ttree = document.getElementById('tabTreeBtn'); if(ttree) ttree.style.setProperty('display', !isGeneralMode ? 'flex' : 'none', 'important');
+
 
     let rulesTxt = document.getElementById('rulesTabTxt'); let stdTxt = document.getElementById('stdTabTxt');
     if(!isGeneralMode) { 
@@ -2474,14 +2292,20 @@ function grantFounderStatus() {
         });
     }
  
-function logoutSession() {
+    function logoutSession() {
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         
         document.getElementById('adminTopBar').style.display = "none";
         let adminTools = document.getElementById('adminNavTools');
         if(adminTools) adminTools.style.display = "none";
-        document.getElementById('tabsContainer').style.display = "none";
+        
+        // SİHİRLİ SATIRLAR: Giriş ekranında sekmeleri "kesinlikle" yok eder!
+        let tc = document.getElementById('tabsContainer');
+        if(tc) tc.style.setProperty('display', 'none', 'important');
+        let nb = document.getElementById('appNavBar');
+        if(nb) nb.style.setProperty('display', 'none', 'important');
+
         document.getElementById('navAdminNotifBtn').style.display = "none"; 
         document.getElementById('navAdminTournamentsBtn').style.display = "none"; 
         document.getElementById('navAdminManualBtn').style.display = "none";
@@ -2490,12 +2314,12 @@ function logoutSession() {
         firebase.auth().signOut().then(() => {
             loggedInUser = null; isAdmin = false; currentTid = null; previousTab = null;
             document.getElementById('mainApp').style.display = "none";
-            document.getElementById('appNavBar').style.display = "none";
             document.getElementById('authWrapper').style.display = "flex";
             toggleAuth('loginPanel');
             showToast("Başarıyla çıkış yapıldı.", "success");
         }).catch(err => showToast("Çıkış yapılırken hata oluştu.", "error"));
     }
+
 
 
 // ==========================================
