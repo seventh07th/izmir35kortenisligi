@@ -300,12 +300,13 @@ body {
 }
 
 /* Profil gibi kısa ekranlarda da içeriği toplayarak taşırmayı önle */
-#profile {
-    display: flex;
+#profile.active {
+    display: flex !important;
     flex-direction: column;
     justify-content: center;
     min-height: calc(100dvh - 120px); /* Üst/Alt menü payı çıkarılmış tam ekran */
 }
+
 
 
 </style>
