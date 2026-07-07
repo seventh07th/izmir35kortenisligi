@@ -2073,7 +2073,13 @@ function renderLocalStandings() {
         if(N < 12) { mainWrapper.innerHTML = `<p style="text-align:center; color:var(--warning);">Ligde yeterli oyuncu yok (Min 12).</p>`; return; }
         
         let dCount = N >= 48 ? 8 : (N >= 24 ? 4 : (N >= 12 ? 2 : 2)); let poCount = dCount; let piCount = dCount * 2;
-        let titleEl = document.getElementById('treeDynamicTitle'); if(titleEl) titleEl.innerText = isPending ? `ÖRNEK ŞAMPİYONLUK HARİTASI (${N} KİŞİLİK)` : `CANLI ŞAMPİYONLUK HARİTASI (${N} KİŞİLİK LİG)`;
+       let titleEl = document.getElementById('treeDynamicTitle'); 
+if(titleEl) {
+    titleEl.innerHTML = isPending 
+        ? `ÖRNEK ŞAMPİYONLUK HARİTASI<br><span style="font-size:10px; color:var(--sub-text); font-weight:bold; letter-spacing:1px; margin-top:4px; display:inline-block;">(${N} KİŞİLİK LİG)</span>` 
+        : `CANLI ŞAMPİYONLUK HARİTASI<br><span style="font-size:10px; color:var(--sub-text); font-weight:bold; letter-spacing:1px; margin-top:4px; display:inline-block;">(${N} KİŞİLİK LİG)</span>`;
+}
+
         
 // YENİ SERİBAŞI FORMATI: Seribaşı 1 (S01)
         let p = (rank) => { 
