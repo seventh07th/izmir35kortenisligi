@@ -14,14 +14,14 @@
     <style>
 
 :root {
-    /* Ana Arka Plan - Derin Karbon Lacivert */
-    --bg-color: #0b1120;
+    /* Ana Arka Plan - Çok Daha Koyu (Obsidyen Siyahı / Derin Gece) */
+    --bg-color: #03050a;
     
-    /* Cam Efekti (Glassmorphism) İçin Yarı Saydam Zemin */
-    --card-bg: rgba(15, 23, 42, 0.45); 
+    /* Cam Efekti (Glassmorphism) İçin Daha Koyu Yarı Saydam Zemin */
+    --card-bg: rgba(10, 15, 28, 0.45); 
     
-    /* Altın Detaylar (KOR Logosu Referanslı) */
-    --accent-color: #d4af37; 
+    /* Zengin ve Tok Altın Rengi (Logoya Uyumlu Koyu Ton) */
+    --accent-color: #b8860b; 
     
     /* Neon Turkuaz (Aksiyon Butonları ve Yükseliş Çizgisi) */
     --neon-cyan: #00e5ff;
@@ -29,8 +29,11 @@
     /* Diğer Sistem Renkleri */
     --text-color: #f8fafc;
     --sub-text: #94a3b8;
-    --border-color: rgba(212, 175, 55, 0.3);
-    --divider: rgba(212, 175, 55, 0.1);
+    
+    /* Kenarlıklar ve Çizgiler İçin Altın Renginin Uyumlu Şeffaf Halleri */
+    --border-color: rgba(184, 134, 11, 0.3);
+    --divider: rgba(184, 134, 11, 0.1);
+    
     --success: #00ffaa;
     --warning: #ffbd00;
     --danger: #ef4444;
@@ -41,11 +44,13 @@
 body {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     background-color: var(--bg-color);
-    background-image: radial-gradient(circle at top, #162032 0%, #0b1120 100%);
+    /* Üstten alta doğru süzülen çok koyu ve asil bir degrade (gradient) geçişi */
+    background-image: radial-gradient(circle at top, #0c121e 0%, #03050a 100%);
     color: var(--text-color);
     margin: 0; padding: 10px;
     width: 100vw; min-height: 100vh; overflow-x: hidden; font-size: 12px;
 }
+
 
 .container { max-width: 1000px; margin: 0 auto; padding-bottom: 30px; }
 h1, h2, h3 { text-align: center; color: var(--accent-color); margin: 10px 0; letter-spacing: 1px; text-transform: uppercase; }
