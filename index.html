@@ -1819,28 +1819,33 @@ if (!window.coreStartPending) {
     };
 }
 
-   function previewPots() {
+ window.previewPots = function() {
         let checked = document.querySelectorAll('.admin-chk:checked'); let N = checked.length; if (N < 12) return alert("⚠️ Torba sistemi için minimum 12 kişi gereklidir."); 
         
-        // 🌟 KESİN ÇÖZÜM: Herkese gizli bir rastgele 'rand' (kura) değeri atıyoruz!
-        let tPlayers = Array.from(checked).map(cb => { let u = globalUsers[cb.value]; return { name: u.name, score: parseFloat(u.sysScore||0), rand: Math.random() }; }); 
+        // 🚨 DÜZELTME: Oyuncuların ID'sini de alıyoruz ki hafızaya kaydedebilelim
+        let tPlayers = Array.from(checked).map(cb => { let u = globalUsers[cb.value]; return { id: u.id, name: u.name, score: parseFloat(u.sysScore||0), rand: Math.random() }; }); 
         
-        // 🌟 Önce puana bak, puanlar eşitse o gizli rastgele sayıya göre diz!
         tPlayers.sort((a, b) => {
             if (b.score !== a.score) return b.score - a.score;
-            return a.rand - b.rand; // Eşit puanlılar sınırda sürekli torba değiştirsin!
+            return a.rand - b.rand; 
         });
         
         let numPots = N >= 48 ? 5 : (N >= 24 ? 4 : 3); let baseSize = Math.floor(N / numPots); let remainder = N % numPots; 
         let html = `<div class="pot-container" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:10px; margin-top:15px;">`; let startIndex = 0;
         
+        // 🌟 HAFIZA KİLİDİ: Her önizlemede yeni bir hafıza oluşturuyoruz
+        window.lastAssignedPots = {}; 
+
         const shuffle = (arr) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
 
         for(let i=1; i<=numPots; i++) { 
             let currentSize = baseSize + (remainder > 0 ? 1 : 0); if(remainder > 0) remainder--; 
             let potSlice = tPlayers.slice(startIndex, startIndex + currentSize); startIndex += currentSize; 
             
-            shuffle(potSlice); // Torba içini görsel olarak karıştır
+            // 🌟 OYUNCULARIN HANGİ TORBAYA DÜŞTÜĞÜNÜ HAFIZAYA KAZI
+            potSlice.forEach(p => window.lastAssignedPots[p.id] = i);
+
+            shuffle(potSlice); 
 
             let listHtml = potSlice.map(p => `<div style="font-size:11px; padding:4px 0; border-bottom:1px solid #0f172a; display:flex; justify-content:space-between;"><span>${p.name}</span><span style="color:var(--success);">${p.score}</span></div>`).join(''); 
             html += `<div style="background:#1e293b; border:1px solid var(--accent-color); border-radius:8px; padding:10px; min-width:150px; flex:1;"><div style="text-align:center; color:var(--accent-color); font-weight:bold; font-size:12px; border-bottom:1px dashed var(--divider); padding-bottom:5px; margin-bottom:8px;">TORBA ${i} (${potSlice.length} Kişi)</div>${listHtml}</div>`; 
@@ -1866,22 +1871,29 @@ if (!window.coreStartManual) {
         
         let tempPlayers = Array.from(checked).map(cb => { let u = globalUsers[cb.value]; return { id: u.id, name: u.name, sysScore: u.sysScore, wins: 0, losses: 0, totalMatches: 0, setAv: 0, kor: 0, korRank: 0, rand: Math.random() }; });
         
-        tempPlayers.sort((a, b) => {
-            let scoreA = parseFloat(a.sysScore || 0); let scoreB = parseFloat(b.sysScore || 0);
-            if (scoreB !== scoreA) return scoreB - scoreA;
-            return a.rand - b.rand; 
-        });
+        let numPots = N >= 48 ? 5 : (N >= 24 ? 4 : 3); let mLimit = numPots * 2;
 
-        let numPots = N >= 48 ? 5 : (N >= 24 ? 4 : 3); let mLimit = numPots * 2; let baseSize = Math.floor(N / numPots); let remainder = N % numPots; let potIndex = 1; let assigned = 0; let currentPotLimit = baseSize + (remainder > 0 ? 1 : 0);
-        tempPlayers.forEach(p => { p.pot = potIndex; assigned++; if (assigned >= currentPotLimit && potIndex < numPots) { potIndex++; assigned = 0; remainder--; currentPotLimit = baseSize + (remainder > 0 ? 1 : 0); } });
+        // 🌟 HAFIZA KONTROLÜ: Eğer önizleme yapıldıysa, kuraları tam olarak o önizlemeye sadık kalarak çek!
+        if (window.lastAssignedPots && Object.keys(window.lastAssignedPots).length === N) {
+            tempPlayers.forEach(p => { p.pot = window.lastAssignedPots[p.id]; });
+        } else {
+            // Eğer önizlemeye basılmadan direkt kura çekildiyse, normal dağıt
+            tempPlayers.sort((a, b) => {
+                let scoreA = parseFloat(a.sysScore || 0); let scoreB = parseFloat(b.sysScore || 0);
+                if (scoreB !== scoreA) return scoreB - scoreA;
+                return a.rand - b.rand; 
+            });
+            let baseSize = Math.floor(N / numPots); let remainder = N % numPots; let potIndex = 1; let assigned = 0; let currentPotLimit = baseSize + (remainder > 0 ? 1 : 0);
+            tempPlayers.forEach(p => { p.pot = potIndex; assigned++; if (assigned >= currentPotLimit && potIndex < numPots) { potIndex++; assigned = 0; remainder--; currentPotLimit = baseSize + (remainder > 0 ? 1 : 0); } });
+        }
 
+        // Torba İçi Karıştırma (Inner-Pot Shuffle)
         let shuffledTempPlayers = [];
         for(let i=1; i<=numPots; i++) { let potPlayers = tempPlayers.filter(p => p.pot === i); shuffle(potPlayers); shuffledTempPlayers.push(...potPlayers); }
         tempPlayers = shuffledTempPlayers;
 
         let finalMatches = []; let wasFullyValid = false;
 
-        // 🌟 ÇÖZÜM: Kördüğüm için 100 deneme ve KESİN torba kuralı!
         for (let attempt = 0; attempt < 100; attempt++) {
             let tempMatches = []; let mId = 0; let pStats = {};
             tempPlayers.forEach(p => pStats[p.id] = { total: 0, pots: {1:0, 2:0, 3:0, 4:0, 5:0} });
