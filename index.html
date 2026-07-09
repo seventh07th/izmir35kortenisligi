@@ -3255,7 +3255,252 @@ window.publishTournament = function() {
     });
 }
 
+// ==========================================
+// 🏆 MASTER OVERRIDE: KESİN HAFIZALI KURA MOTORU
+// ==========================================
 
+window.previewPots = function() {
+    let checked = document.querySelectorAll('.admin-chk:checked'); let N = checked.length; 
+    if (N < 12) return alert("⚠️ Torba sistemi için minimum 12 kişi gereklidir."); 
+    
+    // 1. Oyuncuları ID'leri ile birlikte topla ve rastgele bir zar (rand) ver
+    let tPlayers = Array.from(checked).map(cb => { 
+        let u = globalUsers[cb.value]; 
+        return { id: u.id, name: u.name, score: parseFloat(u.sysScore||0), rand: Math.random() }; 
+    }); 
+    
+    // 2. Puana göre diz, puan eşitse rastgele zara göre diz (sınırda kalanları değiştirir)
+    tPlayers.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return a.rand - b.rand; 
+    });
+    
+    let numPots = N >= 48 ? 5 : (N >= 24 ? 4 : 3); 
+    let baseSize = Math.floor(N / numPots); let remainder = N % numPots; 
+    
+    // 3. HAFIZAYI SIFIRLA VE AÇ
+    window.lastAssignedPots = {}; 
+    
+    let html = `<div class="pot-container" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:10px; margin-top:15px;">`; 
+    let startIndex = 0;
+    const shuffle = (arr) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
+
+    for(let i=1; i<=numPots; i++) { 
+        let currentSize = baseSize + (remainder > 0 ? 1 : 0); if(remainder > 0) remainder--; 
+        let potSlice = tPlayers.slice(startIndex, startIndex + currentSize); startIndex += currentSize; 
+        
+        // 4. HAFIZAYA KAYDET (Kim Hangi Torbada?)
+        potSlice.forEach(p => { window.lastAssignedPots[p.id] = i; });
+
+        shuffle(potSlice); // Görseli karıştır
+
+        let listHtml = potSlice.map(p => `<div style="font-size:11px; padding:4px 0; border-bottom:1px solid #0f172a; display:flex; justify-content:space-between;"><span>${p.name}</span><span style="color:var(--success);">${p.score}</span></div>`).join(''); 
+        html += `<div style="background:#1e293b; border:1px solid var(--accent-color); border-radius:8px; padding:10px; min-width:150px; flex:1;"><div style="text-align:center; color:var(--accent-color); font-weight:bold; font-size:12px; border-bottom:1px dashed var(--divider); padding-bottom:5px; margin-bottom:8px;">TORBA ${i} (${potSlice.length} Kişi)</div>${listHtml}</div>`; 
+    } 
+    html += `</div>`;
+    
+    let container = document.getElementById('potPreviewContainer'); 
+    if (!container) { 
+        container = document.createElement('div'); container.id = 'potPreviewContainer'; container.style.display = 'none'; container.style.marginBottom = '15px'; 
+        let btn = document.getElementById('startManualBtn'); btn.parentNode.insertBefore(container, btn); 
+    } 
+    container.innerHTML = html; container.style.display = 'block';
+};
+
+window.startManualTournament = function(btn) {
+    let checked = document.querySelectorAll('.admin-chk:checked'); let N = checked.length; if (N < 12) return alert("⚠️ Minimum 12 kişi gereklidir."); 
+    let tier = document.getElementById('leagueTier_m').value; let gender = document.getElementById('leagueGender_m').value; let region = document.getElementById('leagueRegion_m').value.trim().toLocaleUpperCase('tr-TR') || 'İZMİR'; let cName = document.getElementById('leagueCustomName_m').value.trim() || `İZMİR 35 KORTENİS LİGİ`; let sDate = document.getElementById('startDate_m').value; if (!sDate) return alert("Tarih seçiniz!");
+    
+    let forceCommonTime = document.getElementById('forceCommonTimeChk') ? document.getElementById('forceCommonTimeChk').checked : false;
+    const hasCommonTime = (u1, u2) => {
+        if (!u1 || !u2 || !Array.isArray(u1.availability) || !Array.isArray(u2.availability)) return true;
+        return u1.availability.some(v => u2.availability.includes(v));
+    };
+
+    let originalText = btn.innerHTML; btn.innerHTML = "⏳ KURA ÇEKİLİYOR..."; btn.disabled = true;
+    const shuffle = (arr) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
+    
+    let tempPlayers = Array.from(checked).map(cb => { let u = globalUsers[cb.value]; return { id: u.id, name: u.name, sysScore: u.sysScore, wins: 0, losses: 0, totalMatches: 0, setAv: 0, kor: 0, korRank: 0, rand: Math.random() }; });
+    
+    let numPots = N >= 48 ? 5 : (N >= 24 ? 4 : 3); let mLimit = numPots * 2;
+
+    // 🌟 KUSURSUZ HAFIZA KONTROLÜ
+    let hasValidMemory = false;
+    if (window.lastAssignedPots) {
+        let memoryKeys = Object.keys(window.lastAssignedPots);
+        if (memoryKeys.length === N && tempPlayers.every(p => window.lastAssignedPots[p.id] !== undefined)) {
+            hasValidMemory = true;
+        }
+    }
+
+    if (hasValidMemory) {
+        // Hafıza taze ve doğruysa milimetrik olarak uygula
+        tempPlayers.forEach(p => { p.pot = window.lastAssignedPots[p.id]; });
+    } else {
+        // Önizleme yapılmadan çekildiyse kendi hesapla
+        tempPlayers.sort((a, b) => {
+            let scoreA = parseFloat(a.sysScore || 0); let scoreB = parseFloat(b.sysScore || 0);
+            if (scoreB !== scoreA) return scoreB - scoreA;
+            return a.rand - b.rand; 
+        });
+        let baseSize = Math.floor(N / numPots); let remainder = N % numPots; let potIndex = 1; let assigned = 0; let currentPotLimit = baseSize + (remainder > 0 ? 1 : 0);
+        tempPlayers.forEach(p => { p.pot = potIndex; assigned++; if (assigned >= currentPotLimit && potIndex < numPots) { potIndex++; assigned = 0; remainder--; currentPotLimit = baseSize + (remainder > 0 ? 1 : 0); } });
+    }
+
+    // Torba İçi Karıştırma
+    let shuffledTempPlayers = [];
+    for(let i=1; i<=numPots; i++) { let potPlayers = tempPlayers.filter(p => p.pot === i); shuffle(potPlayers); shuffledTempPlayers.push(...potPlayers); }
+    tempPlayers = shuffledTempPlayers;
+
+    let finalMatches = []; let wasFullyValid = false;
+
+    for (let attempt = 0; attempt < 100; attempt++) {
+        let tempMatches = []; let mId = 0; let pStats = {};
+        tempPlayers.forEach(p => pStats[p.id] = { total: 0, pots: {1:0, 2:0, 3:0, 4:0, 5:0} });
+
+        for(let i=0; i<tempPlayers.length; i++) {
+            let pA = tempPlayers[i];
+            for(let targetPot = 1; targetPot <= numPots; targetPot++) {
+                let attempts1 = 0;
+                while(pStats[pA.id].pots[targetPot] < 2 && pStats[pA.id].total < mLimit && attempts1 < 20) {
+                    attempts1++;
+                    let candidates = tempPlayers.filter(pB => {
+                        let valid = pB.id !== pA.id && 
+                                    pB.pot === targetPot && 
+                                    pStats[pB.id].total < mLimit && 
+                                    pStats[pB.id].pots[pA.pot] < 2 && // 🚨 KESİN KURAL
+                                    !tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id));
+                        if(!valid) return false;
+                        if(forceCommonTime) return hasCommonTime(globalUsers[pA.id], globalUsers[pB.id]);
+                        return true;
+                    });
+                    if(candidates.length === 0) break;
+                    shuffle(candidates); let pB = candidates[0];
+                    tempMatches.push({ id: mId++, p1: pA.id, p2: pB.id, p1Name: pA.name, p2Name: pB.name, p1S1:'', p1S2:'', p1MT:'', p2S1:'', p2S2:'', p2MT:'', p1S1TB:'', p2S1TB:'', p1S2TB:'', p2S2TB:'', played:false, pending:false, enteredBy:'', isWO:false, woWinner:'', matchDate:'', matchFormat:'', p1Fair: false, p2Fair: false });
+                    pStats[pA.id].total++; pStats[pA.id].pots[targetPot]++; 
+                    pStats[pB.id].total++; pStats[pB.id].pots[pA.pot]++;
+                }
+            }
+        }
+        
+        for(let i=0; i<tempPlayers.length; i++) {
+            let pA = tempPlayers[i]; let fallbackAttempts = 0;
+            while(pStats[pA.id].total < mLimit && fallbackAttempts < 50) {
+                fallbackAttempts++;
+                let candidates = tempPlayers.filter(pB => {
+                    let valid = pB.id !== pA.id && 
+                                pStats[pB.id].total < mLimit && 
+                                pStats[pA.id].pots[pB.pot] < 2 && 
+                                pStats[pB.id].pots[pA.pot] < 2 && 
+                                !tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id));
+                    if(!valid) return false;
+                    if(forceCommonTime) return hasCommonTime(globalUsers[pA.id], globalUsers[pB.id]);
+                    return true;
+                });
+                if(candidates.length === 0) break;
+                shuffle(candidates); let pB = candidates[0];
+                tempMatches.push({ id: mId++, p1: pA.id, p2: pB.id, p1Name: pA.name, p2Name: pB.name, p1S1:'', p1S2:'', p1MT:'', p2S1:'', p2S2:'', p2MT:'', p1S1TB:'', p2S1TB:'', p1S2TB:'', p2S2TB:'', played:false, pending:false, enteredBy:'', isWO:false, woWinner:'', matchDate:'', matchFormat:'', p1Fair: false, p2Fair: false });
+                pStats[pA.id].total++; pStats[pA.id].pots[pB.pot]++; 
+                pStats[pB.id].total++; pStats[pB.id].pots[pA.pot]++;
+            }
+        }
+
+        let isValid = tempPlayers.every(p => pStats[p.id].total === mLimit);
+        if (isValid) { finalMatches = tempMatches; wasFullyValid = true; break; } 
+        else if (attempt === 0 || tempMatches.length > finalMatches.length) { finalMatches = tempMatches; }
+    }
+
+    if (forceCommonTime && !wasFullyValid) alert("⚠️ Müsaitlik saatleri uyuşmadığı için sistem bazı oyunculara eksik maç atamış olabilir. Lütfen fikstürü inceleyin veya 'Müsaitlik Şartı' filtresini kapatarak kuraları tekrar çekin.");
+
+    let newTid = "LIG_" + Date.now(); let newSettings = { status: 'draft', matchLimit: mLimit, tier: tier, gender: gender, region: region, startDate: sDate, playerCount: N, customName: cName }; let regsArr = Array.from(checked).map(cb => cb.value);
+    
+    database.ref('the_35_gold_league/multi_v1/' + newTid).set({ players: tempPlayers, matches: finalMatches, settings: newSettings, registeredPlayers: regsArr }).then(() => { 
+        btn.innerHTML = originalText; btn.disabled = false; 
+        if(document.getElementById('potPreviewContainer')) document.getElementById('potPreviewContainer').style.display = 'none'; 
+        showToast("Akıllı Kura Çekildi! Turnuva şu an GİZLİ TASLAK modunda.", "info");
+        populateLeagueDropdowns(); document.getElementById('adminLeagueSelect').value = newTid; adminSwitchLeague(); 
+    });
+};
+
+// Klasik Pending Kura Motorunu da Master olarak ez
+window.startPendingTournament = function(btn) {
+    let t = allTourneys[currentTid]; let regs = _arr(t.registeredPlayers); let cap = t.settings.maxCapacity || 23; let activeRegs = regs.slice(0, cap); let N = activeRegs.length;
+    if (N < 12) return alert("Minimum 12 kişi gereklidir."); if(!confirm(`DİKKAT: Asıl listedeki ${N} kişi ile kura çekilecek ve turnuva başlatılacaktır. Onaylıyor musunuz?`)) return;
+    let originalText = btn.innerHTML; btn.innerHTML = "⏳ KURA ÇEKİLİYOR..."; btn.disabled = true;
+
+    const shuffle = (arr) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
+    
+    let tempPlayers = activeRegs.map(uid => { let u = globalUsers[uid]; return { id: u.id, name: u.name, sysScore: u.sysScore, wins: 0, losses: 0, totalMatches: 0, setAv: 0, kor: 0, korRank: 0, rand: Math.random() }; });
+    
+    tempPlayers.sort((a, b) => {
+        let scoreA = parseFloat(a.sysScore || 0); let scoreB = parseFloat(b.sysScore || 0);
+        if (scoreB !== scoreA) return scoreB - scoreA;
+        return a.rand - b.rand; 
+    });
+
+    let numPots = N >= 48 ? 5 : (N >= 24 ? 4 : 3); let mLimit = numPots * 2; let baseSize = Math.floor(N / numPots); let remainder = N % numPots; let potIndex = 1; let assigned = 0; let currentPotLimit = baseSize + (remainder > 0 ? 1 : 0);
+    tempPlayers.forEach(p => { p.pot = potIndex; assigned++; if (assigned >= currentPotLimit && potIndex < numPots) { potIndex++; assigned = 0; remainder--; currentPotLimit = baseSize + (remainder > 0 ? 1 : 0); } });
+
+    let shuffledTempPlayers = [];
+    for(let i=1; i<=numPots; i++) { let potPlayers = tempPlayers.filter(p => p.pot === i); shuffle(potPlayers); shuffledTempPlayers.push(...potPlayers); }
+    tempPlayers = shuffledTempPlayers;
+
+    let finalMatches = [];
+
+    for (let attempt = 0; attempt < 100; attempt++) {
+        let tempMatches = []; let mId = 0; let pStats = {};
+        tempPlayers.forEach(p => pStats[p.id] = { total: 0, pots: {1:0, 2:0, 3:0, 4:0, 5:0} });
+
+        for(let i=0; i<tempPlayers.length; i++) {
+            let pA = tempPlayers[i];
+            for(let targetPot = 1; targetPot <= numPots; targetPot++) {
+                let attempts1 = 0;
+                while(pStats[pA.id].pots[targetPot] < 2 && pStats[pA.id].total < mLimit && attempts1 < 20) {
+                    attempts1++;
+                    let candidates = tempPlayers.filter(pB => 
+                        pB.id !== pA.id && 
+                        pB.pot === targetPot && 
+                        pStats[pB.id].total < mLimit && 
+                        pStats[pB.id].pots[pA.pot] < 2 && 
+                        !tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id))
+                    );
+                    if(candidates.length === 0) break;
+                    shuffle(candidates); let pB = candidates[0];
+                    tempMatches.push({ id: mId++, p1: pA.id, p2: pB.id, p1Name: pA.name, p2Name: pB.name, p1S1:'', p1S2:'', p1MT:'', p2S1:'', p2S2:'', p2MT:'', p1S1TB:'', p2S1TB:'', p1S2TB:'', p2S2TB:'', played:false, pending:false, enteredBy:'', isWO:false, woWinner:'', matchDate:'', matchFormat:'', p1Fair: false, p2Fair: false });
+                    pStats[pA.id].total++; pStats[pA.id].pots[targetPot]++; 
+                    pStats[pB.id].total++; pStats[pB.id].pots[pA.pot]++;
+                }
+            }
+        }
+        
+        for(let i=0; i<tempPlayers.length; i++) {
+            let pA = tempPlayers[i]; let fallbackAttempts = 0;
+            while(pStats[pA.id].total < mLimit && fallbackAttempts < 50) {
+                fallbackAttempts++;
+                let candidates = tempPlayers.filter(pB => 
+                    pB.id !== pA.id && 
+                    pStats[pB.id].total < mLimit && 
+                    pStats[pA.id].pots[pB.pot] < 2 && 
+                    pStats[pB.id].pots[pA.pot] < 2 && 
+                    !tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id))
+                );
+                if(candidates.length === 0) break;
+                shuffle(candidates); let pB = candidates[0];
+                tempMatches.push({ id: mId++, p1: pA.id, p2: pB.id, p1Name: pA.name, p2Name: pB.name, p1S1:'', p1S2:'', p1MT:'', p2S1:'', p2S2:'', p2MT:'', p1S1TB:'', p2S1TB:'', p1S2TB:'', p2S2TB:'', played:false, pending:false, enteredBy:'', isWO:false, woWinner:'', matchDate:'', matchFormat:'', p1Fair: false, p2Fair: false });
+                pStats[pA.id].total++; pStats[pA.id].pots[pB.pot]++; 
+                pStats[pB.id].total++; pStats[pB.id].pots[pA.pot]++;
+            }
+        }
+
+        let isValid = tempPlayers.every(p => pStats[p.id].total === mLimit);
+        if (isValid) { finalMatches = tempMatches; break; } else if (attempt === 0 || tempMatches.length > finalMatches.length) { finalMatches = tempMatches; }
+    }
+
+    t.players = tempPlayers; t.matches = finalMatches; t.settings.status = 'draft'; t.settings.playerCount = N; t.settings.matchLimit = mLimit;
+    database.ref(`the_35_gold_league/multi_v1/${currentTid}/players`).set(tempPlayers);
+    database.ref(`the_35_gold_league/multi_v1/${currentTid}/matches`).set(finalMatches);
+    database.ref(`the_35_gold_league/multi_v1/${currentTid}/settings`).set(t.settings).then(() => { btn.innerHTML = originalText; btn.disabled = false; alert("Kuralar kusursuz çekildi! Turnuva şu an GİZLİ TASLAK (Önizleme) modunda."); populateLeagueDropdowns(); adminSwitchLeague(); });
+};
 
 </script>
 </body>
