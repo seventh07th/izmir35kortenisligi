@@ -2851,35 +2851,13 @@ window.openParticipantsModal = function(tid) {
 // Mevcut closeParticipantsModal fonksiyonun aynen kalabilir
 
 // ==========================================
-// 🛠️ YÖNETİCİ KONTROL GÜNCELLEMELERİ (ESNEKLİK MODÜLLERİ)
+// 🛠️ YÖNETİCİ KONTROL VE YAYINLAMA MODÜLLERİ (BİRLEŞTİRİLMİŞ KUSURSUZ VERSİYON)
 // ==========================================
 
-// 1. Üst bar butonlarını duruma göre gösterme/gizleme
-let originalAdminSwitch = window.adminSwitchLeague;
-window.adminSwitchLeague = function() {
-    originalAdminSwitch(); 
-    let val = document.getElementById('adminLeagueSelect').value;
-    let delBtn = document.getElementById('deleteLeagueBtn');
-    let editBtn = document.getElementById('editLeagueBtn');
-    let swapBtn = document.getElementById('swapLeagueBtn');
-    
-    if(val === 'new_pending' || val === 'new_manual' || val === 'notifs' || val === 'tournaments') {
-        if(delBtn) delBtn.style.display = 'none';
-        if(editBtn) editBtn.style.display = 'none';
-        if(swapBtn) swapBtn.style.display = 'none';
-    } else {
-        let t = allTourneys[val];
-        if(!t) return;
-        if(delBtn) delBtn.style.display = 'inline-block';
-        if(editBtn) editBtn.style.display = 'inline-block';
-        if(swapBtn) swapBtn.style.display = (t.settings.status === 'active') ? 'inline-block' : 'none';
-    }
-}
-
-// 2. Ayarları kaydederken ExtraDays (Ekstra Süre) verisini de kaydetme
+// 1. Ekstra Süre (Ayarlar) Modülü
 let originalOpenEdit = window.openEditTournamentModal;
 window.openEditTournamentModal = function() {
-    originalOpenEdit();
+    if(originalOpenEdit) originalOpenEdit();
     if(currentTid && allTourneys[currentTid]) {
         document.getElementById('editTourneyExtraDays').value = allTourneys[currentTid].settings.extraDays || 0;
     }
@@ -2890,15 +2868,14 @@ window.saveTournamentSettings = function() {
     if(currentTid && allTourneys[currentTid]) {
         allTourneys[currentTid].settings.extraDays = parseInt(document.getElementById('editTourneyExtraDays').value) || 0;
     }
-    originalSaveSettings();
+    if(originalSaveSettings) originalSaveSettings();
 }
 
-// 3. FİKSTÜR TAKAS MOTORU (GOD MODE)
+// 2. Fikstür Takas Motoru (İkili Yer Değiştirme)
 window.openSwapModal = function() {
     if(!currentTid || !allTourneys[currentTid]) return;
     let t = allTourneys[currentTid];
-    let s1 = document.getElementById('swapPlayer1');
-    let s2 = document.getElementById('swapPlayer2');
+    let s1 = document.getElementById('swapPlayer1'); let s2 = document.getElementById('swapPlayer2');
     let opts = '<option value="">OYUNCU SEÇİNİZ...</option>';
     _arr(t.players).sort((a,b)=>a.name.localeCompare(b.name)).forEach(p => { opts += `<option value="${p.id}">${p.name}</option>`; });
     s1.innerHTML = opts; s2.innerHTML = opts;
@@ -2907,208 +2884,75 @@ window.openSwapModal = function() {
 window.closeSwapModal = function() { document.getElementById('adminSwapModal').style.display = 'none'; }
 
 window.executeSwap = function() {
-    let p1Id = document.getElementById('swapPlayer1').value;
-    let p2Id = document.getElementById('swapPlayer2').value;
-
+    let p1Id = document.getElementById('swapPlayer1').value; let p2Id = document.getElementById('swapPlayer2').value;
     if(!p1Id || !p2Id) return showToast("Lütfen iki oyuncuyu da seçin.", "warning");
     if(p1Id === p2Id) return showToast("Farklı iki oyuncu seçmelisiniz.", "error");
-
-    showCustomConfirm("FİKSTÜR TAKASI", "Bu iki oyuncunun fikstürdeki (kura ağacındaki) yerleri ve tüm eşleşmeleri tamamen birbiriyle değiştirilecektir. Onaylıyor musunuz?", () => {
-        let t = allTourneys[currentTid];
-        let p1Obj = _arr(t.players).find(p => p.id === p1Id);
-        let p2Obj = _arr(t.players).find(p => p.id === p2Id);
-
+    showCustomConfirm("FİKSTÜR TAKASI", "Eşleşmeler değiştirilecek. Onaylıyor musunuz?", () => {
+        let t = allTourneys[currentTid]; let p1Obj = _arr(t.players).find(p => p.id === p1Id); let p2Obj = _arr(t.players).find(p => p.id === p2Id);
         _arr(t.matches).forEach(m => {
-            let isP1 = (m.p1 === p1Id); let isOpp1 = (m.p1 === p2Id);
-            let isP2 = (m.p2 === p1Id); let isOpp2 = (m.p2 === p2Id);
-
-            // Eğer birbirleriyle oynuyorlarsa maçı bozma, sadece yerlerini değiştir
-            if((isP1 && isOpp2) || (isP2 && isOpp1)) {
-                let tempId = m.p1; let tempName = m.p1Name;
-                m.p1 = m.p2; m.p1Name = m.p2Name;
-                m.p2 = tempId; m.p2Name = tempName;
-            } else {
-                // Diğer tüm rakiplere karşı rotaları takas et
+            let isP1 = (m.p1 === p1Id); let isOpp1 = (m.p1 === p2Id); let isP2 = (m.p2 === p1Id); let isOpp2 = (m.p2 === p2Id);
+            if((isP1 && isOpp2) || (isP2 && isOpp1)) { let tempId = m.p1; let tempName = m.p1Name; m.p1 = m.p2; m.p1Name = m.p2Name; m.p2 = tempId; m.p2Name = tempName; } 
+            else {
                 if(isP1) { m.p1 = p2Id; m.p1Name = p2Obj.name; } else if(isOpp1) { m.p1 = p1Id; m.p1Name = p1Obj.name; }
                 if(isP2) { m.p2 = p2Id; m.p2Name = p2Obj.name; } else if(isOpp2) { m.p2 = p1Id; m.p2Name = p1Obj.name; }
             }
-
-            // Gelişmiş Güvenlik: Eğer maçın hükmen galibi veya normal galibi atandıysa onları da takas et
             if (m.woWinner === p1Id) m.woWinner = p2Id; else if (m.woWinner === p2Id) m.woWinner = p1Id;
             if (m.winnerId === p1Id) m.winnerId = p2Id; else if (m.winnerId === p2Id) m.winnerId = p1Id;
             if (m.enteredBy === p1Id) m.enteredBy = p2Id; else if (m.enteredBy === p2Id) m.enteredBy = p1Id;
         });
-
-        closeSwapModal();
-        saveToDb("Fikstür takası başarıyla gerçekleştirildi!");
+        closeSwapModal(); saveToDb("Fikstür takası başarıyla gerçekleştirildi!");
     });
 }
-// ==========================================
-// 📢 BİLDİRİM MERKEZİ VE MEGAFON MOTORU
-// ==========================================
 
-// 1. Yönetici Megafonu (Toplu Bildirim) İşlevi
+// 3. Yönetici Megafonu
 window.sendMassNotification = function(btn) {
     let msg = document.getElementById('adminMassMessage').value.trim();
-    if(!msg) return showToast("Lütfen göndermek için bir mesaj yazın.", "warning");
-    
-    showCustomConfirm("TOPLU BİLDİRİM GÖNDERİMİ", "Bu mesaj sistemdeki TÜM OYUNCULARIN profiline anlık bildirim olarak düşecektir. Onaylıyor musunuz?", () => {
-        let orig = btn.innerHTML;
-        btn.innerHTML = "⏳ GÖNDERİLİYOR..."; 
-        btn.disabled = true;
-        
-        let updates = {};
-        let now = Date.now();
-        // Sistemdeki herkese bu bildirimi işle
+    if(!msg) return showToast("Mesaj yazın.", "warning");
+    showCustomConfirm("TOPLU BİLDİRİM", "Mesaj tüm oyunculara gidecek. Onaylıyor musunuz?", () => {
+        let orig = btn.innerHTML; btn.innerHTML = "⏳ GÖNDERİLİYOR..."; btn.disabled = true;
+        let updates = {}; let now = Date.now();
         Object.values(globalUsers).forEach(u => {
-            if(u && u.id && u.id !== 'ADMIN') {
-                let newRef = database.ref(`the_35_gold_league/users/${u.id}/alerts`).push();
-                updates[`the_35_gold_league/users/${u.id}/alerts/${newRef.key}`] = { text: `📢 <strong>YÖNETİCİ DUYURUSU:</strong> ${msg}`, time: now };
-            }
+            if(u && u.id && u.id !== 'ADMIN') { let newRef = database.ref(`the_35_gold_league/users/${u.id}/alerts`).push(); updates[`the_35_gold_league/users/${u.id}/alerts/${newRef.key}`] = { text: `📢 <strong>YÖNETİCİ DUYURUSU:</strong> ${msg}`, time: now }; }
         });
-        
-        // Tek seferde veritabanına bas (Performanslı kayıt)
-        database.ref().update(updates).then(() => {
-            showToast("Duyuru tüm oyunculara başarıyla gönderildi!", "success");
-            document.getElementById('adminMassMessage').value = '';
-            btn.innerHTML = orig; 
-            btn.disabled = false;
-        }).catch(err => {
-            showToast("Hata: " + err.message, "error");
-            btn.innerHTML = orig; 
-            btn.disabled = false;
-        });
+        database.ref().update(updates).then(() => { showToast("Duyuru gönderildi!", "success"); document.getElementById('adminMassMessage').value = ''; btn.innerHTML = orig; btn.disabled = false; }).catch(err => { showToast("Hata: " + err.message, "error"); btn.innerHTML = orig; btn.disabled = false; });
     });
 }
 
-// 2. Kura Motorlarına "Otomatik Turnuva Başlangıç" Bildirimi Ekleme (Kanca)
-let originalStartPending = window.startPendingTournament;
-window.startPendingTournament = function(btn) {
-    let t = allTourneys[currentTid]; 
-    let tName = (t && t.settings && t.settings.customName) ? t.settings.customName : "Turnuva";
-    
-    // Eski fonksiyonu çalıştır (Kurayı Çeker)
-    originalStartPending(btn);
-    
-    // Kuradan hemen sonra o turnuvadaki oyunculara bildirim at
-    setTimeout(() => {
-        if(allTourneys[currentTid] && allTourneys[currentTid].settings.status === 'active') {
-            _arr(allTourneys[currentTid].players).forEach(p => {
-                addAlertToUser(p.id, `🎉 <strong>TURNUVA BAŞLADI!</strong> <em>[${tName}]</em> kuraları çekildi ve fikstürünüz oluşturuldu. Fikstür sekmesinden rakiplerinizi görebilirsiniz. Başarılar!`);
-            });
-        }
-    }, 2000); 
-}
-
-let originalStartManual = window.startManualTournament;
-window.startManualTournament = function(btn) {
-    let cName = document.getElementById('leagueCustomName_m').value.trim() || `İZMİR 35 KORTENİS LİGİ`;
-    
-    // Eski fonksiyonu çalıştır (Kurayı Çeker)
-    originalStartManual(btn);
-    
-    // Kuradan hemen sonra seçili oyunculara bildirim at
-    setTimeout(() => {
-        let checked = document.querySelectorAll('.admin-chk:checked');
-        Array.from(checked).forEach(cb => {
-            addAlertToUser(cb.value, `🎉 <strong>TURNUVA BAŞLADI!</strong> <em>[${cName}]</em> kuraları çekildi ve fikstürünüz oluşturuldu. Fikstür sekmesinden rakiplerinizi görebilirsiniz. Başarılar!`);
-        });
-    }, 2000);
-}
-
-// ==========================================
-// 🛠️ GİZLİ FİKSTÜR DÜZENLEYİCİ MOTORU (GÜNCEL)
-// ==========================================
-
-// 1. Manuel Maç Yükleme (Butona basınca çalışır)
+// 4. Gizli Fikstür Düzenleyici
 window.refreshSecretEditor = function() {
-    let sel = document.getElementById('adminEditMatchSelect');
-    if(!sel) return;
+    let sel = document.getElementById('adminEditMatchSelect'); if(!sel) return;
     sel.innerHTML = '<option value="">-- Değiştirilecek Maçı Seçin --</option>';
-    
-    // Eğer currentTid boşsa, allTourneys içindeki en son turnuvayı otomatik seç
-    let targetTid = typeof currentTid !== 'undefined' && currentTid ? currentTid : null;
-    if(!targetTid && typeof allTourneys !== 'undefined' && allTourneys) {
-        let keys = Object.keys(allTourneys);
-        if(keys.length > 0) targetTid = keys[keys.length - 1]; // En son oluşturulan turnuva
-    }
-
+    let targetTid = (typeof currentTid !== 'undefined' && currentTid) ? currentTid : null;
+    if(!targetTid && typeof allTourneys !== 'undefined' && allTourneys) { let keys = Object.keys(allTourneys); if(keys.length > 0) targetTid = keys[keys.length - 1]; }
     if(targetTid && allTourneys[targetTid] && allTourneys[targetTid].matches) {
-        allTourneys[targetTid].matches.forEach((m, idx) => {
-            sel.innerHTML += `<option value="${idx}">Maç ${idx+1}: ${m.p1Name} vs ${m.p2Name}</option>`;
-        });
-        showToast("Maçlar başarıyla listelendi!", "success");
-    } else {
-        showToast("Uyarı: Sistemde kura çekilmiş aktif bir maç bulunamadı.", "warning");
+        allTourneys[targetTid].matches.forEach((m, idx) => { sel.innerHTML += `<option value="${idx}">Maç ${idx+1}: ${m.p1Name} vs ${m.p2Name}</option>`; });
+        showToast("Maçlar listelendi!", "success");
     }
-    
-    // İşlem yapılan turnuva ID'sini global değişkene eşitle ki kaydederken sorun çıkmasın
-    if(targetTid) window.currentTid = targetTid; 
+    if(targetTid) window.currentTid = targetTid;
 };
 
-// 2. Seçilen maçı düzenleme alanına (Dropdownlara) getir
 window.loadMatchForEdit = function() {
-    let mIdx = document.getElementById('adminEditMatchSelect').value;
-    if(mIdx === "") return showToast("Lütfen önce listeden bir maç seçin", "warning");
-    
-    let t = allTourneys[window.currentTid];
-    let match = t.matches[mIdx];
-    
-    let p1Sel = document.getElementById('adminEditP1');
-    let p2Sel = document.getElementById('adminEditP2');
-    p1Sel.innerHTML = ''; p2Sel.innerHTML = '';
-    
-    // Turnuvadaki oyuncuları listeye ekle
-    _arr(t.players).forEach(p => {
-        let pName = (typeof globalUsers !== 'undefined' && globalUsers[p.id]) ? globalUsers[p.id].name : p.name;
-        p1Sel.innerHTML += `<option value="${p.id}">${pName}</option>`;
-        p2Sel.innerHTML += `<option value="${p.id}">${pName}</option>`;
-    });
-    
-    // Maçtaki mevcut oyuncuları otomatik seçili yap
-    p1Sel.value = match.p1;
-    p2Sel.value = match.p2;
-    
-    document.getElementById('adminEditMatchArea').style.display = 'block';
+    let mIdx = document.getElementById('adminEditMatchSelect').value; if(mIdx === "") return showToast("Maç seçin", "warning");
+    let t = allTourneys[window.currentTid]; let match = t.matches[mIdx];
+    let p1Sel = document.getElementById('adminEditP1'); let p2Sel = document.getElementById('adminEditP2'); p1Sel.innerHTML = ''; p2Sel.innerHTML = '';
+    _arr(t.players).forEach(p => { let pName = (typeof globalUsers !== 'undefined' && globalUsers[p.id]) ? globalUsers[p.id].name : p.name; p1Sel.innerHTML += `<option value="${p.id}">${pName}</option>`; p2Sel.innerHTML += `<option value="${p.id}">${pName}</option>`; });
+    p1Sel.value = match.p1; p2Sel.value = match.p2; document.getElementById('adminEditMatchArea').style.display = 'block';
 };
 
-// 3. Yapılan değişikliği veritabanına kaydet
 window.saveEditedMatch = function() {
-    let mIdx = document.getElementById('adminEditMatchSelect').value;
-    let p1Id = document.getElementById('adminEditP1').value;
-    let p2Id = document.getElementById('adminEditP2').value;
-    
-    if(p1Id === p2Id) return showToast("Hata: Bir oyuncu kendisiyle maç yapamaz!", "error");
-    
-    let p1Sel = document.getElementById('adminEditP1');
-    let p2Sel = document.getElementById('adminEditP2');
-    let p1Name = p1Sel.options[p1Sel.selectedIndex].text;
-    let p2Name = p2Sel.options[p2Sel.selectedIndex].text;
-    
-    showCustomConfirm("Eşleşme Değiştiriliyor", `Yeni Eşleşme: <strong>${p1Name} vs ${p2Name}</strong><br><br>Ligin matematiksel dengesini korumak için, bu maçtan çıkardığınız oyuncuyu başka bir maça eklemeyi unutmayın! Onaylıyor musunuz?`, () => {
-        
+    let mIdx = document.getElementById('adminEditMatchSelect').value; let p1Id = document.getElementById('adminEditP1').value; let p2Id = document.getElementById('adminEditP2').value;
+    if(p1Id === p2Id) return showToast("Bir oyuncu kendisiyle oynayamaz!", "error");
+    let p1Sel = document.getElementById('adminEditP1'); let p2Sel = document.getElementById('adminEditP2');
+    let p1Name = p1Sel.options[p1Sel.selectedIndex].text; let p2Name = p2Sel.options[p2Sel.selectedIndex].text;
+    showCustomConfirm("Değiştiriliyor", `Yeni Eşleşme: <strong>${p1Name} vs ${p2Name}</strong><br><br>Ligin dengesini korumak için, çıkardığınız oyuncuyu başka maça eklemeyi unutmayın! Onaylıyor musunuz?`, () => {
         let updates = {};
-        updates[`the_35_gold_league/tournaments/${window.currentTid}/matches/${mIdx}/p1`] = p1Id;
-        updates[`the_35_gold_league/tournaments/${window.currentTid}/matches/${mIdx}/p2`] = p2Id;
-        updates[`the_35_gold_league/tournaments/${window.currentTid}/matches/${mIdx}/p1Name`] = p1Name;
-        updates[`the_35_gold_league/tournaments/${window.currentTid}/matches/${mIdx}/p2Name`] = p2Name;
-        
-        // Veritabanına kaydet
-        database.ref().update(updates).then(() => {
-            showToast("Maç başarıyla değiştirildi!", "success");
-            document.getElementById('adminEditMatchArea').style.display = 'none';
-            window.refreshSecretEditor(); // Listeyi otomatik yenile
-        }).catch(err => {
-            showToast("Kayıt Hatası: " + err.message, "error");
-        });
+        updates[`the_35_gold_league/multi_v1/${window.currentTid}/matches/${mIdx}/p1`] = p1Id; updates[`the_35_gold_league/multi_v1/${window.currentTid}/matches/${mIdx}/p2`] = p2Id;
+        updates[`the_35_gold_league/multi_v1/${window.currentTid}/matches/${mIdx}/p1Name`] = p1Name; updates[`the_35_gold_league/multi_v1/${window.currentTid}/matches/${mIdx}/p2Name`] = p2Name;
+        database.ref().update(updates).then(() => { showToast("Değiştirildi!", "success"); document.getElementById('adminEditMatchArea').style.display = 'none'; window.refreshSecretEditor(); }).catch(err => { showToast("Kayıt Hatası: " + err.message, "error"); });
     });
 };
 
-// ==========================================
-// 🎭 TASLAK (ÖNİZLEME) VE YAYINLAMA MOTORU
-// ==========================================
-
-// 1. Admin Üst Barına "YAYINA AL" butonunu HTML'e dokunmadan enjekte edelim
+// 5. Yayına Al (Publish) ve Taslak UI Kontrolleri
 setTimeout(() => {
     let adminBarDiv = document.querySelector('#adminTopBar > div:nth-child(2)');
     if (adminBarDiv && !document.getElementById('publishLeagueBtn')) {
@@ -3116,13 +2960,12 @@ setTimeout(() => {
     }
 }, 1000);
 
-// 2. Admin lig değiştirdiğinde "Taslak" (Draft) modunu yönetecek zeki kontrol
 window.adminSwitchLeague = function() {
     let val = document.getElementById('adminLeagueSelect').value;
-    if(val === 'new_pending') { currentTid = null; document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tabsContainer').style.display = 'none'; document.getElementById('setup_pending').classList.add('active'); }
-    else if(val === 'new_manual') { currentTid = null; document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tabsContainer').style.display = 'none'; document.getElementById('setup_manual').classList.add('active'); renderAdminChecklist(); }
-    else if (val === 'notifs') { openAdminGlobalNotifs(); }
-    else if (val === 'tournaments') { openAdminGlobalTournaments(); }
+    if(val === 'new_pending') { currentTid = null; document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tabsContainer').style.display = 'none'; let setupP = document.getElementById('setup_pending'); if(setupP) setupP.classList.add('active'); }
+    else if(val === 'new_manual') { currentTid = null; document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tabsContainer').style.display = 'none'; let setupM = document.getElementById('setup_manual'); if(setupM) setupM.classList.add('active'); if(typeof renderAdminChecklist === 'function') renderAdminChecklist(); }
+    else if (val === 'notifs') { if(typeof openAdminGlobalNotifs === 'function') openAdminGlobalNotifs(); }
+    else if (val === 'tournaments') { if(typeof openAdminGlobalTournaments === 'function') openAdminGlobalTournaments(); }
     else {
         currentTid = val; let t = allTourneys[val]; if(!t) return;
         let status = t.settings.status || 'active';
@@ -3130,59 +2973,37 @@ window.adminSwitchLeague = function() {
 
         if (status === 'pending') {
             document.getElementById('tabsContainer').style.display = 'none';
-            document.getElementById('admin_pending').classList.add('active');
-            renderAdminPendingPanel();
+            let adminP = document.getElementById('admin_pending'); if(adminP) adminP.classList.add('active');
+            if(typeof renderAdminPendingPanel === 'function') renderAdminPendingPanel();
         } else {
-            // Active veya Draft (Taslak) ise sekmeleri admin'e göster
             document.getElementById('tabsContainer').style.display = 'flex';
-            loadTournamentData(val);
-            switchTab('standings');
+            if(typeof loadTournamentData === 'function') loadTournamentData(val);
+            if(typeof switchTab === 'function') switchTab('standings');
         }
     }
 
-    // Üst bar butonlarını duruma göre gizle/göster
-    let delBtn = document.getElementById('deleteLeagueBtn');
-    let editBtn = document.getElementById('editLeagueBtn');
-    let swapBtn = document.getElementById('swapLeagueBtn');
-    let pubBtn = document.getElementById('publishLeagueBtn');
-
+    let delBtn = document.getElementById('deleteLeagueBtn'); let editBtn = document.getElementById('editLeagueBtn'); let swapBtn = document.getElementById('swapLeagueBtn'); let pubBtn = document.getElementById('publishLeagueBtn');
     if(val.startsWith('new_') || val === 'notifs' || val === 'tournaments') {
-        if(delBtn) delBtn.style.display = 'none';
-        if(editBtn) editBtn.style.display = 'none';
-        if(swapBtn) swapBtn.style.display = 'none';
-        if(pubBtn) pubBtn.style.display = 'none';
+        if(delBtn) delBtn.style.display = 'none'; if(editBtn) editBtn.style.display = 'none'; if(swapBtn) swapBtn.style.display = 'none'; if(pubBtn) pubBtn.style.display = 'none';
     } else {
-        let t = allTourneys[val];
-        let status = t.settings.status;
-        if(delBtn) delBtn.style.display = 'inline-block';
-        if(editBtn) editBtn.style.display = 'inline-block';
-        
-        // Fikstür Takas butonu hem aktifte hem taslakta görünsün
+        let t = allTourneys[val]; let status = t.settings.status || 'active';
+        if(delBtn) delBtn.style.display = 'inline-block'; if(editBtn) editBtn.style.display = 'inline-block';
         if(swapBtn) swapBtn.style.display = (status === 'active' || status === 'draft') ? 'inline-block' : 'none';
-        
-        // YAYINA AL butonu SADECE taslak modunda görünsün
         if(pubBtn) pubBtn.style.display = (status === 'draft') ? 'inline-block' : 'none';
     }
-    
-    // Taslak modundaysa Gizli Düzenleyiciyi de tetikle
     if (typeof refreshSecretEditor === 'function') refreshSecretEditor();
 }
 
-// 3. Dropdown listesinde "Taslak" ibaresini gösterme
 window.populateLeagueDropdowns = function() {
     let aSel = document.getElementById('adminLeagueSelect'); let uSel = document.getElementById('userActiveLeagueSelect'); if(!aSel || !uSel) return;
     let aOpt = '<option value="new_pending">➕ YENİ TURNUVA (KAYDA AÇ)</option><option value="new_manual">⚙️ OYUNCU YÖNETİMİ - KURA MOTORU</option><option value="notifs" style="display:none;">BİLDİRİMLER</option><option value="tournaments" style="display:none;">TURNUVALAR</option>';
     let uOpt = '<option value="none">GENEL MOD (TÜM ZAMANLAR)</option>';
     Object.keys(allTourneys).forEach(tid => {
-        let t = allTourneys[tid]; if(!t || !t.settings) return;
-        let n = t.settings.customName || `İZMİR 35 LİGİ`;
-        let status = t.settings.status || 'active';
-        
+        let t = allTourneys[tid]; if(!t || !t.settings) return; let n = t.settings.customName || `İZMİR 35 LİGİ`; let status = t.settings.status || 'active';
         if (status === 'pending') { aOpt += `<option value="${tid}">YÖNET (Kayıt): ${n}</option>`; }
         else if (status === 'draft') { aOpt += `<option value="${tid}">YÖNET (Taslak/Önizleme): ${n}</option>`; }
         else {
             aOpt += `<option value="${tid}">YÖNET: ${n}</option>`;
-            // Kullanıcı sadece aktif turnuvaları görsün
             if(!isAdmin && loggedInUser && _arr(t.players).some(p => p.id === loggedInUser.id)) uOpt += `<option value="${tid}">${n}</option>`;
         }
     });
@@ -3191,73 +3012,57 @@ window.populateLeagueDropdowns = function() {
     if(uPrev !== 'none' && allTourneys[uPrev]) uSel.value = uPrev;
 }
 
-// 4. Kura Çekildiğinde Active yerine Draft yap (Oyunculara Bildirim Atma)
-let originalStartPending = window.startPendingTournament;
-window.startPendingTournament = function(btn) {
-    // Eski kura motorunu çalıştır
-    originalStartPending(btn);
-    
-    // Eski motor 'active' olarak kaydettikten 1.5 saniye sonra araya girip 'draft' olarak ez (Hayalet Modu)
-    setTimeout(() => {
-        if(allTourneys[currentTid]) {
-            allTourneys[currentTid].settings.status = 'draft';
-            database.ref(`the_35_gold_league/multi_v1/${currentTid}/settings/status`).set('draft').then(() => {
-                showToast("Kuralar çekildi! Turnuva şu an GİZLİ TASLAK modunda.", "info");
-                populateLeagueDropdowns();
-                adminSwitchLeague();
-            });
-        }
-    }, 1500); 
+// 6. Draft Modu Kancaları (Çakışmayı Engelleyen Koruma)
+if (!window.coreStartPending) {
+    window.coreStartPending = window.startPendingTournament;
+    window.startPendingTournament = function(btn) {
+        window.coreStartPending(btn);
+        setTimeout(() => {
+            if(allTourneys[currentTid]) {
+                allTourneys[currentTid].settings.status = 'draft';
+                database.ref(`the_35_gold_league/multi_v1/${currentTid}/settings/status`).set('draft').then(() => {
+                    showToast("Kuralar çekildi! Turnuva şu an GİZLİ TASLAK modunda.", "info");
+                    populateLeagueDropdowns(); adminSwitchLeague();
+                });
+            }
+        }, 1500); 
+    };
 }
 
-// Aynı şeyi manuel kura motoru için de yapıyoruz
-let originalStartManual = window.startManualTournament;
-window.startManualTournament = function(btn) {
-    originalStartManual(btn);
-    setTimeout(() => {
-        if(allTourneys[currentTid]) {
-            allTourneys[currentTid].settings.status = 'draft';
-            database.ref(`the_35_gold_league/multi_v1/${currentTid}/settings/status`).set('draft').then(() => {
-                showToast("Manuel Kuralar çekildi! Turnuva şu an GİZLİ TASLAK modunda.", "info");
-                populateLeagueDropdowns();
-                adminSwitchLeague();
-            });
-        }
-    }, 1500); 
+if (!window.coreStartManual) {
+    window.coreStartManual = window.startManualTournament;
+    window.startManualTournament = function(btn) {
+        window.coreStartManual(btn);
+        setTimeout(() => {
+            if(allTourneys[currentTid]) {
+                allTourneys[currentTid].settings.status = 'draft';
+                database.ref(`the_35_gold_league/multi_v1/${currentTid}/settings/status`).set('draft').then(() => {
+                    showToast("Kuralar çekildi! Turnuva şu an GİZLİ TASLAK modunda.", "info");
+                    populateLeagueDropdowns(); adminSwitchLeague();
+                });
+            }
+        }, 1500); 
+    };
 }
 
-// 5. Yayına Al (Publish) Motoru
 window.publishTournament = function() {
-    showCustomConfirm("🚀 TURNUVAYI YAYINA AL", "Fikstür onaylanacak ve tüm oyunculara kura çekildiğine dair bildirim gidecektir. Turnuva resmen başlayacak. Onaylıyor musunuz?", () => {
-        let t = allTourneys[currentTid];
-        let tName = t.settings.customName || "Turnuva";
-        
-        let btn = document.getElementById('publishLeagueBtn');
-        if(btn) { btn.innerHTML = "⏳ YAYINLANIYOR..."; btn.disabled = true; }
-
-        // Status'ü active yap ve veritabanına kaydet
+    showCustomConfirm("🚀 TURNUVAYI YAYINA AL", "Fikstür onaylanacak ve turnuva resmen başlayacak. Onaylıyor musunuz?", () => {
+        let t = allTourneys[currentTid]; let tName = t.settings.customName || "Turnuva";
+        let btn = document.getElementById('publishLeagueBtn'); if(btn) { btn.innerHTML = "⏳ YAYINLANIYOR..."; btn.disabled = true; }
         database.ref(`the_35_gold_league/multi_v1/${currentTid}/settings/status`).set('active')
         .then(() => {
             allTourneys[currentTid].settings.status = 'active';
-            showToast("Turnuva başarıyla yayına alındı ve başladı!", "success");
-            
-            // Bekleyen bildirimleri ŞİMDİ fırlat
-            let now = Date.now();
-            let updates = {};
-            _arr(t.players).forEach(p => {
-                let newRef = database.ref(`the_35_gold_league/users/${p.id}/alerts`).push();
-                updates[`the_35_gold_league/users/${p.id}/alerts/${newRef.key}`] = { text: `🎉 <strong>TURNUVA BAŞLADI!</strong> <em>[${tName}]</em> kuraları çekildi ve fikstürünüz oluşturuldu. Fikstür sekmesinden rakiplerinizi görebilirsiniz. Başarılar!`, time: now };
-            });
+            showToast("Turnuva başarıyla yayına alındı!", "success");
+            let now = Date.now(); let updates = {};
+            _arr(t.players).forEach(p => { let newRef = database.ref(`the_35_gold_league/users/${p.id}/alerts`).push(); updates[`the_35_gold_league/users/${p.id}/alerts/${newRef.key}`] = { text: `🎉 <strong>TURNUVA BAŞLADI!</strong> <em>[${tName}]</em> kuraları çekildi ve fikstürünüz oluşturuldu. Fikstür sekmesinden rakiplerinizi görebilirsiniz. Başarılar!`, time: now }; });
             database.ref().update(updates);
-            
-            populateLeagueDropdowns();
-            adminSwitchLeague(); // Butonları ve arayüzü tazele
+            populateLeagueDropdowns(); adminSwitchLeague();
         }).catch(err => {
-            showToast("Hata: " + err.message, "error");
-            if(btn) { btn.innerHTML = "🚀 FİKSTÜRÜ ONAYLA VE YAYINA AL"; btn.disabled = false; }
+            showToast("Hata: " + err.message, "error"); if(btn) { btn.innerHTML = "🚀 FİKSTÜRÜ ONAYLA VE YAYINA AL"; btn.disabled = false; }
         });
     });
 }
+
 
 
 </script>
