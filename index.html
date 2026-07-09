@@ -651,6 +651,7 @@ body {
         <button class="action-sm" style="background:var(--warning); color:black; display:none; padding:8px 12px; font-weight:bold;" id="editLeagueBtn" onclick="openEditTournamentModal()">⚙️ Ayarlar ve Süre Uzat</button>
         <button class="action-sm" style="background:var(--neon-cyan); color:black; display:none; padding:8px 12px; font-weight:bold;" id="swapLeagueBtn" onclick="openSwapModal()">🔄 Fikstür Takas</button>
         <button class="action-sm" style="background:#ffc107; color:black; display:none; padding:8px 12px; font-weight:bold;" id="secretEditLeagueBtn" onclick="openSecretEditModal()">🛠️ Fikstür Düzenle</button>
+        <button class="action-sm" style="background:var(--success); color:black; display:none; padding:8px 12px; font-weight:900; border:2px solid #00ffaa; box-shadow: 0 0 15px rgba(0,255,170,0.4);" id="publishLeagueBtn" onclick="publishTournament()">🚀 FİKSTÜRÜ ONAYLA VE YAYINA AL</button>
         <button class="action-sm" style="background:var(--danger); color:white; display:none; padding:8px 12px; border:1px solid #ff0000;" id="deleteLeagueBtn" onclick="deleteCurrentTournament()">🗑️ Ligi Sil</button>
     </div>
 </div>
@@ -1789,10 +1790,10 @@ function renderAdminChecklist() {
             }
         }
 
-        t.players = tempPlayers; t.matches = finalMatches; t.settings.status = 'active'; t.settings.playerCount = N; t.settings.matchLimit = mLimit;
+       t.players = tempPlayers; t.matches = finalMatches; t.settings.status = 'draft'; t.settings.playerCount = N; t.settings.matchLimit = mLimit;
         database.ref(`the_35_gold_league/multi_v1/${currentTid}/players`).set(tempPlayers);
         database.ref(`the_35_gold_league/multi_v1/${currentTid}/matches`).set(finalMatches);
-        database.ref(`the_35_gold_league/multi_v1/${currentTid}/settings`).set(t.settings).then(() => { btn.innerHTML = originalText; btn.disabled = false; alert("Turnuva kuraları kusursuz şekilde çekildi ve lig başlatıldı!"); populateLeagueDropdowns(); adminSwitchLeague(); });
+        database.ref(`the_35_gold_league/multi_v1/${currentTid}/settings`).set(t.settings).then(() => { btn.innerHTML = originalText; btn.disabled = false; alert("Kuralar kusursuz çekildi! Turnuva şu an GİZLİ TASLAK (Önizleme) modunda."); populateLeagueDropdowns(); adminSwitchLeague(); });
     }
 
     function previewPots() {
@@ -2329,12 +2330,14 @@ function renderRivalsGrid() {
 
     function toggleWO(id, isRev) { let isWo = document.getElementById("type_" + id).value === 'wo'; document.getElementById("score_area_" + id).style.display = isWo ? 'none' : 'block'; document.getElementById("wo_area_" + id).style.display = isWo ? 'block' : 'none'; checkStatus(id, isRev); }
 
-   function renderMatchesView() {
+  function renderMatchesView() {
         const c = document.getElementById('matchListContainer'); let val = document.getElementById('matchFilterSelect').value;
         let dMatches = val === 'last10' ? matches.filter(m => m.played).sort((a,b) => (b.savedAt || 0) - (a.savedAt || 0)).slice(0,10) : matches.filter(m => m.p1 === val || m.p2 === val);
         if (dMatches.length === 0) { c.innerHTML = `<div style="text-align:center; padding:30px; border:1px dashed var(--warning); border-radius:8px; color:var(--warning); width:100%;">⚠️ Bu kritere uygun maç bulunamadı.</div>`; return; }
 
-        let htmlStr = ''; // PERFORMANS: Tüm HTML'i burada biriktiriyoruz
+        let htmlStr = ''; 
+        // 🚨 YENİ: Takvimde bugünden sonrasını engellemek için bugünün tarihini alıyoruz
+        let todayStr = new Date().toISOString().split('T')[0];
         
         dMatches.forEach(m => {
             let isRev = !isAdmin && loggedInUser && (m.p2 === loggedInUser.id); let topN = isRev ? m.p2Name : m.p1Name, botN = isRev ? m.p1Name : m.p2Name; let topId = isRev ? m.p2 : m.p1; let botId = isRev ? m.p1 : m.p2;
@@ -2346,7 +2349,10 @@ function renderRivalsGrid() {
             let sBanner = ''; if(m.played && m.pending) sBanner = `<div style="background:var(--warning); color:black; padding:5px; text-align:center; font-weight:bold; font-size:11px; border-radius:11px 11px 0 0;">⏳ Rakip Skor Onayı Bekliyor</div>`; else if(m.played && !m.pending) { let winnerName = (m.winnerId === m.p1) ? m.p1Name : (m.winnerId === m.p2 ? m.p2Name : "BİLİNMİYOR"); sBanner = `<div style="background:var(--success); color:black; padding:5px; text-align:center; font-weight:bold; font-size:11px; border-radius:11px 11px 0 0;">🏆 KAZANAN: ${winnerName}</div>`; }
             
             let dateBox = '';
-            if(!m.played) { dateBox = `<div class="date-box" style="display:flex; justify-content:space-between; align-items:center;">📅 Maçın Oynandığı Tarih: <input type="date" id="p_date_${m.id}" class="score-input" style="padding:4px; font-size:11px; border-radius:4px; background:#020617; color:white; border:1px solid #475569;" onclick="try{this.showPicker();}catch(e){}"></div>`; } 
+            if(!m.played) { 
+                // 🚨 YENİ: Takvime (max="${todayStr}") özelliği eklendi
+                dateBox = `<div class="date-box" style="display:flex; justify-content:space-between; align-items:center;">📅 Maçın Oynandığı Tarih: <input type="date" id="p_date_${m.id}" max="${todayStr}" class="score-input" style="padding:4px; font-size:11px; border-radius:4px; background:#020617; color:white; border:1px solid #475569;" onclick="try{this.showPicker();}catch(e){}"></div>`; 
+            } 
             else { dateBox = `<div class="date-box" style="border-left-color:var(--success);">📅 Oynandığı Tarih: ${m.matchDate || 'Belirtilmedi'}</div>`; }
 
             let fairPlayBtn = '';
@@ -2357,9 +2363,7 @@ function renderRivalsGrid() {
             htmlStr += `<div class="match-card" style="padding:0;">${sBanner}<div style="padding:15px;"><div class="match-card-header"><div style="flex:1;"><select id="type_${m.id}" class="match-opt" style="width:auto; padding:4px; font-size:11px; border-radius:4px;" onchange="toggleWO('${m.id}', ${isRev})" ${ro?'disabled':''}><option value="normal" ${!m.isWO?'selected':''}>🎾 Normal</option><option value="wo" ${m.isWO?'selected':''}>🛡️ Hükmen</option></select>${fmtDropdown}</div><span style="font-size:11px; color:#94a3b8; margin-left:10px;">#M${m.id}</span></div>${dateBox}<div id="score_area_${m.id}" style="display:${m.isWO?'none':'block'}"><div class="scoreboard"><div class="sb-row sb-header"><div class="sb-name" style="color:var(--sub-text);">OYUNCULAR</div><div class="sb-cell">SET 1</div><div class="sb-cell">SET 2</div><div class="sb-cell mt-col" id="mt_head_${m.id}" style="opacity:0.3;">M.TB</div></div><div class="sb-row"><div class="sb-name player-link" onclick="openPublicProfile('${topId}')">${topN}</div><div class="sb-cell"><input type="number" id="m_${m.id}_t_s1" class="sb-input" value="${ts1}" ${ro?'disabled':''} oninput="checkStatus('${m.id}', ${isRev})"><input type="number" id="m_${m.id}_t_s1tb" class="sb-tb-input" value="${ts1tb}" ${ro?'disabled':''} oninput="checkStatus('${m.id}', ${isRev})"></div><div class="sb-cell"><input type="number" id="m_${m.id}_t_s2" class="sb-input" value="${ts2}" ${ro?'disabled':''} oninput="checkStatus('${m.id}', ${isRev})"><input type="number" id="m_${m.id}_t_s2tb" class="sb-tb-input" value="${ts2tb}" ${ro?'disabled':''} oninput="checkStatus('${m.id}', ${isRev})"></div><div class="sb-cell mt-col"><input type="number" id="m_${m.id}_t_mt" class="sb-input" style="color:var(--warning); border-color:var(--warning);" value="${tmt}" disabled oninput="checkStatus('${m.id}', ${isRev})"></div></div><div class="sb-row"><div class="sb-name player-link" onclick="openPublicProfile('${botId}')">${botN}</div><div class="sb-cell"><input type="number" id="m_${m.id}_b_s1" class="sb-input" value="${bs1}" ${ro?'disabled':''} oninput="checkStatus('${m.id}', ${isRev})"><input type="number" id="m_${m.id}_b_s1tb" class="sb-tb-input" value="${bs1tb}" ${ro?'disabled':''} oninput="checkStatus('${m.id}', ${isRev})"></div><div class="sb-cell"><input type="number" id="m_${m.id}_b_s2" class="sb-input" value="${bs2}" ${ro?'disabled':''} oninput="checkStatus('${m.id}', ${isRev})"><input type="number" id="m_${m.id}_b_s2tb" class="sb-tb-input" value="${bs2tb}" ${ro?'disabled':''} oninput="checkStatus('${m.id}', ${isRev})"></div><div class="sb-cell mt-col"><input type="number" id="m_${m.id}_b_mt" class="sb-input" style="color:var(--warning); border-color:var(--warning);" value="${bmt}" disabled oninput="checkStatus('${m.id}', ${isRev})"></div></div></div></div><div id="wo_area_${m.id}" style="display:${m.isWO?'block':'none'}; text-align:center; padding:10px;"><span style="color:var(--warning);">GALİP:</span> <select id="wo_winner_${m.id}" class="match-opt" style="padding:8px; border-radius:4px; font-weight:bold; background:#020617; color:white;" ${ro?'disabled':''}><option value="${topId}" ${woTopSelected}>${topN}</option><option value="${botId}" ${woBotSelected}>${botN}</option></select><div style="font-size:10px; color:var(--danger); margin-top:5px;">⚠️ Sadece Galibiyet/Mağlubiyet işlenir. Set Averajı veya KOR Puanı verilmez. Kaybedenin şöhret puanından -10 puan silinir.</div></div><div style="display:flex; justify-content:space-between; gap:5px; margin-top:10px;">${(!ro && (isMyMatch || isAdmin)) ? `<button class="save-btn" onclick="submitScore('${m.id}', ${isRev}, this)">${isAdmin?'Skoru İşle':'Skoru Rakibe Gönder (Onay)'}</button>` : ''}${amIScoreApprover ? `<button class="pending-btn" onclick="approveScore('${m.id}', this)">✅ SKORU ONAYLA</button>` : ''}${(isAdmin && m.played) || (isMyMatch && m.pending) ? `<button class="action-sm" style="background:var(--danger); padding:10px;" onclick="clearScoreCloud('${m.id}', this)">İptal/Sil</button>` : ''}</div>${fairPlayBtn}</div></div>`;
         });
         
-        c.innerHTML = htmlStr; // PERFORMANS: Tüm match-card'ları tek seferde DOM'a ekle!
-        
-        // PERFORMANS: DOM'a eklendikten sonra formüller çalışsın diye döngüyü sonradan tetikliyoruz
+        c.innerHTML = htmlStr; 
         dMatches.forEach(m => {
             let isRev = !isAdmin && loggedInUser && (m.p2 === loggedInUser.id);
             checkStatus(m.id, isRev);
@@ -2378,6 +2382,15 @@ function submitScore(mId, isP2, btn) {
         if (!m.played) { 
             let dVal = document.getElementById(`p_date_${mId}`).value; 
             if(!dVal) return showToast("HATA: Maçın oynandığı tarihi seçmelisiniz!", "error"); 
+            
+            // 🚨 YENİ: GELECEK TARİH ENGELLEMESİ
+            let selectedDate = new Date(dVal);
+            let today = new Date();
+            today.setHours(23, 59, 59, 999); // Bugünün son saniyesine kadar izin ver
+            if(selectedDate > today) {
+                return showToast("HATA: Henüz oynanmamış (gelecekteki) bir tarih için skor giremezsiniz!", "error");
+            }
+
             m.matchDate = dVal; 
         }
 
@@ -2411,15 +2424,21 @@ function submitScore(mId, isP2, btn) {
         }
         
         btn.innerHTML = "⏳ İŞLENİYOR..."; btn.disabled = true; m.played = true; m.savedAt = Date.now();
+        let tName = currentSettings.customName || "Turnuva";
         
         if (isAdmin) { 
             m.pending = false; m.enteredBy = 'ADMIN'; 
-            // YENİ BİLDİRİM TETİKLEYİCİSİ
             calculateStats();
             processRGCNotifications(m);
             if(!m.isWO) { checkNTRPAlert(m.p1, globalUsers); checkNTRPAlert(m.p2, globalUsers); }
+            
+            addAlertToUser(m.p1, `⚙️ <strong>YÖNETİCİ SKOR İŞLEDİ:</strong> <em>[${tName}]</em> ligindeki ${m.p1Name} vs ${m.p2Name} maçınızın skoru sistem tarafından onaylandı ve işlendi.`);
+            addAlertToUser(m.p2, `⚙️ <strong>YÖNETİCİ SKOR İŞLEDİ:</strong> <em>[${tName}]</em> ligindeki ${m.p1Name} vs ${m.p2Name} maçınızın skoru sistem tarafından onaylandı ve işlendi.`);
         } else { 
             m.pending = true; m.enteredBy = loggedInUser.id; 
+            
+            let opponentId = (m.p1 === loggedInUser.id) ? m.p2 : m.p1;
+            addAlertToUser(opponentId, `🎾 <strong>SKOR ONAYI BEKLENİYOR:</strong> <em>[${tName}]</em> ligindeki rakibiniz maç skorunuza girdi. Puanların hesaplanması için lütfen sisteme girip onaylayın!`);
         }
         saveToDb(isAdmin ? "Skor Kaydedildi!" : "Skor Rakibin Onayına Gönderildi!");
     }
@@ -2443,26 +2462,34 @@ function submitScore(mId, isP2, btn) {
     }
  
     function giveFairPlay(mId, opponentId, btn) { btn.innerHTML = "⏳..."; btn.disabled = true; let m = matches.find(x => String(x.id) === String(mId)); if(!m) return; if (m.p1 === loggedInUser.id) m.p1Fair = true; else if (m.p2 === loggedInUser.id) m.p2Fair = true; let uRef = database.ref(`the_35_gold_league/users/${opponentId}/fame`); uRef.once('value').then((s) => { let currentFame = s.val() || 0; uRef.set(currentFame + 5).then(() => { saveToDb("Rakibinizi kutladınız! +5 Şöhret Puanı eklendi. 👏"); }); }); }
-    function clearScoreCloud(id, btn) { 
-    let m = matches.find(x => String(x.id) === String(id)); 
-    if (!m) return;
+   
+function clearScoreCloud(id, btn) { 
+        let m = matches.find(x => String(x.id) === String(id)); 
+        if (!m) return;
 
-    // GÜVENLİK KONTROLÜ
-    if (!isAdmin && (!loggedInUser || (m.p1 !== loggedInUser.id && m.p2 !== loggedInUser.id))) {
-        showToast("HATA: Bu maçın skorunu sıfırlama veya iptal etme yetkiniz yok!", "error");
-        return;
+        if (!isAdmin && (!loggedInUser || (m.p1 !== loggedInUser.id && m.p2 !== loggedInUser.id))) {
+            showToast("HATA: Bu maçın skorunu sıfırlama veya iptal etme yetkiniz yok!", "error");
+            return;
+        }
+
+        showCustomConfirm("SKOR İPTALİ", "Bu maçın skorunu iptal etmek/sıfırlamak istiyor musunuz?", () => {
+            btn.innerHTML = "⏳..."; btn.disabled = true; 
+            
+            // 🔔 YENİ: Skor sıfırlandığında oyunculara bildirim gitsin
+            let tName = currentSettings.customName || "Turnuva";
+            addAlertToUser(m.p1, `⚠️ <strong>SKOR İPTALİ:</strong> <em>[${tName}]</em> ligindeki ${m.p1Name} vs ${m.p2Name} maçınızın skoru yönetici tarafından iptal edildi veya sıfırlandı.`);
+            addAlertToUser(m.p2, `⚠️ <strong>SKOR İPTALİ:</strong> <em>[${tName}]</em> ligindeki ${m.p1Name} vs ${m.p2Name} maçınızın skoru yönetici tarafından iptal edildi veya sıfırlandı.`);
+
+            m.played = false; m.pending = false; m.isWO = false; m.woWinner = ''; m.enteredBy = ''; 
+            m.p1S1 = ''; m.p2S1 = ''; m.p1S2 = ''; m.p2S2 = ''; 
+            m.p1S1TB = ''; m.p2S1TB = ''; m.p1S2TB = ''; m.p2S2TB = ''; 
+            m.p1MT = ''; m.p2MT = ''; m.p1Fair = false; m.p2Fair = false; 
+            m.matchFormat = '6_GAME'; 
+            
+            saveToDb("Skor sıfırlandı!");
+        }, true);
     }
 
-    showCustomConfirm("SKOR İPTALİ", "Bu maçın skorunu iptal etmek/sıfırlamak istiyor musunuz?", () => {
-        btn.innerHTML = "⏳..."; btn.disabled = true; 
-        m.played = false; m.pending = false; m.isWO = false; m.woWinner = ''; m.enteredBy = ''; 
-        m.p1S1 = ''; m.p2S1 = ''; m.p1S2 = ''; m.p2S2 = ''; 
-        m.p1S1TB = ''; m.p2S1TB = ''; m.p1S2TB = ''; m.p2S2TB = ''; 
-        m.p1MT = ''; m.p2MT = ''; m.p1Fair = false; m.p2Fair = false; 
-        m.matchFormat = '6_GAME'; 
-        saveToDb("Skor sıfırlandı!");
-    }, true);
-}
    function saveToDb(msg) {
     calculateStats(); 
     try {
@@ -2523,6 +2550,7 @@ function grantFounderStatus() {
         showCustomConfirm("OYUNCU TRANSFERİ", "Bu oyuncuyu transfer etmek istediğinize emin misiniz? Puanlar ve fikstür yeni oyuncuya devredilecektir.", () => {
             let t = allTourneys[currentTid];
             let inUser = globalUsers[inUid];
+            let tName = t.settings.customName || "Turnuva";
             
             // Tablodaki bilgileri değiştir
             let pIndex = _arr(t.players).findIndex(p => p.id === outUid);
@@ -2539,6 +2567,9 @@ function grantFounderStatus() {
             // Kayıt listesini değiştir
             let rIndex = _arr(t.registeredPlayers).indexOf(outUid);
             if(rIndex > -1) { t.registeredPlayers[rIndex] = inUser.id; }
+            
+            // 🔔 YENİ: Yedekten giren kişiye bildirim gönder
+            addAlertToUser(inUser.id, `🔄 <strong>TURNUVAYA ALINDINIZ:</strong> <em>[${tName}]</em> ligine bir oyuncunun yerine asıl oyuncu olarak dahil edildiniz. Sisteme girip fikstürünüzü kontrol edebilirsiniz!`);
             
             closeSubstituteModal();
             saveToDb("Transfer başarıyla gerçekleştirildi!");
