@@ -448,7 +448,10 @@ body {
 
         <label style="font-size:11px; color:var(--sub-text); font-weight:bold; margin-top:12px; display:block;">LOKASYON / İLÇE</label>
         <input type="text" id="editTourneyRegion" class="auth-input force-upper" style="margin-top:4px;" placeholder="ÖRN: BOSTANLI" oninput="this.value = this.value.toLocaleUpperCase('tr-TR')">
-        
+        <label style="font-size:11px; color:var(--warning); font-weight:bold; margin-top:12px; display:block;">⏳ EKSTRA SÜRE (LİG UZATMA - GÜN)</label>
+<input type="number" id="editTourneyExtraDays" class="auth-input" style="margin-top:4px;" placeholder="Örn: 7" value="0">
+<div style="font-size:10px; color:#cbd5e1; margin-top:2px;">* Yağmur/tatil gibi durumlarda lig bitişini ertelemek için gün sayısı girin.</div>
+
         <button class="modal-btn" style="background:var(--success); color:black; margin-top:15px;" onclick="saveTournamentSettings()">Değişiklikleri Veritabanına İşle 💾</button>
     </div>
 </div>
@@ -558,7 +561,19 @@ body {
         <div class="auth-card" id="adminLoginPanel"><h3 style="margin-top:0; color:var(--danger)">Yönetici Girişi</h3><input type="password" id="adminPassword" class="auth-input" placeholder="Yönetici Şifresi"><button class="auth-btn" style="background:var(--danger); color:white;" onclick="loginAdmin()">GİRİŞ YAP</button><p class="switch-link" onclick="toggleAuth('loginPanel')">Oyuncu Girişine Dön</p></div>
     </div>
     <div id="mainApp">
-        <div id="adminTopBar"><span style="color:var(--warning); font-size:13px; font-weight:bold; margin-right:5px;">⚙️ KONTROL MERKEZİ:</span><select id="adminLeagueSelect" class="auth-input force-upper" style="width:auto; margin:0; padding:6px; font-size:13px; display:inline-block;" onchange="adminSwitchLeague()"><option value="new_pending">➕ YENİ TURNUVA (KAYDA AÇ)</option></select><button class="action-sm" style="background:var(--danger); padding:6px 12px; display:none;" id="deleteLeagueBtn" onclick="deleteCurrentTournament()">🗑️ LİGİ SİL</button></div>
+      <div id="adminTopBar" style="display: none; flex-direction:column; background: #0a0f1c; padding: 12px; border-radius: 12px; text-align: center; margin-bottom: 15px; border: 1px dashed var(--accent-color); gap: 10px;">
+    <div>
+        <span style="color:var(--warning); font-size:13px; font-weight:bold; margin-right:5px;">⚙️ KONTROL MERKEZİ:</span>
+        <select id="adminLeagueSelect" class="auth-input force-upper" style="width:100%; max-width:280px; margin:0; padding:6px; font-size:13px; display:inline-block;" onchange="adminSwitchLeague()">
+            <option value="new_pending">➕ YENİ TURNUVA (KAYDA AÇ)</option>
+        </select>
+    </div>
+    <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+        <button class="action-sm" style="background:var(--warning); color:black; display:none; padding:8px 12px; font-weight:bold;" id="editLeagueBtn" onclick="openEditTournamentModal()">⚙️ Ayarlar ve Süre Uzat</button>
+        <button class="action-sm" style="background:var(--neon-cyan); color:black; display:none; padding:8px 12px; font-weight:bold;" id="swapLeagueBtn" onclick="openSwapModal()">🔄 Fikstür Takas</button>
+        <button class="action-sm" style="background:var(--danger); color:white; display:none; padding:8px 12px; border:1px solid #ff0000;" id="deleteLeagueBtn" onclick="deleteCurrentTournament()">🗑️ Ligi Sil</button>
+    </div>
+</div>
         <div id="tournaments" class="panel"><h2 style="color:var(--accent-color); margin-top:0;">🎾 LİG VE TURNUVA MERKEZİ</h2><h3 style="text-align:left; color:var(--success); border-bottom:1px dashed var(--divider); padding-bottom:5px;">AÇIK KAYITLAR (Yaklaşan)</h3><div id="pendingTournamentsList">Yükleniyor...</div><h3 style="text-align:left; color:var(--warning); border-bottom:1px dashed var(--divider); padding-bottom:5px; margin-top:20px;">AKTİF TURNUVALAR (Oynanıyor)</h3><div id="activeTournamentsList">Yükleniyor...</div></div>
        <div id="profile" class="panel">
     <div style="background: linear-gradient(145deg, rgba(15, 23, 42, 0.8), rgba(0, 0, 0, 0.9)); border-radius: 20px; border: 1px solid var(--border-color); padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); position: relative; overflow: hidden;">
@@ -646,6 +661,19 @@ body {
         <button class="modal-btn" style="background:var(--success); color:black; margin-top:5px;" onclick="saveAdminPlayerChanges()">Değişiklikleri Veritabanına İşle 💾</button>
     </div>
 </div>
+
+<div id="adminSwapModal" class="modal">
+    <div class="modal-content" style="max-width:400px;">
+        <button style="position:absolute; top:10px; right:15px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer;" onclick="closeSwapModal()">✖</button>
+        <h3 style="color:var(--neon-cyan); margin-top:0;">🔄 FİKSTÜR TAKASI</h3>
+        <p style="font-size:11px; color:#cbd5e1; margin-bottom:15px;">Seçilen iki oyuncunun kura ağacındaki yerlerini ve tüm maç yollarını birbiriyle değiştirir.</p>
+        <select id="swapPlayer1" class="auth-select force-upper" style="background:#03050a;"></select>
+        <div style="text-align:center; font-size:24px; margin:5px 0;">↕️</div>
+        <select id="swapPlayer2" class="auth-select force-upper" style="background:#03050a;"></select>
+        <button class="modal-btn" style="background:var(--neon-cyan); color:black; margin-top:20px;" onclick="executeSwap()">Takası Gerçekleştir</button>
+    </div>
+</div>
+
  
 <script>
 
@@ -1322,11 +1350,22 @@ function renderProfile() {
             let formatText = "Maç formatı (4'lük veya 6'lık) öncesinde oyuncular tarafından kararlaştırılır."; let cap = s.maxCapacity || (s.playerCount || 23); let mLimit = cap >= 48 ? 10 : (cap >= 24 ? 8 : 6);
             let ligType = cap >= 48 ? "BÜYÜK LİG (48-96 Kişi)" : (cap >= 24 ? "STANDART LİG (24-47 Kişi)" : "BUTİK LİG (12-23 Kişi)");
             let poText = cap >= 48 ? "İlk 8 Seribaşı, İkinci 8 Play-Off, Sonraki 16 (En iyi KOR) Play-In" : (cap >= 24 ? "İlk 4 Seribaşı, İkinci 4 Play-Off, Sonraki 8 (En iyi KOR) Play-In" : "İlk 2 Seribaşı, İkinci 2 Play-Off, Sonraki 4 (En iyi KOR) Play-In");
+                       let exDays = s.extraDays ? parseInt(s.extraDays) : 0;
             let sDateObj = null; let eDateObj = null; let poS = null; let poE = null; let fSat = null;
-            if(s.startDate) { let st = new Date(s.startDate); if(!isNaN(st.getTime())) { sDateObj = st; eDateObj = new Date(st.getTime() + (mLimit * 7 * 24*60*60*1000)); poS = new Date(eDateObj.getTime() + (1 * 24*60*60*1000)); poE = new Date(poS.getTime() + (14 * 24*60*60*1000)); fSat = new Date(poE.getTime()); let ds = (6 - fSat.getDay() + 7) % 7; if (ds === 0) ds = 7; fSat.setDate(fSat.getDate() + ds); } }
-            let countdownHtml = ''; let isRegistrationExpired = false;
-            if (sDateObj && status === 'pending') { let now = Date.now(); let diffMs = sDateObj.getTime() - now; isRegistrationExpired = diffMs <= 0; if (!isRegistrationExpired && diffMs <= 86400000) { let hours = Math.floor(diffMs / (1000 * 60 * 60)); let minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60)); countdownHtml = `<div style="background:var(--danger); color:white; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold; text-align:center; margin-bottom:8px; animation: blink 1.5s infinite;">⏳ KAYITLAR KAPANMAK ÜZERE: Son ${hours} Saat ${minutes} Dakika</div>`; } }
-            let pInfo = sDateObj ? `<div style="display:flex; flex-direction:column; gap:4px;">${countdownHtml}<strong style="color:var(--accent-color);">📋 FORMAT: ${ligType} | Şehir: İZMİR | İlçe: ${s.region || 'Belirtilmedi'}</strong><span>🎾 <strong>Maç Sistemi:</strong> ${formatText}</span><span>⚔️ <strong>Kural:</strong> ${poText} kalır.</span><hr style="border:0; border-top:1px dashed var(--divider); margin:4px 0;"><strong style="color:var(--success);">🗓️ TAKVİM VE İŞLEYİŞ:</strong><span>• <strong>Son Kayıt ve Başlangıç:</strong> ${sDateObj.toLocaleDateString('tr-TR')}</span><span>• <strong>Lig Aşaması (${mLimit} Maç):</strong> ${sDateObj.toLocaleDateString('tr-TR')} - ${eDateObj.toLocaleDateString('tr-TR')}</span><span>• <strong>Play-Off Turları:</strong> ${poS.toLocaleDateString('tr-TR')} - ${poE.toLocaleDateString('tr-TR')}</span><span>• <strong>Büyük Final:</strong> ~${fSat.toLocaleDateString('tr-TR')} (Hafta Sonu)</span><div style="margin-top:5px; color:var(--warning); font-weight:bold; font-size:10px;">⚠️ NOT: Lig aşaması başlamadan önce kayıtların tamamlanması gerekmektedir. Son kayıt tarihi turnuva başlangıç günüdür.</div></div>` : '<div style="color:var(--sub-text);">Tarih Belirlenmedi</div>';
+            if(s.startDate) { 
+                let st = new Date(s.startDate); 
+                if(!isNaN(st.getTime())) { 
+                    sDateObj = st; 
+                    eDateObj = new Date(st.getTime() + (((mLimit * 7) + exDays) * 24*60*60*1000)); 
+                    poS = new Date(eDateObj.getTime() + (1 * 24*60*60*1000)); 
+                    poE = new Date(poS.getTime() + (14 * 24*60*60*1000)); 
+                    fSat = new Date(poE.getTime()); 
+                    let ds = (6 - fSat.getDay() + 7) % 7; 
+                    if (ds === 0) ds = 7; 
+                    fSat.setDate(fSat.getDate() + ds); 
+                } 
+            }
+
             let regs = _arr(t.registeredPlayers); let N = status === 'pending' ? regs.length : _arr(t.players).length; let amIIn = false; let myIndex = -1;
             if(!isAdmin && loggedInUser) { myIndex = regs.indexOf(loggedInUser.id); amIIn = myIndex !== -1; }
             
@@ -1981,9 +2020,30 @@ window.switchTab = function(t) {
     function generateDynamicRules(s) {
         let titleEl = document.getElementById('rulesHeaderTitle'); if(titleEl) titleEl.innerText = "📜 TURNUVA KURALLARI VE LİG FORMATI";
         let n = s.playerCount || s.maxCapacity || 23; let mLimit = s.matchLimit || (n >= 48 ? 10 : (n >= 24 ? 8 : 6));
-        let sDateStr = "Belirlenmedi", eDateStr = "Belirlenmedi", poDateStr = "Belirlenmedi", finalStr = "Belirlenmedi";
-        if(s.startDate) { let st = new Date(s.startDate); if(!isNaN(st.getTime())) { let en = new Date(st); en.setDate(en.getDate() + (mLimit * 7)); let poS = new Date(en); poS.setDate(poS.getDate() + 1); let poE = new Date(poS); poE.setDate(poS.getDate() + 14); let fSat = new Date(poE); let ds = (6 - fSat.getDay() + 7) % 7; if (ds === 0) ds = 7; fSat.setDate(fSat.getDate() + ds); let fSun = new Date(fSat); fSun.setDate(fSat.getDate() + 1); const opt = { day: 'numeric', month: 'long', year: 'numeric' }; sDateStr = st.toLocaleDateString('tr-TR', opt); eDateStr = en.toLocaleDateString('tr-TR', opt); poDateStr = `${poS.toLocaleDateString('tr-TR', opt)} - ${poE.toLocaleDateString('tr-TR', opt)}`; finalStr = `${fSat.toLocaleDateString('tr-TR', opt)} - ${fSun.toLocaleDateString('tr-TR', opt)} (İlk Hafta Sonu)`; } }
-        
+               let exDays = s.extraDays ? parseInt(s.extraDays) : 0;
+        if(s.startDate) { 
+            let st = new Date(s.startDate); 
+            if(!isNaN(st.getTime())) { 
+                let en = new Date(st); 
+                en.setDate(en.getDate() + (mLimit * 7) + exDays); // Ekstra süre burada eklendi
+                let poS = new Date(en); 
+                poS.setDate(poS.getDate() + 1); 
+                let poE = new Date(poS); 
+                poE.setDate(poS.getDate() + 14); 
+                let fSat = new Date(poE); 
+                let ds = (6 - fSat.getDay() + 7) % 7; 
+                if (ds === 0) ds = 7; 
+                fSat.setDate(fSat.getDate() + ds); 
+                let fSun = new Date(fSat); 
+                fSun.setDate(fSat.getDate() + 1); 
+                const opt = { day: 'numeric', month: 'long', year: 'numeric' }; 
+                sDateStr = st.toLocaleDateString('tr-TR', opt); 
+                eDateStr = en.toLocaleDateString('tr-TR', opt); 
+                poDateStr = `${poS.toLocaleDateString('tr-TR', opt)} - ${poE.toLocaleDateString('tr-TR', opt)}`; 
+                finalStr = `${fSat.toLocaleDateString('tr-TR', opt)} - ${fSun.toLocaleDateString('tr-TR', opt)} (İlk Hafta Sonu)`; 
+            } 
+        }
+
         let exWin = "Lider maçını 6'lık veya 4'lük formatta kazanmış olsun, oyun yüzdesi %60 ve rakibinin çarpanı 1.5 ise: (60 * 1.5) + 10 (Galibiyet Primi) formülüyle 100 Turnuva KOR Puanı alır. Ancak lider, rakibine hiç oyun vermeden (%100) kazanırsa: (100 * 1.5) + 10 = 160 Puan alır.";
         let exLoss = "Kaybeden taraf maçı kaybetmesine rağmen rakipten 8 oyun kopardıysa ve %40 MİP oranına ulaştıysa (Rakibin çarpanı da 1.5 ise): (40 * 1.5) × 0.50 formülüyle 30 Turnuva KOR Puanı elde eder.";
         let poText = n >= 48 ? "Lig sonunda ilk 8 oyuncu 'Seri Başı', sonraki 8 oyuncu 'Play-Off' turuna kalır. Kalan oyunculardan en iyi 16 KOR puanlı oyuncu 'Play-In' eşleşmesi yapar ve kazananlar Play-Off turuna yükselir." : (n >= 24 ? "Lig sonunda ilk 4 oyuncu 'Seri Başı', sonraki 4 oyuncu 'Play-Off' turuna kalır. Kalan oyunculardan en iyi 8 KOR puanlı oyuncu 'Play-In' oynar." : "Lig sonunda ilk 2 oyuncu 'Seri Başı', sonraki 2 oyuncu 'Play-Off' turuna kalır. Kalan oyunculardan en iyi 4 KOR puanlı oyuncu 'Play-In' oynar.");
