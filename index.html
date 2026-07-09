@@ -703,6 +703,30 @@ body {
     <textarea id="adminMassMessage" class="auth-input" style="height:70px; text-align:left; resize:none; margin-bottom:10px; border-radius:8px;" placeholder="Örn: Yağmur nedeniyle Alsancak kortlarındaki maçlar yarına ertelenmiştir..."></textarea>
     <button class="action-btn" style="background:var(--neon-cyan); color:black; font-size:12px; padding:10px;" onclick="sendMassNotification(this)">🚀 HERKESE BİLDİRİM GÖNDER</button>
 </div>
+<!-- 🛠️ GİZLİ FİKSTÜR DÜZENLEYİCİ -->
+<div style="background: rgba(255, 193, 7, 0.05); border: 1px solid #ffc107; padding: 15px; border-radius: 12px; margin-top: 20px; box-shadow: 0 5px 15px rgba(255,193,7,0.1);">
+    <h4 style="color:#ffc107; margin-top:0; border-bottom: 1px dashed #ffc107; padding-bottom: 5px;">🛠️ GİZLİ FİKSTÜR DÜZENLEYİCİ</h4>
+    <p style="font-size:11px; color:#cbd5e1; margin-bottom:10px;">Oyunculara duyurmadan önce eşleşmelere manuel müdahale edin. (Ligin dengesi için çıkardığınız oyuncuyu, mutlaka başka bir maça ekleyerek takası tamamlayın.)</p>
+    
+    <div style="display:flex; gap:10px; margin-bottom:10px;">
+        <select id="adminEditMatchSelect" class="auth-input" style="flex:1;">
+            <option value="">-- Değiştirilecek Maçı Seçin --</option>
+        </select>
+        <button class="action-btn" style="background:#ffc107; color:black; padding:10px; width:auto; font-size:12px;" onclick="loadMatchForEdit()">MAÇI GETİR</button>
+    </div>
+    
+    <div id="adminEditMatchArea" style="display:none; background:#1e293b; padding:15px; border-radius:8px; border: 1px solid #334155;">
+        <label style="color:#94a3b8; font-size:11px;">1. Oyuncu:</label>
+        <select id="adminEditP1" class="auth-input" style="margin-bottom:10px;"></select>
+        
+        <label style="color:#94a3b8; font-size:11px;">2. Oyuncu:</label>
+        <select id="adminEditP2" class="auth-input" style="margin-bottom:15px;"></select>
+        
+        <button class="action-btn" style="background:var(--neon-green); padding:10px;" onclick="saveEditedMatch()">💾 YENİ EŞLEŞMEYİ KAYDET</button>
+    </div>
+</div>
+
+
 
  <div style="display:flex; justify-content:flex-end; margin-bottom:10px;"><button class="action-sm" style="background:var(--accent-color); color:black; font-weight:bold; padding:8px 12px;" onclick="changeAdminPassword()">🔑 YÖNETİCİ ŞİFRESİNİ DEĞİŞTİR</button><div id="adminPushContainer" style="width:100%; text-align:center;"></div></div><div style="background:#020617; padding:15px; border-radius:8px; border:1px solid var(--danger); margin-bottom:15px;"><h4 style="color:var(--danger); margin-top:0; border-bottom:1px solid var(--divider); padding-bottom:5px;">🔑 ŞİFRE SIFIRLAMA TALEPLERİ</h4><div id="adminPasswordResets">Bulunmuyor.</div></div><div style="background:#020617; padding:15px; border-radius:8px; border:1px solid var(--warning); margin-bottom:15px;"><h4 style="color:var(--warning); margin-top:0; border-bottom:1px solid var(--divider); padding-bottom:5px;">⏳ ONAY BEKLEYEN SKORLAR (TÜM LİGLER)</h4><div id="adminPendingList">Yükleniyor...</div></div><div style="background:#020617; padding:15px; border-radius:8px; border:1px solid var(--success);"><h4 style="color:var(--success); margin-top:0; border-bottom:1px solid var(--divider); padding-bottom:5px;">✅ LİGLERDE BİTEN SON 10 MAÇ</h4><div id="adminFinishedScoresList">Yükleniyor...</div></div></div>
         <div id="admin_pending" class="panel"><h2 style="color:var(--accent-color); margin-top:0;" id="pendingAdminTitle">KAYIT YÖNETİMİ</h2><p style="font-size:12px; color:var(--sub-text); margin-bottom:15px;">Bu turnuva henüz başlatılmadı. Oyuncular kayıt olabilir veya siz manuel ekleyebilirsiniz. Asıl liste dolarsa gelenler yedek listeye geçer.</p><div style="background:#1e293b; padding:15px; border-radius:8px; margin-bottom:15px;"><h4 style="margin:0 0 10px 0; color:var(--success);">📥 MANUEL OYUNCU EKLE</h4><div style="display:flex; gap:10px;"><select id="adminManualAddSelect" class="auth-select force-upper" style="margin:0; flex:1;"><option value="">SİSTEMDEN OYUNCU SEÇ...</option></select><button class="action-sm" style="background:var(--success); color:black;" onclick="adminManualAddPlayer()">LİSTEYE EKLE</button></div></div><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><h4 style="margin:0; color:white;">ASIL LİSTE <span id="mainListCount" style="color:var(--accent-color);">(0/23)</span> <button class="action-sm" style="background:var(--warning); color:black; margin-left:10px;" onclick="grantFounderStatus()">👑 Listeyi Kurucu Yap</button></h4>
@@ -2988,6 +3012,87 @@ window.startManualTournament = function(btn) {
         });
     }, 2000);
 }
+
+// ==========================================
+// 🛠️ GİZLİ FİKSTÜR DÜZENLEYİCİ MOTORU
+// ==========================================
+
+// 1. Yönetici Paneli açıldığında kura çekilmiş maçları listeye yükle
+function refreshSecretEditor() {
+    let sel = document.getElementById('adminEditMatchSelect');
+    if(!sel) return;
+    sel.innerHTML = '<option value="">-- Değiştirilecek Maçı Seçin --</option>';
+    if(currentTid && allTourneys[currentTid] && allTourneys[currentTid].matches) {
+        allTourneys[currentTid].matches.forEach((m, idx) => {
+            sel.innerHTML += `<option value="${idx}">Maç ${idx+1}: ${m.p1Name} vs ${m.p2Name}</option>`;
+        });
+    }
+}
+
+// Admin turnuva seçtiğinde listeyi otomatik güncelle
+let origUpdateAdmin = window.updateAdminPanelUI;
+window.updateAdminPanelUI = function() {
+    if(origUpdateAdmin) origUpdateAdmin();
+    refreshSecretEditor();
+};
+
+// 2. Seçilen maçı düzenleme alanına (Dropdownlara) getir
+window.loadMatchForEdit = function() {
+    let mIdx = document.getElementById('adminEditMatchSelect').value;
+    if(mIdx === "") return showToast("Lütfen bir maç seçin", "warning");
+    
+    let t = allTourneys[currentTid];
+    let match = t.matches[mIdx];
+    
+    let p1Sel = document.getElementById('adminEditP1');
+    let p2Sel = document.getElementById('adminEditP2');
+    p1Sel.innerHTML = ''; p2Sel.innerHTML = '';
+    
+    // Turnuvadaki tüm oyuncuları listeye ekle
+    _arr(t.players).forEach(p => {
+        let pName = globalUsers[p.id] ? globalUsers[p.id].name : p.name;
+        p1Sel.innerHTML += `<option value="${p.id}">${pName}</option>`;
+        p2Sel.innerHTML += `<option value="${p.id}">${pName}</option>`;
+    });
+    
+    // Maçtaki mevcut oyuncuları seçili hale getir
+    p1Sel.value = match.p1;
+    p2Sel.value = match.p2;
+    
+    document.getElementById('adminEditMatchArea').style.display = 'block';
+};
+
+// 3. Yapılan değişikliği veritabanına doğrudan kaydet
+window.saveEditedMatch = function() {
+    let mIdx = document.getElementById('adminEditMatchSelect').value;
+    let p1Id = document.getElementById('adminEditP1').value;
+    let p2Id = document.getElementById('adminEditP2').value;
+    
+    if(p1Id === p2Id) return showToast("Bir oyuncu kendisiyle maç yapamaz!", "error");
+    
+    let p1Sel = document.getElementById('adminEditP1');
+    let p2Sel = document.getElementById('adminEditP2');
+    let p1Name = p1Sel.options[p1Sel.selectedIndex].text;
+    let p2Name = p2Sel.options[p2Sel.selectedIndex].text;
+    
+    showCustomConfirm("Eşleşme Değiştiriliyor", `Yeni Eşleşme: <strong>${p1Name} vs ${p2Name}</strong><br><br>Matematiği bozmamak adına bu maçtan çıkardığınız oyuncuyu, sisteme giren oyuncunun maçına eklemeyi unutmayın. Onaylıyor musunuz?`, () => {
+        
+        let updates = {};
+        updates[`the_35_gold_league/tournaments/${currentTid}/matches/${mIdx}/p1`] = p1Id;
+        updates[`the_35_gold_league/tournaments/${currentTid}/matches/${mIdx}/p2`] = p2Id;
+        updates[`the_35_gold_league/tournaments/${currentTid}/matches/${mIdx}/p1Name`] = p1Name;
+        updates[`the_35_gold_league/tournaments/${currentTid}/matches/${mIdx}/p2Name`] = p2Name;
+        
+        // Veritabanını güncelle
+        database.ref().update(updates).then(() => {
+            showToast("Maç başarıyla değiştirildi!", "success");
+            document.getElementById('adminEditMatchArea').style.display = 'none';
+            setTimeout(() => refreshSecretEditor(), 1000); // Listeyi yenile
+        }).catch(err => {
+            showToast("Hata oluştu: " + err.message, "error");
+        });
+    });
+};
 
 
 </script>

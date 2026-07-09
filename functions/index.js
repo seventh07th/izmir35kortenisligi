@@ -81,3 +81,42 @@ async function sendNotificationToUser(userId, title, body) {
         console.error(`🚨 Bildirim hatası -> Kullanıcı: ${userId}`, error);
     }
 }
+// YENİ: Uyarılar (Alerts) Tablosunu Dinle ve Kilit Ekranına Fırlat
+exports.sendAlertPushNotification = functions.database.ref('/the_35_gold_league/users/{uid}/alerts/{alertId}')
+    .onCreate(async (snapshot, context) => {
+        const alertData = snapshot.val();
+        const uid = context.params.uid;
+
+        if (!alertData || !alertData.text) return null;
+
+        // HTML taglerini (kalın yazı vb.) kilit ekranında düzgün görünmesi için temizle
+        const cleanText = alertData.text.replace(/<[^>]*>?/gm, '');
+
+        // Oyuncunun FCM Token'ını (Telefon Kimliğini) al
+        const userRef = admin.database().ref(`/the_35_gold_league/users/${uid}/fcmToken`);
+        const userSnap = await userRef.once('value');
+        const token = userSnap.val();
+
+        if (!token) {
+            console.log(uid + ' için bildirim izni (token) yok.');
+            return null;
+        }
+
+        // Kilit Ekranı Bildirim Paketi
+        const payload = {
+            notification: {
+                title: 'İzmir 35 KorTenis Ligi',
+                body: cleanText,
+                icon: '/icon-192.png' // Varsa logomuz
+            }
+        };
+
+        return admin.messaging().sendToDevice(token, payload)
+            .then(response => {
+                console.log('Megafon/Uyarı bildirimi gönderildi:', response);
+            })
+            .catch(error => {
+                console.error('Bildirim gönderim hatası:', error);
+            });
+    });
+
