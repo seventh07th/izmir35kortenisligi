@@ -1734,25 +1734,25 @@ function renderAdminChecklist() {
 
  // 4. Kura Çekildiğinde Active yerine Draft yap (Oyunculara Bildirim Atma)
 if (!window.coreStartPending) {
-    window.coreStartPending = function(btn) {
+  window.coreStartPending = function(btn) {
         let t = allTourneys[currentTid]; let regs = _arr(t.registeredPlayers); let cap = t.settings.maxCapacity || 23; let activeRegs = regs.slice(0, cap); let N = activeRegs.length;
         if (N < 12) return alert("Minimum 12 kişi gereklidir."); if(!confirm(`DİKKAT: Asıl listedeki ${N} kişi ile kura çekilecek ve turnuva başlatılacaktır. Onaylıyor musunuz?`)) return;
         let originalText = btn.innerHTML; btn.innerHTML = "⏳ KURA ÇEKİLİYOR..."; btn.disabled = true;
 
+        const shuffle = (arr) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
+        
         let tempPlayers = activeRegs.map(uid => { let u = globalUsers[uid]; return { id: u.id, name: u.name, sysScore: u.sysScore, wins: 0, losses: 0, totalMatches: 0, setAv: 0, kor: 0, korRank: 0 }; });
+        
+        // 🌟 SINIRDAKİ AYNI PUANLILARI ADİL DAĞITMAK İÇİN ÖNCE KARIŞTIR
+        shuffle(tempPlayers);
         tempPlayers.sort((a, b) => parseFloat(b.sysScore || 0) - parseFloat(a.sysScore || 0));
 
         let numPots = N >= 48 ? 5 : (N >= 24 ? 4 : 3); let mLimit = numPots * 2; let baseSize = Math.floor(N / numPots); let remainder = N % numPots; let potIndex = 1; let assigned = 0; let currentPotLimit = baseSize + (remainder > 0 ? 1 : 0);
         tempPlayers.forEach(p => { p.pot = potIndex; assigned++; if (assigned >= currentPotLimit && potIndex < numPots) { potIndex++; assigned = 0; remainder--; currentPotLimit = baseSize + (remainder > 0 ? 1 : 0); } });
 
-        // 🌟 YENİ: TORBA İÇİ KARIŞTIRMA (Inner-Pot Shuffle)
-        const shuffle = (arr) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
+        // Torba İçi Karıştırma (Inner-Pot Shuffle)
         let shuffledTempPlayers = [];
-        for(let i=1; i<=numPots; i++) {
-            let potPlayers = tempPlayers.filter(p => p.pot === i);
-            shuffle(potPlayers);
-            shuffledTempPlayers.push(...potPlayers);
-        }
+        for(let i=1; i<=numPots; i++) { let potPlayers = tempPlayers.filter(p => p.pot === i); shuffle(potPlayers); shuffledTempPlayers.push(...potPlayers); }
         tempPlayers = shuffledTempPlayers;
 
         let finalMatches = [];
@@ -1796,7 +1796,6 @@ if (!window.coreStartPending) {
         database.ref(`the_35_gold_league/multi_v1/${currentTid}/matches`).set(finalMatches);
         database.ref(`the_35_gold_league/multi_v1/${currentTid}/settings`).set(t.settings).then(() => { btn.innerHTML = originalText; btn.disabled = false; alert("Kuralar kusursuz çekildi! Turnuva şu an GİZLİ TASLAK (Önizleme) modunda."); populateLeagueDropdowns(); adminSwitchLeague(); });
     };
-
     window.startPendingTournament = function(btn) {
         window.coreStartPending(btn);
     };
@@ -1806,40 +1805,33 @@ if (!window.coreStartPending) {
         let checked = document.querySelectorAll('.admin-chk:checked'); let N = checked.length; if (N < 12) return alert("⚠️ Torba sistemi için minimum 12 kişi gereklidir."); 
         let tPlayers = Array.from(checked).map(cb => { let u = globalUsers[cb.value]; return { name: u.name, score: parseFloat(u.sysScore||0) }; }); 
         
-        // Önce Puanlara Göre Asıl Sıralamayı Yap (Kim hangi torbaya girecek belirlemek için)
+        // 🎲 KARIŞTIRMA (SHUFFLE) FONKSİYONU
+        const shuffle = (arr) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
+        
+        // 🌟 AYNI PUANLILARIN TORBA DEĞİŞTİRMESİ İÇİN SİHİRLİ DOKUNUŞ
+        // Önce tüm oyuncuları rastgele karıştırıyoruz, SONRA puana göre sıralıyoruz.
+        shuffle(tPlayers);
         tPlayers.sort((a, b) => b.score - a.score);
         
         let numPots = N >= 48 ? 5 : (N >= 24 ? 4 : 3); let baseSize = Math.floor(N / numPots); let remainder = N % numPots; 
-        let html = `<div class="pot-container" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:10px; margin-top:15px;">`; 
-        let startIndex = 0;
-        
-        // 🎲 Karıştırma (Shuffle) Fonksiyonu
-        const shuffle = (arr) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
-
+        let html = `<div class="pot-container" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:10px; margin-top:15px;">`; let startIndex = 0;
         for(let i=1; i<=numPots; i++) { 
-            let currentSize = baseSize + (remainder > 0 ? 1 : 0); 
-            if(remainder > 0) remainder--; 
+            let currentSize = baseSize + (remainder > 0 ? 1 : 0); if(remainder > 0) remainder--; 
+            let potSlice = tPlayers.slice(startIndex, startIndex + currentSize); startIndex += currentSize; 
             
-            // O torbaya girmesi gereken oyuncuları listeden kesip al
-            let potSlice = tPlayers.slice(startIndex, startIndex + currentSize); 
-            startIndex += currentSize; 
-            
-            // 🌟 İŞTE SİHİR BURADA: Torba içindeki oyuncuları kendi aralarında KARIŞTIR! (Her tıklandığında değişir)
+            // Torba içini ekrana basarken de karıştır ki hep aynı kişi en üstte görünmesin
             shuffle(potSlice);
 
             let listHtml = potSlice.map(p => `<div style="font-size:11px; padding:4px 0; border-bottom:1px solid #0f172a; display:flex; justify-content:space-between;"><span>${p.name}</span><span style="color:var(--success);">${p.score}</span></div>`).join(''); 
             html += `<div style="background:#1e293b; border:1px solid var(--accent-color); border-radius:8px; padding:10px; min-width:150px; flex:1;"><div style="text-align:center; color:var(--accent-color); font-weight:bold; font-size:12px; border-bottom:1px dashed var(--divider); padding-bottom:5px; margin-bottom:8px;">TORBA ${i} (${potSlice.length} Kişi)</div>${listHtml}</div>`; 
         } 
         html += `</div>`;
-        
-        let container = document.getElementById('potPreviewContainer'); 
-        if (!container) { container = document.createElement('div'); container.id = 'potPreviewContainer'; container.style.display = 'none'; container.style.marginBottom = '15px'; let btn = document.getElementById('startManualBtn'); btn.parentNode.insertBefore(container, btn); } 
-        container.innerHTML = html; container.style.display = 'block';
+        let container = document.getElementById('potPreviewContainer'); if (!container) { container = document.createElement('div'); container.id = 'potPreviewContainer'; container.style.display = 'none'; container.style.marginBottom = '15px'; let btn = document.getElementById('startManualBtn'); btn.parentNode.insertBefore(container, btn); } container.innerHTML = html; container.style.display = 'block';
     }
 
    // 3. Akıllı Müsaitlik Kura Motoru (Gelişmiş Manuel Çekim)
 if (!window.coreStartManual) {
-    window.coreStartManual = function(btn) {
+   window.coreStartManual = function(btn) {
         let checked = document.querySelectorAll('.admin-chk:checked'); let N = checked.length; if (N < 12) return alert("⚠️ Minimum 12 kişi gereklidir."); 
         let tier = document.getElementById('leagueTier_m').value; let gender = document.getElementById('leagueGender_m').value; let region = document.getElementById('leagueRegion_m').value.trim().toLocaleUpperCase('tr-TR') || 'İZMİR'; let cName = document.getElementById('leagueCustomName_m').value.trim() || `İZMİR 35 KORTENİS LİGİ`; let sDate = document.getElementById('startDate_m').value; if (!sDate) return alert("Tarih seçiniz!");
         
@@ -1850,20 +1842,21 @@ if (!window.coreStartManual) {
         };
 
         let originalText = btn.innerHTML; btn.innerHTML = "⏳ KURA ÇEKİLİYOR..."; btn.disabled = true;
+        
+        const shuffle = (arr) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
+        
         let tempPlayers = Array.from(checked).map(cb => { let u = globalUsers[cb.value]; return { id: u.id, name: u.name, sysScore: u.sysScore, wins: 0, losses: 0, totalMatches: 0, setAv: 0, kor: 0, korRank: 0 }; });
+        
+        // 🌟 SINIRDAKİ AYNI PUANLILARI ADİL DAĞITMAK İÇİN ÖNCE KARIŞTIR
+        shuffle(tempPlayers);
         tempPlayers.sort((a, b) => parseFloat(b.sysScore || 0) - parseFloat(a.sysScore || 0));
 
         let numPots = N >= 48 ? 5 : (N >= 24 ? 4 : 3); let mLimit = numPots * 2; let baseSize = Math.floor(N / numPots); let remainder = N % numPots; let potIndex = 1; let assigned = 0; let currentPotLimit = baseSize + (remainder > 0 ? 1 : 0);
         tempPlayers.forEach(p => { p.pot = potIndex; assigned++; if (assigned >= currentPotLimit && potIndex < numPots) { potIndex++; assigned = 0; remainder--; currentPotLimit = baseSize + (remainder > 0 ? 1 : 0); } });
 
-        // 🌟 YENİ: TORBA İÇİ KARIŞTIRMA (Inner-Pot Shuffle)
-        const shuffle = (arr) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
+        // Torba İçi Karıştırma (Inner-Pot Shuffle)
         let shuffledTempPlayers = [];
-        for(let i=1; i<=numPots; i++) {
-            let potPlayers = tempPlayers.filter(p => p.pot === i);
-            shuffle(potPlayers);
-            shuffledTempPlayers.push(...potPlayers);
-        }
+        for(let i=1; i<=numPots; i++) { let potPlayers = tempPlayers.filter(p => p.pot === i); shuffle(potPlayers); shuffledTempPlayers.push(...potPlayers); }
         tempPlayers = shuffledTempPlayers;
 
         let finalMatches = []; let wasFullyValid = false;
@@ -1924,7 +1917,6 @@ if (!window.coreStartManual) {
             populateLeagueDropdowns(); document.getElementById('adminLeagueSelect').value = newTid; adminSwitchLeague(); 
         });
     };
-
     window.startManualTournament = function(btn) {
         window.coreStartManual(btn);
     };
