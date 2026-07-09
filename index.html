@@ -1804,10 +1804,37 @@ if (!window.coreStartPending) {
 
     function previewPots() {
         let checked = document.querySelectorAll('.admin-chk:checked'); let N = checked.length; if (N < 12) return alert("⚠️ Torba sistemi için minimum 12 kişi gereklidir."); 
-        let tPlayers = Array.from(checked).map(cb => { let u = globalUsers[cb.value]; return { name: u.name, score: parseFloat(u.sysScore||0) }; }); tPlayers.sort((a, b) => b.score - a.score);
-        let numPots = N >= 48 ? 5 : (N >= 24 ? 4 : 3); let baseSize = Math.floor(N / numPots); let remainder = N % numPots; let html = `<div class="pot-container" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:10px; margin-top:15px;">`; let startIndex = 0;
-        for(let i=1; i<=numPots; i++) { let currentSize = baseSize + (remainder > 0 ? 1 : 0); if(remainder > 0) remainder--; let potSlice = tPlayers.slice(startIndex, startIndex + currentSize); startIndex += currentSize; let listHtml = potSlice.map(p => `<div style="font-size:11px; padding:4px 0; border-bottom:1px solid #0f172a; display:flex; justify-content:space-between;"><span>${p.name}</span><span style="color:var(--success);">${p.score}</span></div>`).join(''); html += `<div style="background:#1e293b; border:1px solid var(--accent-color); border-radius:8px; padding:10px; min-width:150px; flex:1;"><div style="text-align:center; color:var(--accent-color); font-weight:bold; font-size:12px; border-bottom:1px dashed var(--divider); padding-bottom:5px; margin-bottom:8px;">TORBA ${i} (${potSlice.length} Kişi)</div>${listHtml}</div>`; } html += `</div>`;
-        let container = document.getElementById('potPreviewContainer'); if (!container) { container = document.createElement('div'); container.id = 'potPreviewContainer'; container.style.display = 'none'; container.style.marginBottom = '15px'; let btn = document.getElementById('startManualBtn'); btn.parentNode.insertBefore(container, btn); } container.innerHTML = html; container.style.display = 'block';
+        let tPlayers = Array.from(checked).map(cb => { let u = globalUsers[cb.value]; return { name: u.name, score: parseFloat(u.sysScore||0) }; }); 
+        
+        // Önce Puanlara Göre Asıl Sıralamayı Yap (Kim hangi torbaya girecek belirlemek için)
+        tPlayers.sort((a, b) => b.score - a.score);
+        
+        let numPots = N >= 48 ? 5 : (N >= 24 ? 4 : 3); let baseSize = Math.floor(N / numPots); let remainder = N % numPots; 
+        let html = `<div class="pot-container" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:10px; margin-top:15px;">`; 
+        let startIndex = 0;
+        
+        // 🎲 Karıştırma (Shuffle) Fonksiyonu
+        const shuffle = (arr) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
+
+        for(let i=1; i<=numPots; i++) { 
+            let currentSize = baseSize + (remainder > 0 ? 1 : 0); 
+            if(remainder > 0) remainder--; 
+            
+            // O torbaya girmesi gereken oyuncuları listeden kesip al
+            let potSlice = tPlayers.slice(startIndex, startIndex + currentSize); 
+            startIndex += currentSize; 
+            
+            // 🌟 İŞTE SİHİR BURADA: Torba içindeki oyuncuları kendi aralarında KARIŞTIR! (Her tıklandığında değişir)
+            shuffle(potSlice);
+
+            let listHtml = potSlice.map(p => `<div style="font-size:11px; padding:4px 0; border-bottom:1px solid #0f172a; display:flex; justify-content:space-between;"><span>${p.name}</span><span style="color:var(--success);">${p.score}</span></div>`).join(''); 
+            html += `<div style="background:#1e293b; border:1px solid var(--accent-color); border-radius:8px; padding:10px; min-width:150px; flex:1;"><div style="text-align:center; color:var(--accent-color); font-weight:bold; font-size:12px; border-bottom:1px dashed var(--divider); padding-bottom:5px; margin-bottom:8px;">TORBA ${i} (${potSlice.length} Kişi)</div>${listHtml}</div>`; 
+        } 
+        html += `</div>`;
+        
+        let container = document.getElementById('potPreviewContainer'); 
+        if (!container) { container = document.createElement('div'); container.id = 'potPreviewContainer'; container.style.display = 'none'; container.style.marginBottom = '15px'; let btn = document.getElementById('startManualBtn'); btn.parentNode.insertBefore(container, btn); } 
+        container.innerHTML = html; container.style.display = 'block';
     }
 
    // 3. Akıllı Müsaitlik Kura Motoru (Gelişmiş Manuel Çekim)
