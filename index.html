@@ -1819,10 +1819,10 @@ if (!window.coreStartPending) {
     };
 }
 
- window.previewPots = function() {
+window.previewPots = function() {
         let checked = document.querySelectorAll('.admin-chk:checked'); let N = checked.length; if (N < 12) return alert("⚠️ Torba sistemi için minimum 12 kişi gereklidir."); 
         
-        // 🚨 DÜZELTME: Oyuncuların ID'sini de alıyoruz ki hafızaya kaydedebilelim
+        // 🚨 KESİN DÜZELTME BURADA: "id: u.id" eklendi ki hafıza sistemi kimin kim olduğunu bilebilsin!
         let tPlayers = Array.from(checked).map(cb => { let u = globalUsers[cb.value]; return { id: u.id, name: u.name, score: parseFloat(u.sysScore||0), rand: Math.random() }; }); 
         
         tPlayers.sort((a, b) => {
@@ -1833,7 +1833,7 @@ if (!window.coreStartPending) {
         let numPots = N >= 48 ? 5 : (N >= 24 ? 4 : 3); let baseSize = Math.floor(N / numPots); let remainder = N % numPots; 
         let html = `<div class="pot-container" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:10px; margin-top:15px;">`; let startIndex = 0;
         
-        // 🌟 HAFIZA KİLİDİ: Her önizlemede yeni bir hafıza oluşturuyoruz
+        // HAFIZA SIFIRLAMA
         window.lastAssignedPots = {}; 
 
         const shuffle = (arr) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
@@ -1842,7 +1842,7 @@ if (!window.coreStartPending) {
             let currentSize = baseSize + (remainder > 0 ? 1 : 0); if(remainder > 0) remainder--; 
             let potSlice = tPlayers.slice(startIndex, startIndex + currentSize); startIndex += currentSize; 
             
-            // 🌟 OYUNCULARIN HANGİ TORBAYA DÜŞTÜĞÜNÜ HAFIZAYA KAZI
+            // 🌟 HAFIZAYA KAYDET
             potSlice.forEach(p => window.lastAssignedPots[p.id] = i);
 
             shuffle(potSlice); 
@@ -1856,6 +1856,7 @@ if (!window.coreStartPending) {
 
    // 3. Akıllı Müsaitlik Kura Motoru (Gelişmiş Manuel Çekim)
 if (!window.coreStartManual) {
+
 window.coreStartManual = function(btn) {
         let checked = document.querySelectorAll('.admin-chk:checked'); let N = checked.length; if (N < 12) return alert("⚠️ Minimum 12 kişi gereklidir."); 
         let tier = document.getElementById('leagueTier_m').value; let gender = document.getElementById('leagueGender_m').value; let region = document.getElementById('leagueRegion_m').value.trim().toLocaleUpperCase('tr-TR') || 'İZMİR'; let cName = document.getElementById('leagueCustomName_m').value.trim() || `İZMİR 35 KORTENİS LİGİ`; let sDate = document.getElementById('startDate_m').value; if (!sDate) return alert("Tarih seçiniz!");
@@ -1873,10 +1874,9 @@ window.coreStartManual = function(btn) {
         
         let numPots = N >= 48 ? 5 : (N >= 24 ? 4 : 3); let mLimit = numPots * 2;
 
-        // 🌟 KUSURSUZ HAFIZA KİLİDİ (İllüzyonu çözen kısım)
+        // 🌟 HAFIZA KONTROLÜ (Artık ID'ler uyuştuğu için mükemmel çalışacak)
         let hasValidMemory = false;
         if (window.lastAssignedPots) {
-            // Eğer oyuncu listesi değişmediyse hafızayı kullan
             let memoryKeys = Object.keys(window.lastAssignedPots);
             if (memoryKeys.length === N && tempPlayers.every(p => window.lastAssignedPots[p.id] !== undefined)) {
                 hasValidMemory = true;
@@ -1884,10 +1884,8 @@ window.coreStartManual = function(btn) {
         }
 
         if (hasValidMemory) {
-            // 1. Torbaları Önizle butonuna basılmış, hafızadakini birebir kullan
             tempPlayers.forEach(p => { p.pot = window.lastAssignedPots[p.id]; });
         } else {
-            // 2. Önizlemeye basmadan direkt kurayı çek demiş, sıfırdan dağıt
             tempPlayers.sort((a, b) => {
                 let scoreA = parseFloat(a.sysScore || 0); let scoreB = parseFloat(b.sysScore || 0);
                 if (scoreB !== scoreA) return scoreB - scoreA;
@@ -1972,6 +1970,7 @@ window.coreStartManual = function(btn) {
             populateLeagueDropdowns(); document.getElementById('adminLeagueSelect').value = newTid; adminSwitchLeague(); 
         });
     };
+
     window.startManualTournament = function(btn) {
         window.coreStartManual(btn);
     };
