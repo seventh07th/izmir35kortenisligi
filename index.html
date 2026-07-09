@@ -2409,24 +2409,39 @@ if(titleEl) {
 
     function filterPlayerFikstur() { let val = document.getElementById('playerFilterSelect').value; document.querySelectorAll('.player-rivals-card').forEach(c => c.style.display = (val === 'all' || c.getAttribute('data-player-id') === val) ? 'block' : 'none'); }
 
-function renderRivalsGrid() {
+    function renderRivalsGrid() {
         const c = document.getElementById('rivalsGridContainer'); 
-        let htmlStr = ''; // PERFORMANS: Tüm HTML'i bu değişkende topluyoruz
+        let htmlStr = ''; 
         
         players.forEach(p => {
             let cardHtml = `<div class="player-rivals-card" data-player-id="${p.id}"><div class="player-main-title">${p.name} FİKSTÜRÜ</div>`;
+            
             matches.filter(m => m.p1 === p.id || m.p2 === p.id).forEach((m, idx) => {
-                let oppId = (m.p1 === p.id) ? m.p2 : m.p1; let oppName = (m.p1 === p.id) ? m.p2Name : m.p1Name;
+                let oppId = (m.p1 === p.id) ? m.p2 : m.p1; 
+                let oppName = (m.p1 === p.id) ? m.p2Name : m.p1Name;
+                
+                // 🌟 YENİ SİHİR: Rakibin hangi torbadan (Pot) geldiğini bul ve rozet oluştur!
+                let oppObj = players.find(x => String(x.id) === String(oppId));
+                let potTag = (oppObj && oppObj.pot) ? `<span style="background:var(--warning); color:black; font-size:9px; padding:2px 5px; border-radius:4px; margin-left:6px; font-weight:bold; box-shadow:0 0 5px rgba(255,189,0,0.4);">T${oppObj.pot}</span>` : '';
+
                 let smartCal = ""; let myU = globalUsers[p.id]; let oppU = globalUsers[oppId];
-                if(!m.played && myU && oppU && Array.isArray(myU.availability) && Array.isArray(oppU.availability)) { let common = myU.availability.filter(v => oppU.availability.includes(v)); if(common.length > 0) smartCal = `<div style="width:100%; font-size:10px; color:var(--success); margin-top:4px;">💡 Ortak Müsaitlik: ${common.map(c=>c.toLocaleUpperCase('tr-TR')).join(', ')}</div>`; }
-                let ds = m.matchDate ? ` <span style="color:var(--success)">(${m.matchDate})</span>` : ''; let sIcon = m.played ? (m.pending ? "⏳" : "✅") : "🎾";
-                cardHtml += `<div class="rival-line"><div style="width:100%; display:flex; justify-content:space-between;"><span>M${idx+1}: <strong class="player-link" onclick="openPublicProfile('${oppId}')">${oppName}</strong>${ds}</span><span>${sIcon}</span></div>${smartCal}</div>`;
+                if(!m.played && myU && oppU && Array.isArray(myU.availability) && Array.isArray(oppU.availability)) { 
+                    let common = myU.availability.filter(v => oppU.availability.includes(v)); 
+                    if(common.length > 0) smartCal = `<div style="width:100%; font-size:10px; color:var(--success); margin-top:4px;">💡 Ortak Müsaitlik: ${common.map(c=>c.toLocaleUpperCase('tr-TR')).join(', ')}</div>`; 
+                }
+                
+                let ds = m.matchDate ? ` <span style="color:var(--success)">(${m.matchDate})</span>` : ''; 
+                let sIcon = m.played ? (m.pending ? "⏳" : "✅") : "🎾";
+                
+                // Rozeti (potTag) ismin hemen yanına yerleştiriyoruz
+                cardHtml += `<div class="rival-line"><div style="width:100%; display:flex; justify-content:space-between; align-items:center;"><span>M${idx+1}: <strong class="player-link" onclick="openPublicProfile('${oppId}')">${oppName}</strong>${potTag}${ds}</span><span>${sIcon}</span></div>${smartCal}</div>`;
             });
+            
             cardHtml += `</div>`;
             htmlStr += cardHtml;
         });
         
-        c.innerHTML = htmlStr; // PERFORMANS: Sadece 1 kez DOM'a yazdır!
+        c.innerHTML = htmlStr; 
         filterPlayerFikstur();
     }
 
