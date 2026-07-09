@@ -53,3 +53,73 @@ self.addEventListener('fetch', (event) => {
             })
     );
 });
+
+// ==========================================
+// 📢 BİLDİRİM MERKEZİ VE MEGAFON MOTORU
+// ==========================================
+
+// 1. Yönetici Megafonu (Toplu Bildirim) İşlevi
+window.sendMassNotification = function() {
+    let msg = document.getElementById('adminMassMessage').value.trim();
+    if(!msg) return showToast("Lütfen göndermek için bir mesaj yazın.", "warning");
+    
+    showCustomConfirm("TOPLU BİLDİRİM GÖNDERİMİ", "Bu mesaj sistemdeki TÜM OYUNCULARIN profiline anlık bildirim olarak düşecektir. Onaylıyor musunuz?", () => {
+        let btn = document.activeElement; let orig = btn.innerText;
+        btn.innerText = "⏳ GÖNDERİLİYOR..."; btn.disabled = true;
+        
+        let updates = {};
+        let now = Date.now();
+        // Sistemdeki herkese bu bildirimi işle
+        Object.values(globalUsers).forEach(u => {
+            if(u && u.id && u.id !== 'ADMIN') {
+                let newRef = database.ref(`the_35_gold_league/users/${u.id}/alerts`).push();
+                updates[`the_35_gold_league/users/${u.id}/alerts/${newRef.key}`] = { text: `📢 <strong>YÖNETİCİ DUYURUSU:</strong> ${msg}`, time: now };
+            }
+        });
+        
+        // Tek seferde veritabanına bas (Performanslı kayıt)
+        database.ref().update(updates).then(() => {
+            showToast("Duyuru tüm oyunculara başarıyla gönderildi!", "success");
+            document.getElementById('adminMassMessage').value = '';
+            btn.innerText = orig; btn.disabled = false;
+        }).catch(err => {
+            showToast("Hata: " + err.message, "error");
+            btn.innerText = orig; btn.disabled = false;
+        });
+    });
+}
+
+// 2. Kura Motorlarına "Otomatik Turnuva Başlangıç" Bildirimi Ekleme (Kanca)
+let originalStartPending = window.startPendingTournament;
+window.startPendingTournament = function(btn) {
+    let t = allTourneys[currentTid]; 
+    let tName = t.settings.customName || "Turnuva";
+    
+    // Eski fonksiyonu çalıştır (Kurayı Çeker)
+    originalStartPending(btn);
+    
+    // Kuradan hemen sonra o turnuvadaki oyunculara bildirim at
+    setTimeout(() => {
+        if(allTourneys[currentTid] && allTourneys[currentTid].settings.status === 'active') {
+            _arr(allTourneys[currentTid].players).forEach(p => {
+                addAlertToUser(p.id, `🎉 <strong>TURNUVA BAŞLADI!</strong> <em>[${tName}]</em> kuraları çekildi ve fikstürünüz oluşturuldu. Fikstür sekmesinden rakiplerinizi görebilirsiniz. Başarılar!`);
+            });
+        }
+    }, 2000); // Veritabanı kaydının bitmesi için 2 saniye bekler
+}
+
+let originalStartManual = window.startManualTournament;
+window.startManualTournament = function(btn) {
+    let cName = document.getElementById('leagueCustomName_m').value.trim() || `İZMİR 35 KORTENİS LİGİ`;
+    
+    // Eski fonksiyonu çalıştır (Kurayı Çeker)
+    originalStartManual(btn);
+    
+    // Kuradan hemen sonra seçili oyunculara bildirim at
+    setTimeout(() => {
+        let checked = document.querySelectorAll('.admin-chk:checked');
+        Array.from(checked).forEach(cb => {
+            addAlertToUser(cb.value, `🎉 <strong>TURNUVA BAŞLADI!</strong> <em>[${cName}]</em> kuraları çekildi ve fikstürünüz oluşturuldu. Fikstür sekmesinden rakiplerinizi görebilirsiniz. Başarılar!`);
+        });
+    }, 2000);
+}
