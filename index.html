@@ -1734,34 +1734,32 @@ function renderAdminChecklist() {
 
  // 4. Kura Çekildiğinde Active yerine Draft yap (Oyunculara Bildirim Atma)
 if (!window.coreStartPending) {
-  window.coreStartPending = function(btn) {
+ window.coreStartPending = function(btn) {
         let t = allTourneys[currentTid]; let regs = _arr(t.registeredPlayers); let cap = t.settings.maxCapacity || 23; let activeRegs = regs.slice(0, cap); let N = activeRegs.length;
         if (N < 12) return alert("Minimum 12 kişi gereklidir."); if(!confirm(`DİKKAT: Asıl listedeki ${N} kişi ile kura çekilecek ve turnuva başlatılacaktır. Onaylıyor musunuz?`)) return;
         let originalText = btn.innerHTML; btn.innerHTML = "⏳ KURA ÇEKİLİYOR..."; btn.disabled = true;
 
         const shuffle = (arr) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
         
-        // 🌟 Herkese gizli bir rastgele 'rand' (kura) değeri atıyoruz
         let tempPlayers = activeRegs.map(uid => { let u = globalUsers[uid]; return { id: u.id, name: u.name, sysScore: u.sysScore, wins: 0, losses: 0, totalMatches: 0, setAv: 0, kor: 0, korRank: 0, rand: Math.random() }; });
         
-        // 🌟 Önce puana bak, puanlar eşitse gizli kura numarasına göre sırala
         tempPlayers.sort((a, b) => {
             let scoreA = parseFloat(a.sysScore || 0); let scoreB = parseFloat(b.sysScore || 0);
             if (scoreB !== scoreA) return scoreB - scoreA;
-            return a.rand - b.rand; // Eşit puanlılar sınırda yer değiştirir!
+            return a.rand - b.rand; 
         });
 
         let numPots = N >= 48 ? 5 : (N >= 24 ? 4 : 3); let mLimit = numPots * 2; let baseSize = Math.floor(N / numPots); let remainder = N % numPots; let potIndex = 1; let assigned = 0; let currentPotLimit = baseSize + (remainder > 0 ? 1 : 0);
         tempPlayers.forEach(p => { p.pot = potIndex; assigned++; if (assigned >= currentPotLimit && potIndex < numPots) { potIndex++; assigned = 0; remainder--; currentPotLimit = baseSize + (remainder > 0 ? 1 : 0); } });
 
-        // Torba İçi Karıştırma (Inner-Pot Shuffle)
         let shuffledTempPlayers = [];
         for(let i=1; i<=numPots; i++) { let potPlayers = tempPlayers.filter(p => p.pot === i); shuffle(potPlayers); shuffledTempPlayers.push(...potPlayers); }
         tempPlayers = shuffledTempPlayers;
 
         let finalMatches = [];
 
-        for (let attempt = 0; attempt < 50; attempt++) {
+        // 🌟 ÇÖZÜM: Kördüğüm için 100 deneme ve KESİN torba kuralı!
+        for (let attempt = 0; attempt < 100; attempt++) {
             let tempMatches = []; let mId = 0; let pStats = {};
             tempPlayers.forEach(p => pStats[p.id] = { total: 0, pots: {1:0, 2:0, 3:0, 4:0, 5:0} });
 
@@ -1771,23 +1769,39 @@ if (!window.coreStartPending) {
                     let attempts1 = 0;
                     while(pStats[pA.id].pots[targetPot] < 2 && pStats[pA.id].total < mLimit && attempts1 < 20) {
                         attempts1++;
-                        let candidates = tempPlayers.filter(pB => pB.id !== pA.id && pB.pot === targetPot && pStats[pB.id].total < mLimit && pStats[pB.id].pots[pA.pot] < 2 && !tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id)));
+                        let candidates = tempPlayers.filter(pB => 
+                            pB.id !== pA.id && 
+                            pB.pot === targetPot && 
+                            pStats[pB.id].total < mLimit && 
+                            pStats[pB.id].pots[pA.pot] < 2 && // 🚨 KESİN KURAL: Rakip de benim torbamdan 2'yi aşmamalı!
+                            !tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id))
+                        );
                         if(candidates.length === 0) break;
                         shuffle(candidates); let pB = candidates[0];
                         tempMatches.push({ id: mId++, p1: pA.id, p2: pB.id, p1Name: pA.name, p2Name: pB.name, p1S1:'', p1S2:'', p1MT:'', p2S1:'', p2S2:'', p2MT:'', p1S1TB:'', p2S1TB:'', p1S2TB:'', p2S2TB:'', played:false, pending:false, enteredBy:'', isWO:false, woWinner:'', matchDate:'', matchFormat:'', p1Fair: false, p2Fair: false });
-                        pStats[pA.id].total++; pStats[pA.id].pots[targetPot]++; pStats[pB.id].total++; pStats[pB.id].pots[pA.pot]++;
+                        pStats[pA.id].total++; pStats[pA.id].pots[targetPot]++; 
+                        pStats[pB.id].total++; pStats[pB.id].pots[pA.pot]++; // Rakibin sayacını da işle
                     }
                 }
             }
+            
+            // İkinci Tur (Boşluk Doldurma) - Burada da kural ASLA çiğnenmez!
             for(let i=0; i<tempPlayers.length; i++) {
                 let pA = tempPlayers[i]; let fallbackAttempts = 0;
                 while(pStats[pA.id].total < mLimit && fallbackAttempts < 50) {
                     fallbackAttempts++;
-                    let candidates = tempPlayers.filter(pB => pB.id !== pA.id && pStats[pB.id].total < mLimit && !tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id)));
+                    let candidates = tempPlayers.filter(pB => 
+                        pB.id !== pA.id && 
+                        pStats[pB.id].total < mLimit && 
+                        pStats[pA.id].pots[pB.pot] < 2 && // 🚨 KESİN KURAL KORUNDU
+                        pStats[pB.id].pots[pA.pot] < 2 && // 🚨 KESİN KURAL KORUNDU
+                        !tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id))
+                    );
                     if(candidates.length === 0) break;
                     shuffle(candidates); let pB = candidates[0];
                     tempMatches.push({ id: mId++, p1: pA.id, p2: pB.id, p1Name: pA.name, p2Name: pB.name, p1S1:'', p1S2:'', p1MT:'', p2S1:'', p2S2:'', p2MT:'', p1S1TB:'', p2S1TB:'', p1S2TB:'', p2S2TB:'', played:false, pending:false, enteredBy:'', isWO:false, woWinner:'', matchDate:'', matchFormat:'', p1Fair: false, p2Fair: false });
-                    pStats[pA.id].total++; pStats[pB.id].total++;
+                    pStats[pA.id].total++; pStats[pA.id].pots[pB.pot]++; 
+                    pStats[pB.id].total++; pStats[pB.id].pots[pA.pot]++;
                 }
             }
 
@@ -1837,7 +1851,7 @@ if (!window.coreStartPending) {
 
    // 3. Akıllı Müsaitlik Kura Motoru (Gelişmiş Manuel Çekim)
 if (!window.coreStartManual) {
-window.coreStartManual = function(btn) {
+ window.coreStartManual = function(btn) {
         let checked = document.querySelectorAll('.admin-chk:checked'); let N = checked.length; if (N < 12) return alert("⚠️ Minimum 12 kişi gereklidir."); 
         let tier = document.getElementById('leagueTier_m').value; let gender = document.getElementById('leagueGender_m').value; let region = document.getElementById('leagueRegion_m').value.trim().toLocaleUpperCase('tr-TR') || 'İZMİR'; let cName = document.getElementById('leagueCustomName_m').value.trim() || `İZMİR 35 KORTENİS LİGİ`; let sDate = document.getElementById('startDate_m').value; if (!sDate) return alert("Tarih seçiniz!");
         
@@ -1850,27 +1864,25 @@ window.coreStartManual = function(btn) {
         let originalText = btn.innerHTML; btn.innerHTML = "⏳ KURA ÇEKİLİYOR..."; btn.disabled = true;
         const shuffle = (arr) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
         
-        // 🌟 Herkese gizli bir rastgele 'rand' (kura) değeri atıyoruz
         let tempPlayers = Array.from(checked).map(cb => { let u = globalUsers[cb.value]; return { id: u.id, name: u.name, sysScore: u.sysScore, wins: 0, losses: 0, totalMatches: 0, setAv: 0, kor: 0, korRank: 0, rand: Math.random() }; });
         
-        // 🌟 Önce puana bak, puanlar eşitse gizli kura numarasına göre sırala
         tempPlayers.sort((a, b) => {
             let scoreA = parseFloat(a.sysScore || 0); let scoreB = parseFloat(b.sysScore || 0);
             if (scoreB !== scoreA) return scoreB - scoreA;
-            return a.rand - b.rand; // Eşit puanlılar sınırda yer değiştirir!
+            return a.rand - b.rand; 
         });
 
         let numPots = N >= 48 ? 5 : (N >= 24 ? 4 : 3); let mLimit = numPots * 2; let baseSize = Math.floor(N / numPots); let remainder = N % numPots; let potIndex = 1; let assigned = 0; let currentPotLimit = baseSize + (remainder > 0 ? 1 : 0);
         tempPlayers.forEach(p => { p.pot = potIndex; assigned++; if (assigned >= currentPotLimit && potIndex < numPots) { potIndex++; assigned = 0; remainder--; currentPotLimit = baseSize + (remainder > 0 ? 1 : 0); } });
 
-        // Torba İçi Karıştırma (Inner-Pot Shuffle)
         let shuffledTempPlayers = [];
         for(let i=1; i<=numPots; i++) { let potPlayers = tempPlayers.filter(p => p.pot === i); shuffle(potPlayers); shuffledTempPlayers.push(...potPlayers); }
         tempPlayers = shuffledTempPlayers;
 
         let finalMatches = []; let wasFullyValid = false;
 
-        for (let attempt = 0; attempt < 50; attempt++) {
+        // 🌟 ÇÖZÜM: Kördüğüm için 100 deneme ve KESİN torba kuralı!
+        for (let attempt = 0; attempt < 100; attempt++) {
             let tempMatches = []; let mId = 0; let pStats = {};
             tempPlayers.forEach(p => pStats[p.id] = { total: 0, pots: {1:0, 2:0, 3:0, 4:0, 5:0} });
 
@@ -1881,7 +1893,11 @@ window.coreStartManual = function(btn) {
                     while(pStats[pA.id].pots[targetPot] < 2 && pStats[pA.id].total < mLimit && attempts1 < 20) {
                         attempts1++;
                         let candidates = tempPlayers.filter(pB => {
-                            let valid = pB.id !== pA.id && pB.pot === targetPot && pStats[pB.id].total < mLimit && pStats[pB.id].pots[pA.pot] < 2 && !tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id));
+                            let valid = pB.id !== pA.id && 
+                                        pB.pot === targetPot && 
+                                        pStats[pB.id].total < mLimit && 
+                                        pStats[pB.id].pots[pA.pot] < 2 && // 🚨 KESİN KURAL
+                                        !tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id));
                             if(!valid) return false;
                             if(forceCommonTime) return hasCommonTime(globalUsers[pA.id], globalUsers[pB.id]);
                             return true;
@@ -1889,16 +1905,22 @@ window.coreStartManual = function(btn) {
                         if(candidates.length === 0) break;
                         shuffle(candidates); let pB = candidates[0];
                         tempMatches.push({ id: mId++, p1: pA.id, p2: pB.id, p1Name: pA.name, p2Name: pB.name, p1S1:'', p1S2:'', p1MT:'', p2S1:'', p2S2:'', p2MT:'', p1S1TB:'', p2S1TB:'', p1S2TB:'', p2S2TB:'', played:false, pending:false, enteredBy:'', isWO:false, woWinner:'', matchDate:'', matchFormat:'', p1Fair: false, p2Fair: false });
-                        pStats[pA.id].total++; pStats[pA.id].pots[targetPot]++; pStats[pB.id].total++; pStats[pB.id].pots[pA.pot]++;
+                        pStats[pA.id].total++; pStats[pA.id].pots[targetPot]++; 
+                        pStats[pB.id].total++; pStats[pB.id].pots[pA.pot]++;
                     }
                 }
             }
+            
             for(let i=0; i<tempPlayers.length; i++) {
                 let pA = tempPlayers[i]; let fallbackAttempts = 0;
                 while(pStats[pA.id].total < mLimit && fallbackAttempts < 50) {
                     fallbackAttempts++;
                     let candidates = tempPlayers.filter(pB => {
-                        let valid = pB.id !== pA.id && pStats[pB.id].total < mLimit && !tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id));
+                        let valid = pB.id !== pA.id && 
+                                    pStats[pB.id].total < mLimit && 
+                                    pStats[pA.id].pots[pB.pot] < 2 && // 🚨 KESİN KURAL
+                                    pStats[pB.id].pots[pA.pot] < 2 && // 🚨 KESİN KURAL
+                                    !tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id));
                         if(!valid) return false;
                         if(forceCommonTime) return hasCommonTime(globalUsers[pA.id], globalUsers[pB.id]);
                         return true;
@@ -1906,7 +1928,8 @@ window.coreStartManual = function(btn) {
                     if(candidates.length === 0) break;
                     shuffle(candidates); let pB = candidates[0];
                     tempMatches.push({ id: mId++, p1: pA.id, p2: pB.id, p1Name: pA.name, p2Name: pB.name, p1S1:'', p1S2:'', p1MT:'', p2S1:'', p2S2:'', p2MT:'', p1S1TB:'', p2S1TB:'', p1S2TB:'', p2S2TB:'', played:false, pending:false, enteredBy:'', isWO:false, woWinner:'', matchDate:'', matchFormat:'', p1Fair: false, p2Fair: false });
-                    pStats[pA.id].total++; pStats[pB.id].total++;
+                    pStats[pA.id].total++; pStats[pA.id].pots[pB.pot]++; 
+                    pStats[pB.id].total++; pStats[pB.id].pots[pA.pot]++;
                 }
             }
 
@@ -1915,7 +1938,7 @@ window.coreStartManual = function(btn) {
             else if (attempt === 0 || tempMatches.length > finalMatches.length) { finalMatches = tempMatches; }
         }
 
-        if (forceCommonTime && !wasFullyValid) alert("⚠️ Müsaitlik saatleri uyuşmadığı için sistem bazı oyunculara eksik maç atamış olabilir. Lütfen fikstürü inceleyin veya filtreyi kapatarak tekrar çekin.");
+        if (forceCommonTime && !wasFullyValid) alert("⚠️ Müsaitlik saatleri uyuşmadığı için sistem bazı oyunculara eksik maç atamış olabilir. Lütfen fikstürü inceleyin veya 'Müsaitlik Şartı' filtresini kapatarak kuraları tekrar çekin.");
 
         let newTid = "LIG_" + Date.now(); let newSettings = { status: 'draft', matchLimit: mLimit, tier: tier, gender: gender, region: region, startDate: sDate, playerCount: N, customName: cName }; let regsArr = Array.from(checked).map(cb => cb.value);
         
