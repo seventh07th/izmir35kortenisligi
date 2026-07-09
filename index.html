@@ -650,6 +650,7 @@ body {
     <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
         <button class="action-sm" style="background:var(--warning); color:black; display:none; padding:8px 12px; font-weight:bold;" id="editLeagueBtn" onclick="openEditTournamentModal()">⚙️ Ayarlar ve Süre Uzat</button>
         <button class="action-sm" style="background:var(--neon-cyan); color:black; display:none; padding:8px 12px; font-weight:bold;" id="swapLeagueBtn" onclick="openSwapModal()">🔄 Fikstür Takas</button>
+        <button class="action-sm" style="background:#ffc107; color:black; display:none; padding:8px 12px; font-weight:bold;" id="secretEditLeagueBtn" onclick="openSecretEditModal()">🛠️ Fikstür Düzenle</button>
         <button class="action-sm" style="background:var(--danger); color:white; display:none; padding:8px 12px; border:1px solid #ff0000;" id="deleteLeagueBtn" onclick="deleteCurrentTournament()">🗑️ Ligi Sil</button>
     </div>
 </div>
@@ -704,38 +705,17 @@ body {
     <button class="action-btn" style="background:var(--neon-cyan); color:black; font-size:12px; padding:10px;" onclick="sendMassNotification(this)">🚀 HERKESE BİLDİRİM GÖNDER</button>
 </div>
 
-<!-- 🛠️ GİZLİ FİKSTÜR DÜZENLEYİCİ -->
-<div style="background: rgba(255, 193, 7, 0.05); border: 1px solid #ffc107; padding: 15px; border-radius: 12px; margin-top: 20px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(255,193,7,0.1);">
-    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px dashed #ffc107; padding-bottom: 5px; margin-bottom: 10px;">
-        <h4 style="color:#ffc107; margin:0;">🛠️ GİZLİ FİKSTÜR DÜZENLEYİCİ</h4>
-        <button class="action-btn" onclick="refreshSecretEditor()" style="background:#ffc107; color:black; border:none; padding:5px 10px; border-radius:6px; font-size:11px; width:auto;">🔄 Maçları Listele</button>
-    </div>
-    <p style="font-size:11px; color:#cbd5e1; margin-bottom:10px;">Önce "Maçları Listele"ye basın. Ardından oyunculara duyurmadan önce eşleşmelere manuel müdahale edin.</p>
-    
-    <div style="display:flex; gap:10px; margin-bottom:10px;">
-        <select id="adminEditMatchSelect" class="auth-input" style="flex:1;">
-            <option value="">-- Değiştirilecek Maçı Seçin --</option>
-        </select>
-        <button class="action-btn" style="background:#ffc107; color:black; padding:10px; width:auto; font-size:12px;" onclick="loadMatchForEdit()">MAÇI GETİR</button>
-    </div>
-    
-    <div id="adminEditMatchArea" style="display:none; background:#1e293b; padding:15px; border-radius:8px; border: 1px solid #334155;">
-        <label style="color:#94a3b8; font-size:11px;">1. Oyuncu (Kırmızı Köşe):</label>
-        <select id="adminEditP1" class="auth-input" style="margin-bottom:10px;"></select>
-        
-        <label style="color:#94a3b8; font-size:11px;">2. Oyuncu (Mavi Köşe):</label>
-        <select id="adminEditP2" class="auth-input" style="margin-bottom:15px;"></select>
-        
-        <button class="action-btn" style="background:var(--neon-green); padding:10px;" onclick="saveEditedMatch()">💾 YENİ EŞLEŞMEYİ KAYDET</button>
-    </div>
-</div>
-
 
  <div style="display:flex; justify-content:flex-end; margin-bottom:10px;"><button class="action-sm" style="background:var(--accent-color); color:black; font-weight:bold; padding:8px 12px;" onclick="changeAdminPassword()">🔑 YÖNETİCİ ŞİFRESİNİ DEĞİŞTİR</button><div id="adminPushContainer" style="width:100%; text-align:center;"></div></div><div style="background:#020617; padding:15px; border-radius:8px; border:1px solid var(--danger); margin-bottom:15px;"><h4 style="color:var(--danger); margin-top:0; border-bottom:1px solid var(--divider); padding-bottom:5px;">🔑 ŞİFRE SIFIRLAMA TALEPLERİ</h4><div id="adminPasswordResets">Bulunmuyor.</div></div><div style="background:#020617; padding:15px; border-radius:8px; border:1px solid var(--warning); margin-bottom:15px;"><h4 style="color:var(--warning); margin-top:0; border-bottom:1px solid var(--divider); padding-bottom:5px;">⏳ ONAY BEKLEYEN SKORLAR (TÜM LİGLER)</h4><div id="adminPendingList">Yükleniyor...</div></div><div style="background:#020617; padding:15px; border-radius:8px; border:1px solid var(--success);"><h4 style="color:var(--success); margin-top:0; border-bottom:1px solid var(--divider); padding-bottom:5px;">✅ LİGLERDE BİTEN SON 10 MAÇ</h4><div id="adminFinishedScoresList">Yükleniyor...</div></div></div>
         <div id="admin_pending" class="panel"><h2 style="color:var(--accent-color); margin-top:0;" id="pendingAdminTitle">KAYIT YÖNETİMİ</h2><p style="font-size:12px; color:var(--sub-text); margin-bottom:15px;">Bu turnuva henüz başlatılmadı. Oyuncular kayıt olabilir veya siz manuel ekleyebilirsiniz. Asıl liste dolarsa gelenler yedek listeye geçer.</p><div style="background:#1e293b; padding:15px; border-radius:8px; margin-bottom:15px;"><h4 style="margin:0 0 10px 0; color:var(--success);">📥 MANUEL OYUNCU EKLE</h4><div style="display:flex; gap:10px;"><select id="adminManualAddSelect" class="auth-select force-upper" style="margin:0; flex:1;"><option value="">SİSTEMDEN OYUNCU SEÇ...</option></select><button class="action-sm" style="background:var(--success); color:black;" onclick="adminManualAddPlayer()">LİSTEYE EKLE</button></div></div><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><h4 style="margin:0; color:white;">ASIL LİSTE <span id="mainListCount" style="color:var(--accent-color);">(0/23)</span> <button class="action-sm" style="background:var(--warning); color:black; margin-left:10px;" onclick="grantFounderStatus()">👑 Listeyi Kurucu Yap</button></h4>
 </div><div class="admin-player-list" id="pendingMainList" style="min-height:50px;"></div><h4 style="margin:15px 0 5px 0; color:var(--warning);">YEDEK LİSTE (Bekleyenler)</h4><div class="admin-player-list" id="pendingWaitlist" style="min-height:50px;"></div><div class="global-alert" id="pendingReadyAlert" style="display:none; margin:15px 0; padding:15px;">✅ Minimum oyuncu sayısına (12) ulaşıldı. Turnuvayı dilediğiniz zaman başlatabilirsiniz.</div><button class="action-btn" id="startPendingBtn" onclick="startPendingTournament(this)" disabled style="background:#334155; color:#94a3b8;">⏳ KURAYI ÇEK VE TURNUVAYI BAŞLAT</button></div>
         <div id="setup_pending" class="panel"><h2 style="color:var(--accent-color); margin-top:0;">➕ YENİ TURNUVA OLUŞTUR (KAYDA AÇ)</h2><div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px;"><input type="text" id="leagueCustomName" class="auth-input force-upper" style="width:100%; margin:0;" placeholder="🏆 TURNUVA ADI" oninput="this.value = this.value.toLocaleUpperCase('tr-TR')"><select id="leagueCapacity" class="auth-input force-upper" style="width:100%; margin:0; border-color: var(--accent-color); font-weight:bold;" onchange="updatePlayoffInfo(this.value, 'playoffInfoPending')"><option value="23" selected>🧍 BUTİK LİG (12-23 Kişi)</option><option value="47">🧍‍♂️ STANDART LİG (24-47 Kişi)</option><option value="96">🏟️ BÜYÜK LİG (48-96 Kişi)</option></select><div id="playoffInfoPending" style="font-size:11px; color:#cbd5e1; grid-column: 1 / -1; margin-top: -5px; margin-bottom: 5px;">🧍 BUTİK LİG: İlk 2 Seribaşı, İkinci 2 Play-Off, Sonraki 4 Play-In oynar.</div><select id="leagueGender" class="auth-input force-upper" style="width:100%; margin:0;"><option value="ERKEK" selected>👨 ERKEK LİGİ</option><option value="KADIN">👩 KADIN LİGİ</option><option value="KARMA">🤝 KARMA LİG</option></select><input type="text" id="leagueRegion" list="districts" class="auth-input force-upper" style="width:100%; margin:0;" placeholder="📍 İLÇE (SEÇ VEYA YAZ)" oninput="this.value = this.value.toLocaleUpperCase('tr-TR')"><datalist id="districts"><option value="BOSTANLI"><option value="BORNOVA"><option value="İNCİRALTI"><option value="KONAK"><option value="ÇİĞLİ"><option value="BUCA"></datalist><select id="leagueTier" class="auth-input force-upper" style="width:100%; margin:0;"><option value="SILVER">🥈 SILVER (1.5 - 3.9)</option><option value="GOLD" selected>🥇 GOLD (4.0 - 5.9)</option><option value="PLATIN">💎 PLATIN (6.0 - 7.0)</option><option value="OPEN">🌍 OPEN LİG (Açık Kategori)</option></select><input type="date" id="startDate" class="auth-input" style="width:100%; margin:0;" onclick="try{this.showPicker();}catch(e){}"></div><button class="action-btn" onclick="createPendingTournament()">🚀 TURNUVAYI KAYDA AÇ</button></div>
-        <div id="setup_manual" class="panel"><h2 style="color:var(--success); margin-top:0;">⚙️ GELİŞMİŞ KURA MOTORU VE OYUNCU YÖNETİMİ</h2><div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 10px;"><input type="text" id="leagueCustomName_m" class="auth-input force-upper" style="width:100%; margin:0;" placeholder="🏆 ÖZEL AD" oninput="this.value = this.value.toLocaleUpperCase('tr-TR')"><select id="leagueGender_m" class="auth-input force-upper" style="width:100%; margin:0; border-color: var(--accent-color); font-weight:bold;"><option value="ERKEK" selected>👨 ERKEK LİGİ</option><option value="KADIN">👩 KADIN LİGİ</option><option value="KARMA">🤝 KARMA LİG</option></select><input type="text" id="leagueRegion_m" list="districts_m" class="auth-input force-upper" style="width:100%; margin:0;" placeholder="📍 İLÇE" oninput="this.value = this.value.toLocaleUpperCase('tr-TR')"><datalist id="districts_m"><option value="BOSTANLI"><option value="BORNOVA"><option value="İNCİRALTI"><option value="KONAK"><option value="ÇİĞLİ"><option value="BUCA"></datalist><select id="leagueTier_m" class="auth-input force-upper" style="width:100%; margin:0;"><option value="SILVER">🥈 SILVER (1.5 - 3.9)</option><option value="GOLD" selected>🥇 GOLD (4.0 - 5.9)</option><option value="PLATIN">💎 PLATIN (6.0 - 7.0)</option><option value="OPEN">🌍 OPEN LİG</option></select><input type="date" id="startDate_m" class="auth-input" style="width:100%; margin:0;" onclick="try{this.showPicker();}catch(e){}"></div><div style="font-size:11px; color:#cbd5e1; margin-top: 5px; margin-bottom: 5px;">* Katılım sayısına göre (Butik: 12-23, Standart: 24-47, Büyük: 48-96) Play-Off sistemi otomatik belirlenir.</div><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; margin-top:20px;"><span style="font-size:12px; color:var(--sub-text);">Tüm Oyuncular (Havuz):</span><div style="display:flex; align-items:center; gap:10px;"><label style="font-size:11px; font-weight:bold; color:white; cursor:pointer;"><input type="checkbox" id="selectAllChk" onchange="toggleSelectAll()"> TÜMÜNÜ SEÇ</label><span id="playerCountDisplay" style="background:var(--accent-color); color:black; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:11px;">0 SEÇİLDİ</span></div></div><div style="display:flex; gap:5px; margin-bottom:10px;"><input type="text" id="adminSearchName" class="auth-input force-upper" style="margin:0; flex:1;" placeholder="🔍 İSİMLE ARA..." oninput="adminFilterPlayers()"><select id="adminFilterGender" class="auth-select force-upper" style="margin:0; flex:1;" onchange="adminFilterPlayers()"><option value="all">CİNSİYET (TÜMÜ)</option><option value="ERKEK">ERKEK</option><option value="KADIN">KADIN</option></select><select id="adminFilterTier" class="auth-select force-upper" style="margin:0; flex:1;" onchange="adminFilterPlayers()"><option value="all">SEVİYE (TÜMÜ)</option><option value="SILVER">SILVER</option><option value="GOLD">GOLD</option><option value="PLATIN">PLATIN</option></select><select id="adminSortList" class="auth-select force-upper" style="margin:0; flex:1;" onchange="adminFilterPlayers()"><option value="az">A-Z SIRALA</option><option value="score_desc">PUAN (YÜKSEK)</option><option value="score_asc">PUAN (DÜŞÜK)</option></select></div><div class="admin-player-list" id="adminChecklist"></div><button class="action-btn" style="background:#1e293b; color:white; border:1px dashed var(--success); margin-bottom:15px;" onclick="previewPots()">📦 SEÇİLENLER İÇİN TORBALARI ÖNİZLE</button><div id="potPreviewContainer" style="display:none; margin-bottom:15px;"></div><button class="action-btn" style="background:var(--success);" id="startManualBtn" onclick="startManualTournament(this)">🔮 SEÇİLİ OYUNCULARLA DİNAMİK KURAYI ÇEK</button></div>
+        <div id="setup_manual" class="panel"><h2 style="color:var(--success); margin-top:0;">⚙️ GELİŞMİŞ KURA MOTORU VE OYUNCU YÖNETİMİ</h2><div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 10px;"><input type="text" id="leagueCustomName_m" class="auth-input force-upper" style="width:100%; margin:0;" placeholder="🏆 ÖZEL AD" oninput="this.value = this.value.toLocaleUpperCase('tr-TR')"><select id="leagueGender_m" class="auth-input force-upper" style="width:100%; margin:0; border-color: var(--accent-color); font-weight:bold;"><option value="ERKEK" selected>👨 ERKEK LİGİ</option><option value="KADIN">👩 KADIN LİGİ</option><option value="KARMA">🤝 KARMA LİG</option></select><input type="text" id="leagueRegion_m" list="districts_m" class="auth-input force-upper" style="width:100%; margin:0;" placeholder="📍 İLÇE" oninput="this.value = this.value.toLocaleUpperCase('tr-TR')"><datalist id="districts_m"><option value="BOSTANLI"><option value="BORNOVA"><option value="İNCİRALTI"><option value="KONAK"><option value="ÇİĞLİ"><option value="BUCA"></datalist><select id="leagueTier_m" class="auth-input force-upper" style="width:100%; margin:0;"><option value="SILVER">🥈 SILVER (1.5 - 3.9)</option><option value="GOLD" selected>🥇 GOLD (4.0 - 5.9)</option><option value="PLATIN">💎 PLATIN (6.0 - 7.0)</option><option value="OPEN">🌍 OPEN LİG</option></select><input type="date" id="startDate_m" class="auth-input" style="width:100%; margin:0;" onclick="try{this.showPicker();}catch(e){}"></div><div style="font-size:11px; color:#cbd5e1; margin-top: 5px; margin-bottom: 5px;">* Katılım sayısına göre (Butik: 12-23, Standart: 24-47, Büyük: 48-96) Play-Off sistemi otomatik belirlenir.</div><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; margin-top:20px;"><span style="font-size:12px; color:var(--sub-text);">Tüm Oyuncular (Havuz):</span><div style="display:flex; align-items:center; gap:10px;"><label style="font-size:11px; font-weight:bold; color:white; cursor:pointer;"><input type="checkbox" id="selectAllChk" onchange="toggleSelectAll()"> TÜMÜNÜ SEÇ</label><span id="playerCountDisplay" style="background:var(--accent-color); color:black; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:11px;">0 SEÇİLDİ</span></div></div><div style="display:flex; gap:5px; margin-bottom:10px;"><input type="text" id="adminSearchName" class="auth-input force-upper" style="margin:0; flex:1;" placeholder="🔍 İSİMLE ARA..." oninput="adminFilterPlayers()"><select id="adminFilterGender" class="auth-select force-upper" style="margin:0; flex:1;" onchange="adminFilterPlayers()"><option value="all">CİNSİYET (TÜMÜ)</option><option value="ERKEK">ERKEK</option><option value="KADIN">KADIN</option></select><select id="adminFilterTier" class="auth-select force-upper" style="margin:0; flex:1;" onchange="adminFilterPlayers()"><option value="all">SEVİYE (TÜMÜ)</option><option value="SILVER">SILVER</option><option value="GOLD">GOLD</option><option value="PLATIN">PLATIN</option></select><select id="adminSortList" class="auth-select force-upper" style="margin:0; flex:1;" onchange="adminFilterPlayers()"><option value="az">A-Z SIRALA</option><option value="score_desc">PUAN (YÜKSEK)</option><option value="score_asc">PUAN (DÜŞÜK)</option></select></div><div class="admin-player-list" id="adminChecklist"></div><button class="action-btn" style="background:#1e293b; color:white; border:1px dashed var(--success); margin-bottom:15px;" onclick="previewPots()">📦 SEÇİLENLER İÇİN TORBALARI ÖNİZLE</button><div id="potPreviewContainer" style="display:none; margin-bottom:15px;"></div><div style="margin-bottom:15px; background:rgba(0, 229, 255, 0.05); border:1px solid var(--neon-cyan); padding:10px; border-radius:8px;">
+    <label style="display:flex; align-items:center; gap:8px; font-size:11px; color:white; cursor:pointer;">
+        <input type="checkbox" id="forceCommonTimeChk" style="width:16px; height:16px;">
+        <span style="flex:1;"><strong>AKILLI EŞLEŞTİRME (Müsaitlik Şartı):</strong> Kura çekerken oyuncuların en az bir ortak müsaitlik saatini baz al. <br><span style="font-size:9px; color:var(--warning);">* Uyarı: Saatleri hiç uyuşmayan oyuncular olursa sistem bazı kişilere eksik maç yazabilir.</span></span>
+    </label>
+</div><button class="action-btn" style="background:var(--success);" id="startManualBtn" onclick="startManualTournament(this)">🔮 SEÇİLİ OYUNCULARLA DİNAMİK KURAYI ÇEK</button></div>
         <div id="rules" class="panel"><h2 id="rulesHeaderTitle">📜 SİSTEM REHBERİ VE MANİFESTOSU</h2><div id="dynamicRulesContainer" class="rules-content">Yükleniyor...</div></div>
         <div id="standings" class="panel active"><h3 id="standingsTitle" style="color:var(--accent-color); text-align:center; margin-top:0;">🏆 GENEL SIRALAMA (TÜM ZAMANLAR)</h3><table id="standingsTable"><thead id="standingsHead"><tr><th>#</th><th style="text-align:left;">OYUNCU</th><th>O</th><th>G</th><th>M</th><th>K-KOR 🌟</th></tr></thead><tbody id="standingsBody"></tbody></table><div id="miniStandingsWrapper"></div></div>
         <div id="rivals" class="panel"><select id="playerFilterSelect" class="auth-input force-upper" style="width:100%; margin-bottom:15px; display:none;" onchange="filterPlayerFikstur()"></select><div id="rivalsGridContainer"></div></div>
@@ -789,7 +769,31 @@ body {
     </div>
 </div>
 
- 
+ <div id="adminSecretEditModal" class="modal">
+    <div class="modal-content" style="max-width:450px;">
+        <button style="position:absolute; top:10px; right:15px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer;" onclick="closeSecretEditModal()">✖</button>
+        <h3 style="color:#ffc107; margin-top:0;">🛠️ FİKSTÜR DÜZENLEYİCİ</h3>
+        <p style="font-size:11px; color:#cbd5e1; margin-bottom:15px;">Turnuva ağacındaki eşleşmelere manuel müdahale edin. Lig dengesini korumak için çıkardığınız oyuncuyu başka maça ekleyin.</p>
+        
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <select id="adminEditMatchSelect" class="auth-input" style="flex:1; margin:0;">
+                <option value="">-- Değiştirilecek Maçı Seçin --</option>
+            </select>
+            <button class="action-btn" style="background:#ffc107; color:black; padding:10px; width:auto; font-size:12px; margin:0;" onclick="loadMatchForEdit()">GETİR</button>
+        </div>
+        
+        <div id="adminEditMatchArea" style="display:none; background:#1e293b; padding:15px; border-radius:8px; border: 1px solid #334155; text-align:left;">
+            <label style="color:#94a3b8; font-size:11px; font-weight:bold;">1. Oyuncu (Kırmızı Köşe):</label>
+            <select id="adminEditP1" class="auth-input" style="margin-top:4px; margin-bottom:12px;"></select>
+            
+            <label style="color:#94a3b8; font-size:11px; font-weight:bold;">2. Oyuncu (Mavi Köşe):</label>
+            <select id="adminEditP2" class="auth-input" style="margin-top:4px; margin-bottom:15px;"></select>
+            
+            <button class="action-btn" style="background:var(--neon-green); padding:12px; margin:0;" onclick="saveEditedMatch()">💾 YENİ EŞLEŞMEYİ KAYDET</button>
+        </div>
+    </div>
+</div>
+
 <script>
 
 // ==========================================
@@ -2918,133 +2922,161 @@ window.sendMassNotification = function(btn) {
     });
 }
 
-// 4. Gizli Fikstür Düzenleyici
-window.refreshSecretEditor = function() {
-    let sel = document.getElementById('adminEditMatchSelect'); if(!sel) return;
+// ==========================================
+// 🛠️ YENİ FİKSTÜR DÜZENLEYİCİ VE AKILLI KURA MOTORU
+// ==========================================
+
+// 1. İlgili Turnuva Ekranında Açılan Düzenleyici
+window.openSecretEditModal = function() {
+    if(!currentTid) return showToast("Lütfen önce bir turnuva seçin.", "warning");
+    let sel = document.getElementById('adminEditMatchSelect');
     sel.innerHTML = '<option value="">-- Değiştirilecek Maçı Seçin --</option>';
-    let targetTid = (typeof currentTid !== 'undefined' && currentTid) ? currentTid : null;
-    if(!targetTid && typeof allTourneys !== 'undefined' && allTourneys) { let keys = Object.keys(allTourneys); if(keys.length > 0) targetTid = keys[keys.length - 1]; }
-    if(targetTid && allTourneys[targetTid] && allTourneys[targetTid].matches) {
-        allTourneys[targetTid].matches.forEach((m, idx) => { sel.innerHTML += `<option value="${idx}">Maç ${idx+1}: ${m.p1Name} vs ${m.p2Name}</option>`; });
-        showToast("Maçlar listelendi!", "success");
+    if(allTourneys[currentTid] && allTourneys[currentTid].matches) {
+        allTourneys[currentTid].matches.forEach((m, idx) => {
+            sel.innerHTML += `<option value="${idx}">Maç ${idx+1}: ${m.p1Name} vs ${m.p2Name}</option>`;
+        });
     }
-    if(targetTid) window.currentTid = targetTid;
+    document.getElementById('adminSecretEditModal').style.display = 'flex';
+};
+
+window.closeSecretEditModal = function() {
+    document.getElementById('adminSecretEditModal').style.display = 'none';
+    document.getElementById('adminEditMatchArea').style.display = 'none';
 };
 
 window.loadMatchForEdit = function() {
-    let mIdx = document.getElementById('adminEditMatchSelect').value; if(mIdx === "") return showToast("Maç seçin", "warning");
-    let t = allTourneys[window.currentTid]; let match = t.matches[mIdx];
-    let p1Sel = document.getElementById('adminEditP1'); let p2Sel = document.getElementById('adminEditP2'); p1Sel.innerHTML = ''; p2Sel.innerHTML = '';
-    _arr(t.players).forEach(p => { let pName = (typeof globalUsers !== 'undefined' && globalUsers[p.id]) ? globalUsers[p.id].name : p.name; p1Sel.innerHTML += `<option value="${p.id}">${pName}</option>`; p2Sel.innerHTML += `<option value="${p.id}">${pName}</option>`; });
-    p1Sel.value = match.p1; p2Sel.value = match.p2; document.getElementById('adminEditMatchArea').style.display = 'block';
+    let mIdx = document.getElementById('adminEditMatchSelect').value;
+    if(mIdx === "") return showToast("Lütfen listeden bir maç seçin", "warning");
+    let t = allTourneys[currentTid]; let match = t.matches[mIdx];
+    let p1Sel = document.getElementById('adminEditP1'); let p2Sel = document.getElementById('adminEditP2');
+    p1Sel.innerHTML = ''; p2Sel.innerHTML = '';
+    _arr(t.players).forEach(p => {
+        let pName = (typeof globalUsers !== 'undefined' && globalUsers[p.id]) ? globalUsers[p.id].name : p.name;
+        p1Sel.innerHTML += `<option value="${p.id}">${pName}</option>`; p2Sel.innerHTML += `<option value="${p.id}">${pName}</option>`;
+    });
+    p1Sel.value = match.p1; p2Sel.value = match.p2;
+    document.getElementById('adminEditMatchArea').style.display = 'block';
 };
 
 window.saveEditedMatch = function() {
-    let mIdx = document.getElementById('adminEditMatchSelect').value; let p1Id = document.getElementById('adminEditP1').value; let p2Id = document.getElementById('adminEditP2').value;
+    let mIdx = document.getElementById('adminEditMatchSelect').value;
+    let p1Id = document.getElementById('adminEditP1').value; let p2Id = document.getElementById('adminEditP2').value;
     if(p1Id === p2Id) return showToast("Bir oyuncu kendisiyle oynayamaz!", "error");
     let p1Sel = document.getElementById('adminEditP1'); let p2Sel = document.getElementById('adminEditP2');
     let p1Name = p1Sel.options[p1Sel.selectedIndex].text; let p2Name = p2Sel.options[p2Sel.selectedIndex].text;
+    
     showCustomConfirm("Değiştiriliyor", `Yeni Eşleşme: <strong>${p1Name} vs ${p2Name}</strong><br><br>Ligin dengesini korumak için, çıkardığınız oyuncuyu başka maça eklemeyi unutmayın! Onaylıyor musunuz?`, () => {
         let updates = {};
-        updates[`the_35_gold_league/multi_v1/${window.currentTid}/matches/${mIdx}/p1`] = p1Id; updates[`the_35_gold_league/multi_v1/${window.currentTid}/matches/${mIdx}/p2`] = p2Id;
-        updates[`the_35_gold_league/multi_v1/${window.currentTid}/matches/${mIdx}/p1Name`] = p1Name; updates[`the_35_gold_league/multi_v1/${window.currentTid}/matches/${mIdx}/p2Name`] = p2Name;
-        database.ref().update(updates).then(() => { showToast("Değiştirildi!", "success"); document.getElementById('adminEditMatchArea').style.display = 'none'; window.refreshSecretEditor(); }).catch(err => { showToast("Kayıt Hatası: " + err.message, "error"); });
+        updates[`the_35_gold_league/multi_v1/${currentTid}/matches/${mIdx}/p1`] = p1Id; updates[`the_35_gold_league/multi_v1/${currentTid}/matches/${mIdx}/p2`] = p2Id;
+        updates[`the_35_gold_league/multi_v1/${currentTid}/matches/${mIdx}/p1Name`] = p1Name; updates[`the_35_gold_league/multi_v1/${currentTid}/matches/${mIdx}/p2Name`] = p2Name;
+        
+        database.ref().update(updates).then(() => {
+            showToast("Maç Değiştirildi!", "success");
+            document.getElementById('adminEditMatchArea').style.display = 'none';
+            window.openSecretEditModal(); // Listeyi yenile
+            if(allTourneys[currentTid].settings.status !== 'pending') { loadTournamentData(currentTid); renderVisualBracket(); renderRivalsGrid(); }
+        }).catch(err => showToast("Kayıt Hatası: " + err.message, "error"));
     });
 };
 
-// 5. Yayına Al (Publish) ve Taslak UI Kontrolleri
-setTimeout(() => {
-    let adminBarDiv = document.querySelector('#adminTopBar > div:nth-child(2)');
-    if (adminBarDiv && !document.getElementById('publishLeagueBtn')) {
-        adminBarDiv.innerHTML = `<button class="action-sm" style="background:var(--success); color:black; display:none; padding:8px 12px; font-weight:900; border:2px solid #00ffaa; box-shadow: 0 0 15px rgba(0,255,170,0.4);" id="publishLeagueBtn" onclick="publishTournament()">🚀 FİKSTÜRÜ ONAYLA VE YAYINA AL</button>` + adminBarDiv.innerHTML;
-    }
-}, 1000);
-
+// 2. Üst Bar Butonlarının Kontrolü
+let originalAdminSwitchUI = window.adminSwitchLeague;
 window.adminSwitchLeague = function() {
+    originalAdminSwitchUI();
     let val = document.getElementById('adminLeagueSelect').value;
-    if(val === 'new_pending') { currentTid = null; document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tabsContainer').style.display = 'none'; let setupP = document.getElementById('setup_pending'); if(setupP) setupP.classList.add('active'); }
-    else if(val === 'new_manual') { currentTid = null; document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tabsContainer').style.display = 'none'; let setupM = document.getElementById('setup_manual'); if(setupM) setupM.classList.add('active'); if(typeof renderAdminChecklist === 'function') renderAdminChecklist(); }
-    else if (val === 'notifs') { if(typeof openAdminGlobalNotifs === 'function') openAdminGlobalNotifs(); }
-    else if (val === 'tournaments') { if(typeof openAdminGlobalTournaments === 'function') openAdminGlobalTournaments(); }
-    else {
-        currentTid = val; let t = allTourneys[val]; if(!t) return;
-        let status = t.settings.status || 'active';
-        document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-
-        if (status === 'pending') {
-            document.getElementById('tabsContainer').style.display = 'none';
-            let adminP = document.getElementById('admin_pending'); if(adminP) adminP.classList.add('active');
-            if(typeof renderAdminPendingPanel === 'function') renderAdminPendingPanel();
-        } else {
-            document.getElementById('tabsContainer').style.display = 'flex';
-            if(typeof loadTournamentData === 'function') loadTournamentData(val);
-            if(typeof switchTab === 'function') switchTab('standings');
-        }
-    }
-
-    let delBtn = document.getElementById('deleteLeagueBtn'); let editBtn = document.getElementById('editLeagueBtn'); let swapBtn = document.getElementById('swapLeagueBtn'); let pubBtn = document.getElementById('publishLeagueBtn');
+    let secretEditBtn = document.getElementById('secretEditLeagueBtn');
+    let pubBtn = document.getElementById('publishLeagueBtn');
+    
     if(val.startsWith('new_') || val === 'notifs' || val === 'tournaments') {
-        if(delBtn) delBtn.style.display = 'none'; if(editBtn) editBtn.style.display = 'none'; if(swapBtn) swapBtn.style.display = 'none'; if(pubBtn) pubBtn.style.display = 'none';
+        if(secretEditBtn) secretEditBtn.style.display = 'none';
+        if(pubBtn) pubBtn.style.display = 'none';
     } else {
-        let t = allTourneys[val]; let status = t.settings.status || 'active';
-        if(delBtn) delBtn.style.display = 'inline-block'; if(editBtn) editBtn.style.display = 'inline-block';
-        if(swapBtn) swapBtn.style.display = (status === 'active' || status === 'draft') ? 'inline-block' : 'none';
+        let t = allTourneys[val]; let status = t ? t.settings.status : 'active';
+        if(secretEditBtn) secretEditBtn.style.display = (status === 'active' || status === 'draft') ? 'inline-block' : 'none';
         if(pubBtn) pubBtn.style.display = (status === 'draft') ? 'inline-block' : 'none';
     }
-    if (typeof refreshSecretEditor === 'function') refreshSecretEditor();
 }
 
-window.populateLeagueDropdowns = function() {
-    let aSel = document.getElementById('adminLeagueSelect'); let uSel = document.getElementById('userActiveLeagueSelect'); if(!aSel || !uSel) return;
-    let aOpt = '<option value="new_pending">➕ YENİ TURNUVA (KAYDA AÇ)</option><option value="new_manual">⚙️ OYUNCU YÖNETİMİ - KURA MOTORU</option><option value="notifs" style="display:none;">BİLDİRİMLER</option><option value="tournaments" style="display:none;">TURNUVALAR</option>';
-    let uOpt = '<option value="none">GENEL MOD (TÜM ZAMANLAR)</option>';
-    Object.keys(allTourneys).forEach(tid => {
-        let t = allTourneys[tid]; if(!t || !t.settings) return; let n = t.settings.customName || `İZMİR 35 LİGİ`; let status = t.settings.status || 'active';
-        if (status === 'pending') { aOpt += `<option value="${tid}">YÖNET (Kayıt): ${n}</option>`; }
-        else if (status === 'draft') { aOpt += `<option value="${tid}">YÖNET (Taslak/Önizleme): ${n}</option>`; }
-        else {
-            aOpt += `<option value="${tid}">YÖNET: ${n}</option>`;
-            if(!isAdmin && loggedInUser && _arr(t.players).some(p => p.id === loggedInUser.id)) uOpt += `<option value="${tid}">${n}</option>`;
+// 3. Akıllı Müsaitlik Kura Motoru (Gelişmiş Manuel Çekim)
+window.startManualTournament = function(btn) {
+    let checked = document.querySelectorAll('.admin-chk:checked'); let N = checked.length; if (N < 12) return alert("⚠️ Minimum 12 kişi gereklidir."); 
+    let tier = document.getElementById('leagueTier_m').value; let gender = document.getElementById('leagueGender_m').value; let region = document.getElementById('leagueRegion_m').value.trim().toLocaleUpperCase('tr-TR') || 'İZMİR'; let cName = document.getElementById('leagueCustomName_m').value.trim() || `İZMİR 35 KORTENİS LİGİ`; let sDate = document.getElementById('startDate_m').value; if (!sDate) return alert("Tarih seçiniz!");
+    
+    // Müsaitlik Şartı Kontrolü
+    let forceCommonTime = document.getElementById('forceCommonTimeChk') ? document.getElementById('forceCommonTimeChk').checked : false;
+    const hasCommonTime = (u1, u2) => {
+        if (!u1 || !u2 || !Array.isArray(u1.availability) || !Array.isArray(u2.availability)) return true;
+        return u1.availability.some(v => u2.availability.includes(v));
+    };
+
+    let originalText = btn.innerHTML; btn.innerHTML = "⏳ KURA ÇEKİLİYOR..."; btn.disabled = true;
+    let tempPlayers = Array.from(checked).map(cb => { let u = globalUsers[cb.value]; return { id: u.id, name: u.name, sysScore: u.sysScore, wins: 0, losses: 0, totalMatches: 0, setAv: 0, kor: 0, korRank: 0 }; });
+    tempPlayers.sort((a, b) => parseFloat(b.sysScore || 0) - parseFloat(a.sysScore || 0));
+
+    let numPots = N >= 48 ? 5 : (N >= 24 ? 4 : 3); let mLimit = numPots * 2; let baseSize = Math.floor(N / numPots); let remainder = N % numPots; let potIndex = 1; let assigned = 0; let currentPotLimit = baseSize + (remainder > 0 ? 1 : 0);
+    tempPlayers.forEach(p => { p.pot = potIndex; assigned++; if (assigned >= currentPotLimit && potIndex < numPots) { potIndex++; assigned = 0; remainder--; currentPotLimit = baseSize + (remainder > 0 ? 1 : 0); } });
+
+    let finalMatches = []; let wasFullyValid = false;
+    const shuffle = (arr) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
+
+    for (let attempt = 0; attempt < 50; attempt++) {
+        let tempMatches = []; let mId = 0; let pStats = {};
+        tempPlayers.forEach(p => pStats[p.id] = { total: 0, pots: {1:0, 2:0, 3:0, 4:0, 5:0} });
+
+        for(let i=0; i<tempPlayers.length; i++) {
+            let pA = tempPlayers[i];
+            for(let targetPot = 1; targetPot <= numPots; targetPot++) {
+                let attempts1 = 0;
+                while(pStats[pA.id].pots[targetPot] < 2 && pStats[pA.id].total < mLimit && attempts1 < 20) {
+                    attempts1++;
+                    let candidates = tempPlayers.filter(pB => {
+                        let valid = pB.id !== pA.id && pB.pot === targetPot && pStats[pB.id].total < mLimit && pStats[pB.id].pots[pA.pot] < 2 && !tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id));
+                        if(!valid) return false;
+                        if(forceCommonTime) return hasCommonTime(globalUsers[pA.id], globalUsers[pB.id]);
+                        return true;
+                    });
+                    if(candidates.length === 0) break;
+                    shuffle(candidates); let pB = candidates[0];
+                    tempMatches.push({ id: mId++, p1: pA.id, p2: pB.id, p1Name: pA.name, p2Name: pB.name, p1S1:'', p1S2:'', p1MT:'', p2S1:'', p2S2:'', p2MT:'', p1S1TB:'', p2S1TB:'', p1S2TB:'', p2S2TB:'', played:false, pending:false, enteredBy:'', isWO:false, woWinner:'', matchDate:'', matchFormat:'', p1Fair: false, p2Fair: false });
+                    pStats[pA.id].total++; pStats[pA.id].pots[targetPot]++; pStats[pB.id].total++; pStats[pB.id].pots[pA.pot]++;
+                }
+            }
         }
+        for(let i=0; i<tempPlayers.length; i++) {
+            let pA = tempPlayers[i]; let fallbackAttempts = 0;
+            while(pStats[pA.id].total < mLimit && fallbackAttempts < 50) {
+                fallbackAttempts++;
+                let candidates = tempPlayers.filter(pB => {
+                    let valid = pB.id !== pA.id && pStats[pB.id].total < mLimit && !tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id));
+                    if(!valid) return false;
+                    if(forceCommonTime) return hasCommonTime(globalUsers[pA.id], globalUsers[pB.id]);
+                    return true;
+                });
+                if(candidates.length === 0) break;
+                shuffle(candidates); let pB = candidates[0];
+                tempMatches.push({ id: mId++, p1: pA.id, p2: pB.id, p1Name: pA.name, p2Name: pB.name, p1S1:'', p1S2:'', p1MT:'', p2S1:'', p2S2:'', p2MT:'', p1S1TB:'', p2S1TB:'', p1S2TB:'', p2S2TB:'', played:false, pending:false, enteredBy:'', isWO:false, woWinner:'', matchDate:'', matchFormat:'', p1Fair: false, p2Fair: false });
+                pStats[pA.id].total++; pStats[pB.id].total++;
+            }
+        }
+
+        let isValid = tempPlayers.every(p => pStats[p.id].total === mLimit);
+        if (isValid) { finalMatches = tempMatches; wasFullyValid = true; break; } 
+        else if (attempt === 0 || tempMatches.length > finalMatches.length) { finalMatches = tempMatches; }
+    }
+
+    if (forceCommonTime && !wasFullyValid) alert("⚠️ Müsaitlik saatleri uyuşmadığı için sistem bazı oyunculara eksik maç atamış olabilir. Lütfen fikstürü inceleyin veya filtreyi kapatarak tekrar çekin.");
+
+    let newTid = "LIG_" + Date.now(); let newSettings = { status: 'draft', matchLimit: mLimit, tier: tier, gender: gender, region: region, startDate: sDate, playerCount: N, customName: cName }; let regsArr = Array.from(checked).map(cb => cb.value);
+    
+    database.ref('the_35_gold_league/multi_v1/' + newTid).set({ players: tempPlayers, matches: finalMatches, settings: newSettings, registeredPlayers: regsArr }).then(() => { 
+        btn.innerHTML = originalText; btn.disabled = false; 
+        if(document.getElementById('potPreviewContainer')) document.getElementById('potPreviewContainer').style.display = 'none'; 
+        showToast("Akıllı Kura Çekildi! Turnuva şu an GİZLİ TASLAK modunda.", "info");
+        populateLeagueDropdowns(); document.getElementById('adminLeagueSelect').value = newTid; adminSwitchLeague(); 
     });
-    let aPrev = aSel.value, uPrev = uSel.value; aSel.innerHTML = aOpt; uSel.innerHTML = uOpt;
-    if(aPrev !== 'new_pending' && aPrev !== 'new_manual' && aPrev !== 'notifs' && aPrev !== 'tournaments' && allTourneys[aPrev]) aSel.value = aPrev;
-    if(uPrev !== 'none' && allTourneys[uPrev]) uSel.value = uPrev;
 }
 
-// 6. Draft Modu Kancaları (Çakışmayı Engelleyen Koruma)
-if (!window.coreStartPending) {
-    window.coreStartPending = window.startPendingTournament;
-    window.startPendingTournament = function(btn) {
-        window.coreStartPending(btn);
-        setTimeout(() => {
-            if(allTourneys[currentTid]) {
-                allTourneys[currentTid].settings.status = 'draft';
-                database.ref(`the_35_gold_league/multi_v1/${currentTid}/settings/status`).set('draft').then(() => {
-                    showToast("Kuralar çekildi! Turnuva şu an GİZLİ TASLAK modunda.", "info");
-                    populateLeagueDropdowns(); adminSwitchLeague();
-                });
-            }
-        }, 1500); 
-    };
-}
-
-if (!window.coreStartManual) {
-    window.coreStartManual = window.startManualTournament;
-    window.startManualTournament = function(btn) {
-        window.coreStartManual(btn);
-        setTimeout(() => {
-            if(allTourneys[currentTid]) {
-                allTourneys[currentTid].settings.status = 'draft';
-                database.ref(`the_35_gold_league/multi_v1/${currentTid}/settings/status`).set('draft').then(() => {
-                    showToast("Kuralar çekildi! Turnuva şu an GİZLİ TASLAK modunda.", "info");
-                    populateLeagueDropdowns(); adminSwitchLeague();
-                });
-            }
-        }, 1500); 
-    };
-}
-
+// 4. Yayına Alma Motoru (Aynı Kalıyor)
 window.publishTournament = function() {
     showCustomConfirm("🚀 TURNUVAYI YAYINA AL", "Fikstür onaylanacak ve turnuva resmen başlayacak. Onaylıyor musunuz?", () => {
         let t = allTourneys[currentTid]; let tName = t.settings.customName || "Turnuva";
