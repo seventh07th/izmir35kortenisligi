@@ -3334,10 +3334,8 @@ window.startManualTournament = function(btn) {
     }
 
     if (hasValidMemory) {
-        // Hafıza taze ve doğruysa milimetrik olarak uygula
         tempPlayers.forEach(p => { p.pot = window.lastAssignedPots[p.id]; });
     } else {
-        // Önizleme yapılmadan çekildiyse kendi hesapla
         tempPlayers.sort((a, b) => {
             let scoreA = parseFloat(a.sysScore || 0); let scoreB = parseFloat(b.sysScore || 0);
             if (scoreB !== scoreA) return scoreB - scoreA;
@@ -3352,7 +3350,9 @@ window.startManualTournament = function(btn) {
     for(let i=1; i<=numPots; i++) { let potPlayers = tempPlayers.filter(p => p.pot === i); shuffle(potPlayers); shuffledTempPlayers.push(...potPlayers); }
     tempPlayers = shuffledTempPlayers;
 
-    let finalMatches = []; let wasFullyValid = false;
+    let finalMatches = []; 
+    let wasFullyValid = false;
+    let bestScore = -1; // 🏆 YENİ: En çok ortak saat bulduğu kusursuz kurayı puanlayarak saklar!
 
     for (let attempt = 0; attempt < 100; attempt++) {
         let tempMatches = []; let mId = 0; let pStats = {};
@@ -3364,18 +3364,21 @@ window.startManualTournament = function(btn) {
                 let attempts1 = 0;
                 while(pStats[pA.id].pots[targetPot] < 2 && pStats[pA.id].total < mLimit && attempts1 < 20) {
                     attempts1++;
-                    let candidates = tempPlayers.filter(pB => {
-                        let valid = pB.id !== pA.id && 
-                                    pB.pot === targetPot && 
-                                    pStats[pB.id].total < mLimit && 
-                                    pStats[pB.id].pots[pA.pot] < 2 && // 🚨 KESİN KURAL
-                                    !tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id));
-                        if(!valid) return false;
-                        if(forceCommonTime) return hasCommonTime(globalUsers[pA.id], globalUsers[pB.id]);
-                        return true;
-                    });
+                    let candidates = tempPlayers.filter(pB => 
+                        pB.id !== pA.id && 
+                        pB.pot === targetPot && 
+                        pStats[pB.id].total < mLimit && 
+                        pStats[pB.id].pots[pA.pot] < 2 && // 🚨 KESİN KURAL: Torba limiti aşılmaz
+                        !tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id))
+                    );
+                    
                     if(candidates.length === 0) break;
-                    shuffle(candidates); let pB = candidates[0];
+                    
+                    // 🌟 SİHİRLİ ESNEME: Önce saatleri uyanları ara, KİMSE KALMADIYSA saat kuralını esnet ama maçı ata!
+                    let preferred = forceCommonTime ? candidates.filter(pB => hasCommonTime(globalUsers[pA.id], globalUsers[pB.id])) : candidates;
+                    let finalCands = preferred.length > 0 ? preferred : candidates;
+                    
+                    shuffle(finalCands); let pB = finalCands[0];
                     tempMatches.push({ id: mId++, p1: pA.id, p2: pB.id, p1Name: pA.name, p2Name: pB.name, p1S1:'', p1S2:'', p1MT:'', p2S1:'', p2S2:'', p2MT:'', p1S1TB:'', p2S1TB:'', p1S2TB:'', p2S2TB:'', played:false, pending:false, enteredBy:'', isWO:false, woWinner:'', matchDate:'', matchFormat:'', p1Fair: false, p2Fair: false });
                     pStats[pA.id].total++; pStats[pA.id].pots[targetPot]++; 
                     pStats[pB.id].total++; pStats[pB.id].pots[pA.pot]++;
@@ -3387,30 +3390,64 @@ window.startManualTournament = function(btn) {
             let pA = tempPlayers[i]; let fallbackAttempts = 0;
             while(pStats[pA.id].total < mLimit && fallbackAttempts < 50) {
                 fallbackAttempts++;
-                let candidates = tempPlayers.filter(pB => {
-                    let valid = pB.id !== pA.id && 
-                                pStats[pB.id].total < mLimit && 
-                                pStats[pA.id].pots[pB.pot] < 2 && 
-                                pStats[pB.id].pots[pA.pot] < 2 && 
-                                !tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id));
-                    if(!valid) return false;
-                    if(forceCommonTime) return hasCommonTime(globalUsers[pA.id], globalUsers[pB.id]);
-                    return true;
-                });
+                let candidates = tempPlayers.filter(pB => 
+                    pB.id !== pA.id && 
+                    pStats[pB.id].total < mLimit && 
+                    pStats[pA.id].pots[pB.pot] < 2 && 
+                    pStats[pB.id].pots[pA.pot] < 2 && 
+                    !tempMatches.some(m => (m.p1 === pA.id && m.p2 === pB.id) || (m.p1 === pB.id && m.p2 === pA.id))
+                );
+                
                 if(candidates.length === 0) break;
-                shuffle(candidates); let pB = candidates[0];
+                
+                // 🌟 SİHİRLİ ESNEME (2. Tur)
+                let preferred = forceCommonTime ? candidates.filter(pB => hasCommonTime(globalUsers[pA.id], globalUsers[pB.id])) : candidates;
+                let finalCands = preferred.length > 0 ? preferred : candidates;
+
+                shuffle(finalCands); let pB = finalCands[0];
                 tempMatches.push({ id: mId++, p1: pA.id, p2: pB.id, p1Name: pA.name, p2Name: pB.name, p1S1:'', p1S2:'', p1MT:'', p2S1:'', p2S2:'', p2MT:'', p1S1TB:'', p2S1TB:'', p1S2TB:'', p2S2TB:'', played:false, pending:false, enteredBy:'', isWO:false, woWinner:'', matchDate:'', matchFormat:'', p1Fair: false, p2Fair: false });
                 pStats[pA.id].total++; pStats[pA.id].pots[pB.pot]++; 
                 pStats[pB.id].total++; pStats[pB.id].pots[pA.pot]++;
             }
         }
 
+        // MAÇLAR EŞİT Mİ?
         let isValid = tempPlayers.every(p => pStats[p.id].total === mLimit);
-        if (isValid) { finalMatches = tempMatches; wasFullyValid = true; break; } 
-        else if (attempt === 0 || tempMatches.length > finalMatches.length) { finalMatches = tempMatches; }
+        if (isValid) { 
+            // GEÇERLİ KURA İSE PUANLA: Kaç tane maç ortak saate denk geldi?
+            let score = 0;
+            if (forceCommonTime) {
+                tempMatches.forEach(m => {
+                    if (hasCommonTime(globalUsers[m.p1], globalUsers[m.p2])) score++;
+                });
+            }
+            
+            // Eğer bu kura, şimdiye kadar bulduğumuzdan DAHA İYİ (daha fazla ortak saatli) ise BUNU SAKLA!
+            if (!wasFullyValid || score > bestScore) {
+                finalMatches = tempMatches; 
+                bestScore = score;
+                wasFullyValid = true; 
+            }
+        } 
+        else if (!wasFullyValid && (attempt === 0 || tempMatches.length > finalMatches.length)) { 
+            // Eğer hala kusursuz bir kura bulamadıysa, en iyisini yedekte tut
+            finalMatches = tempMatches; 
+        }
     }
 
-    if (forceCommonTime && !wasFullyValid) alert("⚠️ Müsaitlik saatleri uyuşmadığı için sistem bazı oyunculara eksik maç atamış olabilir. Lütfen fikstürü inceleyin veya 'Müsaitlik Şartı' filtresini kapatarak kuraları tekrar çekin.");
+    // SONUÇ BİLDİRİMİ EKRANI
+    if (forceCommonTime && wasFullyValid) {
+        let missingCommonTime = 0;
+        finalMatches.forEach(m => { if (!hasCommonTime(globalUsers[m.p1], globalUsers[m.p2])) missingCommonTime++; });
+        
+        if (missingCommonTime > 0) {
+            alert(`⚠️ KURA BAŞARILI! Herkese EŞİT (${mLimit}) maç atandı.\n\nAncak bazı oyuncuların saatleri hiç uyuşmadığı için, algoritma kimseyi mağdur etmemek adına ${missingCommonTime} maçı "Ortak Saat Dışı" atamak zorunda kaldı. Fikstürü inceleyin.`);
+        } else {
+            alert(`✅ KUSURSUZ KURA! Herkese eşit maç atandı ve TÜM MAÇLAR ortak saatlere uyuyor!`);
+        }
+    } else if (!wasFullyValid) {
+        alert("⚠️ Sistem herkese eşit maç atayamadı. Lütfen 'Müsaitlik Şartı' filtresini kapatarak kuraları tekrar çekin.");
+    }
 
     let newTid = "LIG_" + Date.now(); let newSettings = { status: 'draft', matchLimit: mLimit, tier: tier, gender: gender, region: region, startDate: sDate, playerCount: N, customName: cName }; let regsArr = Array.from(checked).map(cb => cb.value);
     
