@@ -1856,7 +1856,7 @@ if (!window.coreStartPending) {
 
    // 3. Akıllı Müsaitlik Kura Motoru (Gelişmiş Manuel Çekim)
 if (!window.coreStartManual) {
- window.coreStartManual = function(btn) {
+window.coreStartManual = function(btn) {
         let checked = document.querySelectorAll('.admin-chk:checked'); let N = checked.length; if (N < 12) return alert("⚠️ Minimum 12 kişi gereklidir."); 
         let tier = document.getElementById('leagueTier_m').value; let gender = document.getElementById('leagueGender_m').value; let region = document.getElementById('leagueRegion_m').value.trim().toLocaleUpperCase('tr-TR') || 'İZMİR'; let cName = document.getElementById('leagueCustomName_m').value.trim() || `İZMİR 35 KORTENİS LİGİ`; let sDate = document.getElementById('startDate_m').value; if (!sDate) return alert("Tarih seçiniz!");
         
@@ -1873,16 +1873,27 @@ if (!window.coreStartManual) {
         
         let numPots = N >= 48 ? 5 : (N >= 24 ? 4 : 3); let mLimit = numPots * 2;
 
-        // 🌟 HAFIZA KONTROLÜ: Eğer önizleme yapıldıysa, kuraları tam olarak o önizlemeye sadık kalarak çek!
-        if (window.lastAssignedPots && Object.keys(window.lastAssignedPots).length === N) {
+        // 🌟 KUSURSUZ HAFIZA KİLİDİ (İllüzyonu çözen kısım)
+        let hasValidMemory = false;
+        if (window.lastAssignedPots) {
+            // Eğer oyuncu listesi değişmediyse hafızayı kullan
+            let memoryKeys = Object.keys(window.lastAssignedPots);
+            if (memoryKeys.length === N && tempPlayers.every(p => window.lastAssignedPots[p.id] !== undefined)) {
+                hasValidMemory = true;
+            }
+        }
+
+        if (hasValidMemory) {
+            // 1. Torbaları Önizle butonuna basılmış, hafızadakini birebir kullan
             tempPlayers.forEach(p => { p.pot = window.lastAssignedPots[p.id]; });
         } else {
-            // Eğer önizlemeye basılmadan direkt kura çekildiyse, normal dağıt
+            // 2. Önizlemeye basmadan direkt kurayı çek demiş, sıfırdan dağıt
             tempPlayers.sort((a, b) => {
                 let scoreA = parseFloat(a.sysScore || 0); let scoreB = parseFloat(b.sysScore || 0);
                 if (scoreB !== scoreA) return scoreB - scoreA;
                 return a.rand - b.rand; 
             });
+
             let baseSize = Math.floor(N / numPots); let remainder = N % numPots; let potIndex = 1; let assigned = 0; let currentPotLimit = baseSize + (remainder > 0 ? 1 : 0);
             tempPlayers.forEach(p => { p.pot = potIndex; assigned++; if (assigned >= currentPotLimit && potIndex < numPots) { potIndex++; assigned = 0; remainder--; currentPotLimit = baseSize + (remainder > 0 ? 1 : 0); } });
         }
